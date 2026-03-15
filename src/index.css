@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Deshabilitar selección de texto en la UI de la app */
+    user-select: none;
+  }
+
+  /* Permitir selección en contenido de texto */
+  p, span, input, textarea {
+    user-select: text;
+  }
+}
