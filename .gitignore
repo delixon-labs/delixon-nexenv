@@ -27,7 +27,9 @@ Thumbs.db
 desktop.ini
 
 # Editor
-.vscode/settings.json
+# NOTA: .vscode/settings.json se versiona intencionalmente (config del proyecto)
+# Solo ignoramos archivos personales del editor
+.vscode/*.log
 .idea/
 *.suo
 *.ntvs*

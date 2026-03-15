@@ -1,0 +1,125 @@
+{
+  // ─── Apariencia ───────────────────────────────────────────────────────────
+  "workbench.colorTheme": "Tokyo Night",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorCustomizations": {
+    "[Tokyo Night]": {
+      "editor.background": "#1a1b2e",
+      "sideBar.background": "#181926",
+      "sideBar.border": "#3b3f51",
+      "activityBar.background": "#13141f",
+      "activityBar.border": "#3b3f51",
+      "panel.background": "#181926",
+      "panel.border": "#3b3f51",
+      "terminal.background": "#181926",
+      "titleBar.activeBackground": "#13141f",
+      "titleBar.border": "#3b3f51",
+      "tab.activeBackground": "#1a1b2e",
+      "tab.inactiveBackground": "#13141f",
+      "tab.border": "#3b3f51",
+      "editorGroupHeader.tabsBackground": "#13141f",
+      "editorGroupHeader.tabsBorder": "#3b3f51",
+      "statusBar.background": "#13141f",
+      "statusBar.border": "#3b3f51"
+    }
+  },
+
+  // ─── Terminal ─────────────────────────────────────────────────────────────
+  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font",
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.defaultProfile.windows": "PowerShell (Delixon)",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (Delixon)": {
+      "source": "PowerShell",
+      "args": ["-NoExit", "-File", "${workspaceFolder}/.vscode/terminal-init.ps1"],
+      "icon": "terminal-powershell"
+    },
+    "Git Bash (Delixon)": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "args": ["--init-file", "${workspaceFolder}/.vscode/terminal-init.sh"],
+      "icon": "terminal-bash"
+    }
+  },
+  // Desactivar cualquier perfil de terminal global — este proyecto usa los suyos
+  "terminal.integrated.inheritEnv": false,
+
+  // ─── Editor general ───────────────────────────────────────────────────────
+  "editor.fontSize": 13,
+  "editor.fontFamily": "JetBrainsMono Nerd Font, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.rulers": [100],
+  "editor.minimap.enabled": false,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.wordWrap": "off",
+
+  // ─── Archivos ─────────────────────────────────────────────────────────────
+  "files.insertFinalNewline": false,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.eol": "\n",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/src-tauri/target": true,
+    "**/.git": false
+  },
+
+  // ─── TypeScript / React ───────────────────────────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // ─── Rust ─────────────────────────────────────────────────────────────────
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  "rust-analyzer.checkOnSave": true,
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.buildScripts.enable": true,
+  "rust-analyzer.procMacro.enable": true,
+
+  // ─── ESLint ───────────────────────────────────────────────────────────────
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
+
+  // ─── Prettier ─────────────────────────────────────────────────────────────
+  "prettier.semi": true,
+  "prettier.singleQuote": false,
+  "prettier.tabWidth": 2,
+  "prettier.printWidth": 100,
+  "prettier.trailingComma": "es5",
+
+  // ─── Git ──────────────────────────────────────────────────────────────────
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+
+  // ─── Misc ─────────────────────────────────────────────────────────────────
+  "chat.editor.enabled": false,
+  "breadcrumbs.enabled": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false
+}
