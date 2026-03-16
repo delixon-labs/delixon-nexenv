@@ -30,12 +30,29 @@ desktop.ini
 # NOTA: .vscode/settings.json se versiona intencionalmente (config del proyecto)
 # Solo ignoramos archivos personales del editor
 .vscode/*.log
+.vscode/terminal-history.txt
+.vscode/bash-history.txt
 .idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.cursor/
+
+# Claude AI (memoria y contexto local — nunca al repo)
+.claude/
+
+# Documentacion privada del proyecto
+.delixonPrivateDocs/
+
+# Archivos de configuracion de Delixon (los generara la app)
+*.delixon
+*.delixon-team
+
+# Windows
+Thumbs.db:encryptable
+$RECYCLE.BIN/
 
 # TypeScript
 *.tsbuildinfo
