@@ -1,7 +1,7 @@
 # Delixon — Estructura del Repositorio y Configuración de Desarrollo
 
-> Organización GitHub: `deli-labs` · Repositorio: `delixon`
-> URL: `https://github.com/deli-labs/delixon`
+> Organización GitHub: `deli-technology` · Repositorio: `delixon-app`
+> URL: `https://github.com/deli-technology/delixon-app`
 
 ---
 
@@ -23,18 +23,18 @@
 ### Organización
 
 ```
-Organización : deli-labs
+Organización : deli-technology
 Owner        : dRaydel (único propietario de momento)
-Repositorio  : delixon
+Repositorio  : delixon-app
 Visibilidad  : Privado durante desarrollo, público en lanzamiento
-URL          : https://github.com/deli-labs/delixon
+URL          : https://github.com/deli-technology/delixon-app
 ```
 
 ### Pasos para crear la organización y el repo
 
 ```bash
 # 1. Crear organización en GitHub
-#    → github.com → "+" → "New organization" → Plan Free → Nombre: deli-labs
+#    → github.com → "+" → "New organization" → Plan Free → Nombre: deli-technology
 
 # 2. Dentro de la organización, crear repositorio
 #    → Nombre: delixon
@@ -44,7 +44,7 @@ URL          : https://github.com/deli-labs/delixon
 #    → Licencia: MIT (o privada según decisión)
 
 # 3. Clonar localmente
-git clone https://github.com/deli-labs/delixon.git
+git clone https://github.com/deli-technology/delixon-app.git
 cd delixon
 ```
 
@@ -264,7 +264,7 @@ DELIXON_DATA_DIR=
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/deli-labs/delixon.git
+git clone https://github.com/deli-technology/delixon-app.git
 cd delixon
 
 # 2. Instalar dependencias Node
@@ -539,4 +539,4 @@ git push origin v0.1.0
 
 ---
 
-*Delixon — deli-labs/delixon · Organización GitHub: deli-labs*
+*Delixon — deli-technology/delixon-app · Organización GitHub: deli-technology*

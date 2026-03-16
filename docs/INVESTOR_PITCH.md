@@ -203,7 +203,7 @@ Delixon se encuentra en fase de **diseño y arquitectura**. La documentación t�
 
 **Lo que existe hoy:**
 - Documentación completa del producto y arquitectura
-- Repositorio configurado en GitHub (`deli-labs/delixon`)
+- Repositorio configurado en GitHub (`deli-technology/delixon-app`)
 - Stack tecnológico validado (Tauri 2.x + React 18 + TypeScript)
 - Plan de fases detallado con criterios de éxito medibles
 - Plantillas iniciales definidas (Node, React, Python, FastAPI, Full Stack)
@@ -248,5 +248,5 @@ La oportunidad está clara. La tecnología está disponible. El problema está s
 
 ---
 
-> *dRaydel · deli-labs · delixon*
-> `https://github.com/deli-labs/delixon`
+> *dRaydel · deli-technology · delixon-app*
+> `https://github.com/deli-technology/delixon-app`
