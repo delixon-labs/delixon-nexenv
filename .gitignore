@@ -26,10 +26,10 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
-# Editor
-# NOTA: .vscode/settings.json se versiona intencionalmente (config del proyecto)
-# Solo ignoramos archivos personales del editor
-.vscode/*.log
+# Editor — .vscode es personal de cada desarrollador
+# Solo se versiona extensions.json (recomendaciones)
+.vscode/*
+!.vscode/extensions.json
 .vscode/terminal-history.txt
 .vscode/bash-history.txt
 .idea/
