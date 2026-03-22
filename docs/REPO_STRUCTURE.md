@@ -1,7 +1,7 @@
 # Delixon — Estructura del Repositorio y Configuración de Desarrollo
 
-> Organización GitHub: `deli-technology` · Repositorio: `delixon-app`
-> URL: `https://github.com/deli-technology/delixon-app`
+> Organización GitHub: `deli-technology` · Repositorio: `delixon`
+> URL: `https://github.com/deli-technology/delixon`
 
 ---
 
@@ -25,9 +25,9 @@
 ```
 Organización : deli-technology
 Owner        : dRaydel (único propietario de momento)
-Repositorio  : delixon-app
+Repositorio  : delixon
 Visibilidad  : Privado durante desarrollo, público en lanzamiento
-URL          : https://github.com/deli-technology/delixon-app
+URL          : https://github.com/deli-technology/delixon
 ```
 
 ### Pasos para crear la organización y el repo
@@ -44,7 +44,7 @@ URL          : https://github.com/deli-technology/delixon-app
 #    → Licencia: MIT (o privada según decisión)
 
 # 3. Clonar localmente
-git clone https://github.com/deli-technology/delixon-app.git
+git clone https://github.com/deli-technology/delixon.git
 cd delixon
 ```
 
@@ -264,7 +264,7 @@ DELIXON_DATA_DIR=
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/deli-technology/delixon-app.git
+git clone https://github.com/deli-technology/delixon.git
 cd delixon
 
 # 2. Instalar dependencias Node
@@ -539,4 +539,4 @@ git push origin v0.1.0
 
 ---
 
-*Delixon — deli-technology/delixon-app · Organización GitHub: deli-technology*
+*Delixon — deli-technology/delixon · Organización GitHub: deli-technology*

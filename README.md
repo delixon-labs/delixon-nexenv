@@ -1,6 +1,8 @@
 # Delixon
 
 > Deja de configurar. Empieza a construir.
+>
+> *Un clic. Proyecto abierto. Entorno correcto.*
 
 Delixon es una aplicación de escritorio local que gestiona el entorno de desarrollo de cada proyecto de forma completamente aislada e independiente.
 
@@ -28,7 +30,7 @@ Delixon es una aplicación de escritorio local que gestiona el entorno de desarr
 
 ```bash
 # Requisitos: Node 20+, Rust 1.77+
-git clone https://github.com/deli-technology/delixon-app.git
+git clone https://github.com/deli-technology/delixon.git
 cd delixon
 npm install
 cp .env.example .env.local
@@ -37,4 +39,4 @@ npm run tauri dev
 
 ---
 
-*deli-technology · [github.com/deli-technology/delixon-app](https://github.com/deli-technology/delixon-app)*
+*deli-technology · [github.com/deli-technology/delixon](https://github.com/deli-technology/delixon)*

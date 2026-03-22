@@ -1,0 +1,20 @@
+# Delixon — Code Owners
+# Cada PR requiere aprobación de al menos un code owner
+
+# Owner global — todo el repo
+* @rrestevez-dell
+
+# Backend Rust / Tauri
+/src-tauri/ @rrestevez-dell
+
+# Frontend React
+/src/ @rrestevez-dell
+
+# Plantillas
+/templates/ @rrestevez-dell
+
+# CI/CD y configuración del repo
+/.github/ @rrestevez-dell
+
+# Documentación
+/docs/ @rrestevez-dell

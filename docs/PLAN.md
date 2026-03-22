@@ -2,6 +2,8 @@
 
 > *Deja de configurar. Empieza a construir.*
 
+> *Un clic. Proyecto abierto. Entorno correcto.*
+
 ---
 
 ## Índice
@@ -16,7 +18,7 @@
 8. [Hoja de ruta y fases](#8-hoja-de-ruta-y-fases)
 9. [Objetivos por fase](#9-objetivos-por-fase)
 10. [Logros esperados con métricas](#10-logros-esperados-con-métricas)
-11. [Por qué Delixon gana](#11-por-qué-delixon-gana)
+11. [Ventaja de producto](#11-ventaja-de-producto)
 
 ---
 
@@ -34,7 +36,7 @@ Un desarrollador que trabaja en varios proyectos simultáneamente pierde entre *
 | Recordar qué versión de runtime usa cada proyecto | Inconsistencias en builds y comportamientos |
 | Incorporar un nuevo desarrollador al equipo | 4-8 horas de onboarding técnico |
 
-Estos problemas **se multiplican** con cada proyecto nuevo. No son molestias menores — son horas de trabajo real perdidas, errores reales, y fricción constante que desgasta al desarrollador.
+Estos problemas **tienden a multiplicarse** con cada proyecto nuevo. No son molestias menores — representan horas de trabajo real perdidas, errores frecuentes, y fricción constante que desgasta al desarrollador.
 
 ---
 
@@ -225,7 +227,7 @@ Tiempo de configuración inicial: ~8 minutos
 | Seguridad | Alta (modelo de permisos estricto) | Media | Alta |
 | Comunidad y ecosistema | Creciendo rápido | Muy maduro | Maduro (solo Windows) |
 
-**Para Delixon, Tauri es la elección correcta porque:**
+**Para Delixon, Tauri es una elección adecuada porque:**
 - Necesitamos interactuar profundamente con el sistema (procesos, archivos, variables de entorno, PATH)
 - Rust nos da ese control con máximo rendimiento y seguridad
 - React en el frontend nos permite una UI moderna y mantenible
@@ -471,8 +473,8 @@ delixon/
 | Antes de Delixon | Con Delixon | Mejora |
 |------------------|-------------|--------|
 | 2-4 horas configurar entorno nuevo | 5-10 minutos | **95% menos tiempo** |
-| Errores por mezcla de entornos: frecuentes | Eliminados por diseño | **100% eliminados** |
-| Comandos ejecutados en proyecto equivocado | Imposible (terminal aislada) | **Eliminado** |
+| Errores por mezcla de entornos: frecuentes | Minimizados por diseño | **Reducción significativa** |
+| Comandos ejecutados en proyecto equivocado | Muy improbable (terminal aislada) | **Prácticamente eliminado** |
 | Espacio en disco duplicado por dependencias | Dependencias compartidas | **30-60% menos espacio** |
 
 ### Para un equipo de 5 desarrolladores
@@ -485,16 +487,16 @@ delixon/
 
 ### Valor como producto
 
-- Herramienta que no existe exactamente igual en el mercado
+- Herramienta sin un equivalente directo en el mercado actual
 - Potencial freemium: gratis para uso individual, pago para equipos y funciones avanzadas
 - Base de usuarios natural: todo desarrollador que trabaje en más de un proyecto
 - Extensible: marketplace de plantillas creadas por la comunidad
 
 ---
 
-## 11. Por qué Delixon gana
+## 11. Ventaja de producto
 
-Las soluciones que existen hoy (DevContainers, Docker, scripts manuales, direnv) resuelven partes del problema pero no el conjunto:
+Las soluciones que existen hoy (DevContainers, Docker, scripts manuales, direnv) resuelven partes del problema, pero ninguna aborda el conjunto de forma integrada:
 
 | Herramienta | Qué hace bien | Qué no resuelve |
 |-------------|---------------|-----------------|
@@ -504,9 +506,9 @@ Las soluciones que existen hoy (DevContainers, Docker, scripts manuales, direnv)
 | Docker Compose | Servicios aislados | No gestiona el entorno de desarrollo local |
 | Scripts manuales | Flexibles | No son mantenibles ni compartibles fácilmente |
 
-**Delixon integra todo esto en una sola herramienta**, con una interfaz diseñada para desarrolladores, sin requerir conocimiento de Docker o Rust o Bash para usarla.
+**Delixon busca integrar todo esto en una sola herramienta**, con una interfaz diseñada para desarrolladores, sin requerir conocimiento de Docker o Rust o Bash para usarla.
 
-El desarrollador no necesita saber cómo funciona por dentro. Solo necesita saber que cuando abre su proyecto, **todo funciona**.
+El desarrollador no necesita saber cómo funciona por dentro. La experiencia objetivo es que cuando abra su proyecto, **todo funcione**.
 
 ---
 
