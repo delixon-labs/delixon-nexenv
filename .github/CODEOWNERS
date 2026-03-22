@@ -2,16 +2,16 @@
 # Cada PR requiere aprobación de al menos un code owner
 
 # Owner global — todo el repo
-* @rrestevez-dell
+* @rrestevez-dell @mundowise
 
 # Backend Rust / Tauri
-/src-tauri/ @rrestevez-dell
+/src-tauri/ @rrestevez-dell @mundowise
 
 # Frontend React
-/src/ @rrestevez-dell
+/src/ @rrestevez-dell @mundowise
 
 # Plantillas
-/templates/ @rrestevez-dell
+/templates/ @rrestevez-dell @mundowise
 
 # CI/CD y configuración del repo
 /.github/ @rrestevez-dell
