@@ -14,7 +14,7 @@
 /templates/ @rrestevez-dell @mundowise
 
 # CI/CD y configuración del repo
-/.github/ @rrestevez-dell
+/.github/ @rrestevez-dell @mundowise
 
 # Documentación
-/docs/ @rrestevez-dell
+/docs/ @rrestevez-dell @mundowise
