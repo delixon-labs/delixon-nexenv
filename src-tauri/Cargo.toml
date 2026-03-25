@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Gestor de workspaces para desarrolladores"
 authors = ["dRaydel"]
 license = "MIT"
-repository = "https://github.com/deli-labs/delixon"
+repository = "https://github.com/deli-technology/delixon-app"
 edition = "2021"
 rust-version = "1.77"
 

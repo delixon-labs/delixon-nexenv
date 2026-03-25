@@ -1,252 +1,300 @@
-# Delixon
-## La plataforma que libera a los desarrolladores de la carga invisible
+<!-- cSpell:enable -->
+<!-- cSpell:words delixon tauri zustand radix shadcn vite vitest -->
+# Delixon — Investor Memo
 
-> *Cada desarrollador pierde horas cada semana en trabajo que no es su trabajo.*
-> *Delixon se las devuelve.*
+> *Un clic. Proyecto abierto. Entorno correcto.*
+
+---
+
+## Resumen ejecutivo
+
+Delixon es una aplicación de escritorio local que organiza y aísla entornos de desarrollo por proyecto, permitiendo a los desarrolladores abrir cualquier proyecto con su configuración correcta en un clic.
+
+Resuelve un problema cotidiano y costoso: la pérdida de tiempo causada por conflictos entre versiones, variables de entorno, dependencias y configuraciones al trabajar en varios proyectos con stacks distintos.
+
+**La propuesta de valor es simple: un clic, proyecto abierto, entorno correcto.**
+
+Delixon no reemplaza herramientas como VSCode, Git, Docker, nvm o pyenv. Se sitúa por encima de ellas como una capa de organización que coordina el contexto técnico de cada proyecto para que el desarrollador pueda empezar a trabajar sin fricción.
 
 ---
 
 ## El problema
 
-Existe un problema que afecta a cada desarrollador del mundo, todos los días, sin excepción: **el coste invisible de gestionar entornos de desarrollo**.
+Los desarrolladores que trabajan en varios proyectos pierden horas cada semana en tareas que no generan valor directo:
 
-Un desarrollador profesional no trabaja en un solo proyecto. Trabaja en tres, en cinco, en ocho. Cada uno con su propio lenguaje, su propia versión de runtime, sus propias variables de entorno, sus propias dependencias. Y cada vez que cambia de proyecto, o empieza uno nuevo, o incorpora a alguien al equipo, paga ese coste.
+| Tarea sin valor | Impacto real |
+|-----------------|--------------|
+| Cambiar versiones de Node, Python o Go | 15-30 min por incidente |
+| Corregir variables de entorno mezcladas | 30-45 min de depuración |
+| Reconstruir configuraciones locales | 1-3 horas por proyecto nuevo |
+| Resolver conflictos entre dependencias | Variable, a veces horas |
+| Entender cómo ejecutar un proyecto ajeno | 4-8 horas de onboarding |
 
-**¿Cuánto cuesta exactamente?**
+En equipos, este problema escala rápidamente:
 
-- Configurar un entorno nuevo desde cero: entre **1 y 3 horas** por proyecto
-- Depurar errores causados por entornos mezclados: **45 minutos promedio** por incidente
-- Incorporar un nuevo desarrollador a un proyecto existente: **4 a 8 horas** de onboarding técnico
-- Instalar dependencias que ya existen en otro proyecto: tiempo y espacio duplicado, **siempre**
+- Ralentiza el onboarding de cada nuevo miembro.
+- Introduce errores de entorno difíciles de rastrear.
+- Genera dependencia de documentación informal (Slack, wikis desactualizadas).
+- Reduce las horas efectivas de desarrollo real.
 
-Para un desarrollador que trabaja en 4 proyectos simultáneamente, esto suma entre **2 y 5 horas semanales** en trabajo que no aporta ningún valor al producto que está construyendo.
+La mayoría de herramientas actuales resuelven piezas aisladas del problema, pero no la experiencia completa de entrada al proyecto.
 
-Para un equipo de 10 personas, estamos hablando de **20 a 50 horas semanales** dedicadas a infraestructura de desarrollo local, no a desarrollo.
-
-**Este problema no es pequeño. Es estructural. Y nadie lo ha resuelto correctamente.**
-
----
-
-## Las soluciones actuales no funcionan
-
-Existen herramientas que abordan partes del problema:
-
-| Herramienta | Qué resuelve | Por qué no es suficiente |
-|-------------|--------------|--------------------------|
-| `venv` / `nvm` | Aísla un runtime | Solo uno. No integra el resto. No tiene UI. |
-| Docker / DevContainers | Aislamiento total | Requiere conocer Docker. Lento. Pesado. Curva alta. |
-| `direnv` | Variables de entorno | Solo eso. Sin interfaz. Sin integración con el flujo. |
-| Scripts manuales | Flexible | No son mantenibles. No son compartibles. No escalan. |
-| `.code-workspace` de VSCode | Configuración del editor | No aísla el entorno real del sistema. |
-
-Ninguna de estas herramientas resuelve el problema completo. El desarrollador tiene que combinarlas, mantenerlas, documentarlas, y enseñarlas a cada nuevo miembro del equipo. El problema no desaparece — se traslada.
+| Herramienta | Qué resuelve | Qué deja sin resolver |
+|-------------|--------------|----------------------|
+| `venv` / `nvm` | Aísla un runtime | Solo uno. No integra el resto. Sin UI. |
+| Docker / DevContainers | Aislamiento total | Requiere conocer Docker. Pesado. Curva alta. |
+| `direnv` | Variables de entorno | Solo eso. Sin interfaz. Sin integración. |
+| Scripts manuales | Flexible | No mantenibles. No compartibles. No escalan. |
 
 ---
 
-## La solución: Delixon
+## La solución
 
-**Delixon es una aplicación de escritorio local que gestiona el entorno de desarrollo de cada proyecto de forma completamente aislada e independiente.**
+Delixon actúa como punto de entrada operativo para el desarrollador.
 
-No es un nuevo lenguaje. No es un IDE. No es un gestor de paquetes. Es la **capa de organización inteligente** que se sienta entre el desarrollador y sus proyectos, y se encarga de todo lo que el desarrollador no debería tener que pensar.
+Cuando el usuario selecciona un proyecto en Delixon:
 
-El desarrollador abre Delixon, selecciona el proyecto, hace clic en "Abrir".
-VSCode se lanza con el workspace correcto. La terminal tiene el entorno correcto. Las variables de entorno correctas. La versión de Node correcta. La versión de Python correcta. El historial de comandos de ese proyecto, y solo de ese proyecto.
+- Se abre el workspace correcto.
+- Se carga el entorno adecuado.
+- Se aplican las variables de entorno necesarias.
+- Se respeta la versión requerida de cada runtime.
+- Se mantiene el historial y contexto de ese proyecto de forma aislada.
 
-**Sin pasos manuales. Sin documentos de configuración. Sin sorpresas.**
+La experiencia objetivo es eliminar el trabajo invisible previo al desarrollo.
 
----
-
-## Cómo funciona
-
-### Aislamiento completo por proyecto
-
-Cada proyecto registrado en Delixon vive en su propio contexto independiente:
-
-- Variables de entorno propias — no se filtran a otros proyectos
-- Historial de terminal propio — los comandos de un proyecto no aparecen en otro
-- Versión de runtime propia — Node 18 en uno, Node 20 en otro, sin gestor externo
-- Dependencias propias o compartidas inteligentemente — sin duplicados innecesarios
-
-### Gestión inteligente de dependencias
-
-Delixon no reinstala lo que ya existe. Detecta si una dependencia compatible ya está en el sistema y la vincula. Si necesita una versión diferente, la instala de forma aislada solo para ese proyecto. El resultado: **menos espacio en disco, menos tiempo de instalación, mismo aislamiento**.
-
-### Plantillas con mejores prácticas incluidas
-
-Crear un proyecto nuevo en Delixon no es crear una carpeta vacía. Es seleccionar una plantilla — Node, React, Python, FastAPI, Full Stack, Docker — y obtener en segundos:
-
-- Estructura de carpetas estándar y probada
-- Linter y formatter configurados
-- Git inicializado con hooks listos
-- Scripts de desarrollo, build y test funcionando
-- Archivos de entorno y `.gitignore` correctos
-
-El desarrollador empieza a escribir código en minutos, no en horas.
-
-### Portabilidad garantizada
-
-Cada proyecto gestionado por Delixon genera un archivo `.delixon` con toda su configuración. Llevar el proyecto a otra máquina significa clonar el repo y abrir ese archivo en Delixon — que reconstruye el entorno exacto de forma automática.
+En lugar de recordar pasos, leer documentación o preguntar a otro miembro del equipo, el desarrollador entra al proyecto desde un entorno ya preparado.
 
 ---
 
-## Ejemplo real: el primer día de un desarrollador nuevo
+## Producto
 
-**Sin Delixon:**
-```
-09:00 — Llega el nuevo desarrollador
-09:15 — Clona el repo
-09:30 — "¿Qué versión de Node necesito?" → busca en la wiki, no está actualizada
-10:00 — Instala dependencias → error de versión incompatible
-10:30 — Configura variables de entorno → falta una, el proyecto no arranca
-11:00 — "¿Dónde está el .env.example?" → no existe, alguien se lo manda por Slack
-12:00 — Por fin el proyecto arranca. Han pasado 3 horas.
-```
+La primera versión está enfocada en una experiencia local de escritorio, priorizando simplicidad, rendimiento y control del sistema operativo.
 
-**Con Delixon:**
-```
-09:00 — Llega el nuevo desarrollador
-09:05 — Instala Delixon
-09:10 — Importa el archivo .delixon del proyecto
-09:12 — Delixon clona, instala, configura
-09:15 — Está trabajando. Han pasado 15 minutos.
-```
+### Propuesta de producto inicial
 
----
+- Creación de proyectos desde plantillas preconfiguradas.
+- Apertura de proyectos existentes con su entorno correcto.
+- Aislamiento de variables de entorno por proyecto.
+- Historial de terminal separado por proyecto.
+- Integración con VSCode.
+- Exportación e importación de configuración (archivo `.delixon`).
 
-## Mercado
+### Evolución prevista
 
-### Tamaño del mercado
+En fases posteriores, Delixon incorporará:
 
-- **27 millones de desarrolladores de software** activos en el mundo (Stack Overflow Developer Survey 2024)
-- **El 85% trabaja en más de un proyecto simultáneamente** — todos son usuarios potenciales de Delixon
-- El mercado de herramientas de productividad para desarrolladores supera los **$10 billones anuales** y crece a doble dígito
-
-### Usuario objetivo
-
-**Perfil principal — Desarrollador individual:**
-- Trabaja en 2 o más proyectos con tecnologías distintas
-- Usa Windows, Linux o macOS (en ese orden de prioridad para el lanzamiento)
-- Valora su tiempo y la calidad de su entorno de trabajo
-- Está dispuesto a pagar por herramientas que le ahorren tiempo real
-
-**Perfil secundario — Equipo de desarrollo:**
-- Equipos de 2 a 20 personas
-- Con rotación de miembros o incorporación frecuente de nuevos desarrolladores
-- Que sufre inconsistencias de entorno entre miembros ("en mi máquina funciona")
-
-**Perfil futuro — DevOps / Servidores:**
-- Servidores con múltiples proyectos en producción
-- Necesidad de aislamiento de dependencias sin contenedores completos
+- Gestión inteligente de dependencias.
+- Gestor integrado de runtimes.
+- Terminal embebida.
+- Funciones colaborativas para equipos.
+- Soporte cross-platform completo (Windows, Linux, macOS).
+- Futura versión CLI para entornos de servidor.
 
 ---
 
-## Modelo de negocio
+## Stack y decisión técnica
 
-### Freemium
+Delixon está construido con:
 
-**Plan Gratuito — Individual:**
-- Proyectos ilimitados
-- Todas las funciones de aislamiento de entorno
-- Plantillas básicas incluidas
-- Uso personal, sin límite de tiempo
+- **Backend:** Tauri 2 + Rust
+- **Frontend:** React 18 + TypeScript + TailwindCSS
 
-**Plan Pro — $9/mes por usuario:**
-- Plantillas avanzadas y personalizadas
-- Dashboard con métricas de proyectos
-- Gestor de runtimes integrado (instalar/cambiar versiones desde Delixon)
-- Terminal integrada en la app
-- Exportación avanzada de configuraciones
-- Soporte prioritario
+Esta elección responde a criterios de producto, no solo de ingeniería.
 
-**Plan Team — $19/mes por usuario (mínimo 3):**
-- Todo lo de Pro
-- Configuraciones de equipo sincronizadas
-- Onboarding automatizado para nuevos miembros
-- Repositorio privado de plantillas del equipo
-- Panel de administración
+| Criterio | Delixon (Tauri/Rust) | Alternativa típica (Electron) |
+|----------|----------------------|-------------------------------|
+| Tamaño del instalador | ~2-5 MB | ~80-150 MB |
+| Uso de RAM | ~50 MB | ~300-500 MB |
+| Velocidad de arranque | < 1 segundo | 3-8 segundos |
+| Acceso al SO | Nativo (Rust) | Mediado (Node.js) |
+| Seguridad | Modelo de permisos estricto | Media |
 
-**Marketplace de plantillas (futuro):**
-- Desarrolladores y empresas pueden publicar plantillas
-- Plantillas premium: modelo de reparto de ingresos 70/30
-
-### Proyección conservadora (año 1-2)
-
-| Escenario | Usuarios gratuitos | Conversión a Pro | Ingresos mensuales |
-|-----------|-------------------|------------------|--------------------|
-| Conservador | 5.000 | 3% (150 usuarios) | ~$1.350 |
-| Moderado | 20.000 | 5% (1.000 usuarios) | ~$9.000 |
-| Optimista | 50.000 | 7% (3.500 usuarios) | ~$31.500 |
-
-El canal de crecimiento principal es **orgánico**: desarrolladores que usan Delixon recomiendan Delixon. El producto resuelve un problema tan visible que quien lo usa lo comenta.
-
----
-
-## Ventaja competitiva
-
-### Por qué Delixon puede ganar
-
-**1. El momento es ahora.** El ecosistema de desarrollo se ha fragmentado enormemente en los últimos 5 años. Más lenguajes, más frameworks, más versiones, más proyectos. El problema que Delixon resuelve es más agudo que nunca y sigue creciendo.
-
-**2. Nadie lo ha resuelto de esta forma.** Las soluciones existentes son parciales o requieren conocimiento técnico avanzado para configurarlas. Delixon apunta al desarrollador que quiere trabajar, no al que quiere gestionar infraestructura.
-
-**3. El stack tecnológico es una ventaja real.** Construido con Tauri + Rust, Delixon es nativo, rápido y ligero (~5 MB de instalador, ~50 MB de RAM). No es otra app Electron pesada. Eso importa a los desarrolladores.
-
-**4. Diseñado para crecer.** La arquitectura de Delixon está pensada desde el inicio para ser cross-platform (Windows → Linux → macOS), para escalar a equipos, y para expandirse a casos de uso en servidores. El MVP es solo la primera capa de un producto mucho mayor.
-
-**5. Efecto de red en plantillas.** Cada plantilla que un usuario o empresa crea para Delixon hace el producto más valioso para todos los demás. Es un foso competitivo que crece solo.
-
----
-
-## Estado actual
-
-Delixon se encuentra en fase de **diseño y arquitectura**. La documentación técnica, la estructura del repositorio y el plan de producto están completamente definidos.
-
-**Lo que existe hoy:**
-- Documentación completa del producto y arquitectura
-- Repositorio configurado en GitHub (`deli-labs/delixon`)
-- Stack tecnológico validado (Tauri 2.x + React 18 + TypeScript)
-- Plan de fases detallado con criterios de éxito medibles
-- Plantillas iniciales definidas (Node, React, Python, FastAPI, Full Stack)
-
-**Lo que viene:**
-- Fase 1 MVP Windows: 3-4 meses de desarrollo
-- Beta privada con usuarios reales seleccionados
-- Lanzamiento público v1.0 en Windows
-- Expansión a Linux y macOS
-
----
-
-## El equipo
-
-**dRaydel** — Fundador y desarrollador principal
-
-Desarrollador con experiencia en múltiples proyectos simultáneos y tecnologías diversas. El problema que Delixon resuelve es un problema que el fundador ha vivido en primera persona durante años. Esa perspectiva es la base del diseño del producto: cada decisión viene de entender el dolor real del desarrollador, no de suposiciones.
-
-El proyecto está actualmente en desarrollo individual con visión clara de incorporar colaboradores técnicos en cuanto el MVP esté validado.
-
----
-
-## Lo que buscamos
-
-Delixon busca en este momento:
-
-- **Inversión pre-seed** para acelerar el desarrollo del MVP y cubrir los primeros 12 meses
-- **Mentores técnicos o de producto** con experiencia en herramientas para desarrolladores
-- **Early adopters** — desarrolladores que quieran ser los primeros en probar Delixon y dar feedback real
-
-El objetivo no es levantar dinero para buscar un modelo de negocio. El modelo existe, el problema existe, los usuarios existen. El objetivo es acelerar el tiempo hasta tener algo en manos de esos usuarios.
+Para un producto destinado a desarrolladores, el rendimiento y el peso de la aplicación no son detalles secundarios. Son parte de la propuesta de valor.
 
 ---
 
 ## Por qué ahora
 
-Cada semana que pasa, millones de desarrolladores en el mundo pierden horas en configuraciones manuales, entornos mezclados, y onboardings interminables. Cada semana sin Delixon es tiempo que no se puede recuperar.
+La fragmentación del ecosistema de desarrollo ha aumentado de forma estructural en los últimos años:
 
-La oportunidad está clara. La tecnología está disponible. El problema está sin resolver correctamente.
+- Más lenguajes y frameworks conviviendo en un mismo equipo.
+- Más versiones activas por stack.
+- Más proyectos paralelos por desarrollador.
+- Más necesidad de onboarding rápido en equipos pequeños.
+- Más complejidad local incluso en entornos aparentemente simples.
 
-**Delixon va a resolverlo.**
+Las herramientas existentes ayudan, pero obligan al desarrollador a orquestarlas manualmente. Delixon nace para simplificar precisamente esa capa de coordinación que nadie ha abordado de forma completa.
 
 ---
 
-> *dRaydel · deli-labs · delixon*
-> `https://github.com/deli-labs/delixon`
+## Ventaja de producto
+
+La tesis central de Delixon es que el problema no es solo técnico, sino organizativo.
+
+No se trata únicamente de instalar dependencias o cambiar versiones. El problema real es que cada proyecto necesita su propio contexto operativo, y ese contexto hoy se reconstruye manualmente demasiadas veces.
+
+Delixon busca convertirse en la capa desde la que el desarrollador entra a trabajar. Esa posición es estratégica porque aumenta:
+
+- **Frecuencia de uso** — se abre cada vez que el desarrollador trabaja.
+- **Retención** — el contexto acumulado hace difícil abandonar la herramienta.
+- **Dependencia funcional** — los equipos sincronizan sus entornos a través de Delixon.
+- **Potencial de monetización** — a nivel individual y de equipo.
+
+---
+
+## Estado actual del proyecto
+
+Delixon se encuentra en fase de arquitectura avanzada y scaffolding completo.
+
+### Ya construido
+
+- Repositorio principal configurado en GitHub (`deli-technology/delixon`).
+- Organización GitHub creada con estructura de equipos.
+- Stack técnico instalado, compilando y generando instaladores nativos.
+- Arquitectura backend modular en Rust/Tauri (6 módulos).
+- Arquitectura frontend estructurada en React/TypeScript (páginas, componentes, tipos).
+- 7 carpetas de plantillas creadas.
+- Pipeline de CI/CD básica en GitHub Actions.
+- Documentación completa del producto, visión, repositorio y pitch.
+
+### Pendiente de implementación
+
+- Lógica funcional real de los módulos backend.
+- Stores de estado y hooks del frontend.
+- Interfaz visual operativa.
+- Contenido real de las plantillas.
+- Tests unitarios y de integración.
+- Primeras integraciones funcionales de entorno.
+
+En términos prácticos: la base está definida y construida. El trabajo principal ahora es convertir esa estructura en producto usable.
+
+---
+
+## Roadmap
+
+### Fase 1 — MVP Windows `[3-4 meses]`
+
+Objetivo: entregar una versión funcional que permita usar Delixon en casos reales.
+
+- Crear proyecto desde plantilla.
+- Abrir proyecto existente con entorno correcto.
+- Aislamiento de variables de entorno.
+- Integración con VSCode.
+- Exportar/importar configuración.
+- Instalador Windows (.msi / .exe).
+- Beta privada con usuarios reales.
+
+### Fase 2 — Madurez `[2-3 meses tras MVP]`
+
+Objetivo: aumentar utilidad y activar monetización inicial.
+
+- Gestión inteligente de dependencias.
+- Dashboard de estado de proyectos.
+- Gestor de runtimes integrado.
+- Terminal integrada.
+- **Activación del Plan Pro.**
+
+### Fase 3 — Equipos `[2-3 meses tras Fase 2]`
+
+Objetivo: multiplicar el valor en entornos colaborativos.
+
+- Onboarding automatizado.
+- Configuraciones compartidas.
+- Repositorio privado de plantillas.
+- **Activación del Plan Team.**
+
+### Fase 4 — Cross-platform `[2-3 meses tras Fase 3]`
+
+Objetivo: ampliar mercado a Linux y macOS.
+
+### Fase 5 — Servidores `[futuro]`
+
+Objetivo: explorar expansión hacia entornos headless y casos de uso DevOps.
+
+---
+
+## Modelo de negocio
+
+| Plan | Precio | Para quién |
+|------|--------|------------|
+| Gratuito | $0 | Desarrollador individual |
+| Pro | $9/mes | Desarrollador que quiere más |
+| Team | $19/mes/usuario (mín. 3) | Equipos |
+| Marketplace | Reparto 70/30 | Creadores de plantillas |
+
+### Proyección conservadora (año 1-2)
+
+| Escenario | Usuarios gratuitos | Conversión Pro | MRR estimado |
+|-----------|-------------------|----------------|--------------|
+| Conservador | 5.000 | 3% → 150 | ~$1.350 |
+| Moderado | 20.000 | 5% → 1.000 | ~$9.000 |
+| Optimista | 50.000 | 7% → 3.500 | ~$31.500 |
+
+### Lógica de monetización
+
+El canal natural de adopción es bottom-up:
+
+1. Un desarrollador individual descubre valor.
+2. Lo introduce en su flujo diario.
+3. Lo recomienda a su equipo.
+4. El equipo adopta funciones compartidas.
+5. La empresa amplía uso y licencias.
+
+---
+
+## Mercado y oportunidad
+
+- **27 millones de desarrolladores** activos en el mundo (Stack Overflow Developer Survey 2024).
+- **El 85% trabaja en más de un proyecto simultáneamente.**
+- Mercado de herramientas de productividad para desarrolladores: **+$10B anuales**, crecimiento a doble dígito.
+
+La oportunidad no está solo en el tamaño del mercado, sino en la **recurrencia del problema**:
+
+- Ocurre semanalmente.
+- Afecta a usuarios técnicos que valoran las buenas herramientas.
+- Genera dolor claro tanto en uso individual como en equipos.
+
+Si Delixon consigue convertirse en herramienta de entrada diaria al proyecto, puede capturar una posición con alto valor estratégico dentro del flujo de trabajo del desarrollador.
+
+---
+
+## Riesgos principales
+
+Como todo proyecto en esta fase, Delixon tiene riesgos reales:
+
+| Riesgo | Estrategia de mitigación |
+|--------|--------------------------|
+| Ejecución técnica del MVP | Stack validado, arquitectura definida, primer build ya funcional |
+| Definir mal el alcance inicial | Foco extremo en el problema central, iterar con feedback |
+| Abarcar demasiado antes de validar | MVP mínimo → beta → iterar. No más. |
+| Adopción si la propuesta no se comunica bien | Frase clara, demo visual, beta con usuarios reales |
+| Competidor grande entra al espacio | Ventaja de foco: Delixon resuelve un problema concreto, no es un feature de otra plataforma |
+
+---
+
+## Qué buscamos
+
+Actualmente buscamos una combinación de:
+
+- **Inversión pre-seed** para acelerar el desarrollo del MVP y cubrir los primeros 12 meses.
+- **Mentores** con experiencia en herramientas para desarrolladores.
+- **Early adopters técnicos** para la beta privada.
+- **Acompañamiento estratégico** en go-to-market y pricing.
+
+---
+
+## Cierre
+
+Delixon parte de una observación sencilla:
+
+> Los desarrolladores pierden demasiadas horas en preparar el contexto de trabajo antes de empezar a construir.
+
+Ese tiempo perdido no es anecdótico. Es recurrente, costoso y ampliamente aceptado como "normal" pese a no aportar valor real.
+
+El objetivo no es levantar dinero para buscar un modelo de negocio. El modelo existe, el problema existe, los usuarios existen. El objetivo es acelerar el tiempo hasta tener algo en manos de esos usuarios.
+
+**Un clic. Proyecto abierto. Entorno correcto.**
+
+---
+
+*dRaydel · deli-technology · `github.com/deli-technology/delixon`*
