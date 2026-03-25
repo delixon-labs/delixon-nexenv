@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use tauri::command;
 
+use crate::storage;
+
 /// Obtiene las variables de entorno de un proyecto
 #[command]
 pub async fn get_env_vars(project_id: String) -> Result<HashMap<String, String>, String> {
-    // TODO: Fase 1 — leer variables de entorno del proyecto
-    let _ = project_id;
-    Ok(HashMap::new())
+    storage::load_env_vars(&project_id)
 }
 
 /// Establece las variables de entorno de un proyecto
@@ -15,7 +15,10 @@ pub async fn set_env_vars(
     project_id: String,
     vars: HashMap<String, String>,
 ) -> Result<(), String> {
-    // TODO: Fase 1 — guardar variables de entorno del proyecto
-    let _ = (project_id, vars);
-    Ok(())
+    // Verificar que el proyecto existe
+    let projects = storage::load_projects()?;
+    if !projects.iter().any(|p| p.id == project_id) {
+        return Err(format!("Proyecto no encontrado: {}", project_id));
+    }
+    storage::save_env_vars(&project_id, &vars)
 }
