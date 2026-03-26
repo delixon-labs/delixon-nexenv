@@ -1,15 +1,15 @@
-name: Build & Test
+name: CI
 
 on:
-  push:
+  pull_request:
     branches: [main, develop]
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  lint-and-test:
     runs-on: windows-latest
 
     steps:
@@ -22,27 +22,34 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test -- --run
+
+  rust-check:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Run frontend tests
-        run: npm run test -- --run
+      - name: Clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
-
-      - name: Build Tauri app
-        run: npm run tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
