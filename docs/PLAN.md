@@ -1526,7 +1526,80 @@ La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de 
 
 ---
 
-## 21. Checklist general de implementación
+## 21. Dependencias y versiones
+
+> **Política de versiones:** Todas las dependencias usan versiones exactas (sin `^` ni `~`) para evitar actualizaciones involuntarias que rompan el proyecto. Se actualiza manualmente tras verificar compatibilidad.
+
+> **Última actualización:** 2026-03-25
+
+### Frontend (npm — package.json)
+
+| Paquete | Versión | Tipo | Notas |
+|---|---|---|---|
+| **react** | 18.3.1 | dependencies | Última estable de React 18 (React 19 requiere migración) |
+| **react-dom** | 18.3.1 | dependencies | Sigue la versión de React |
+| **react-router-dom** | 6.30.3 | dependencies | Última estable de v6 (v7 requiere migración) |
+| **@tanstack/react-query** | 5.95.2 | dependencies | Manejo de datos asíncronos |
+| **@tauri-apps/api** | 2.10.1 | dependencies | API core de Tauri v2 |
+| **@tauri-apps/plugin-fs** | 2.4.5 | dependencies | Plugin de filesystem |
+| **@tauri-apps/plugin-process** | 2.3.1 | dependencies | Plugin de procesos |
+| **@tauri-apps/plugin-shell** | 2.3.5 | dependencies | Plugin de shell |
+| **clsx** | 2.1.1 | dependencies | Utilidad para clases CSS |
+| **tailwind-merge** | 2.6.1 | dependencies | Merge inteligente de clases Tailwind |
+| **zustand** | 4.5.7 | dependencies | Estado global (v5 requiere migración) |
+| **@eslint/js** | 9.39.4 | devDependencies | Config base de ESLint |
+| **@tauri-apps/cli** | 2.10.1 | devDependencies | CLI de Tauri |
+| **@types/node** | 22.16.4 | devDependencies | Tipos de Node.js |
+| **@types/react** | 18.3.28 | devDependencies | Tipos de React 18 |
+| **@types/react-dom** | 18.3.7 | devDependencies | Tipos de React DOM 18 |
+| **@typescript-eslint/eslint-plugin** | 8.57.2 | devDependencies | Reglas ESLint para TS |
+| **@typescript-eslint/parser** | 8.57.2 | devDependencies | Parser ESLint para TS |
+| **@vitejs/plugin-react** | 4.7.0 | devDependencies | Plugin React para Vite |
+| **autoprefixer** | 10.4.27 | devDependencies | Autoprefixer CSS |
+| **eslint** | 9.39.4 | devDependencies | Linter (v10 requiere migración) |
+| **eslint-plugin-react-hooks** | 5.2.0 | devDependencies | Reglas de hooks |
+| **postcss** | 8.5.8 | devDependencies | Procesador CSS |
+| **prettier** | 3.8.1 | devDependencies | Formateador de código |
+| **tailwindcss** | 3.4.19 | devDependencies | Última estable de v3 (v4 requiere migración) |
+| **typescript** | 5.9.3 | devDependencies | Última estable de TS 5 (v6 requiere migración) |
+| **vite** | 6.4.1 | devDependencies | Bundler (v8 requiere migración) |
+| **vitest** | 3.2.4 | devDependencies | Testing (v4 requiere migración) |
+
+### Backend (Cargo — Cargo.toml)
+
+| Crate | Versión | Notas |
+|---|---|---|
+| **tauri** | 2.10.3 | Core de Tauri v2 |
+| **tauri-build** | 2.5.6 | Build-time |
+| **tauri-plugin-shell** | 2.3.5 | Plugin de shell |
+| **tauri-plugin-fs** | 2.4.5 | Plugin de filesystem |
+| **tauri-plugin-process** | 2.3.1 | Plugin de procesos |
+| **serde** | 1.0.228 | Serialización/deserialización |
+| **serde_json** | 1.0.149 | JSON |
+| **tokio** | 1.50.0 | Runtime asíncrono |
+| **which** | 6.0.3 | Detección de binarios (v8 requiere migración) |
+| **dirs** | 5.0.1 | Rutas del sistema (v6 requiere migración) |
+| **thiserror** | 1.0.69 | Manejo de errores (v2 requiere migración) |
+| **uuid** | 1.22.0 | Generación de UUIDs |
+| **chrono** | 0.4.44 | Fechas y tiempos |
+
+### Migraciones mayores pendientes (futuro)
+
+Estas actualizaciones requieren trabajo de migración dedicado y no deben hacerse junto con features:
+
+| Paquete | Actual | Objetivo | Impacto |
+|---|---|---|---|
+| React | 18.x | 19.x | Breaking changes en APIs, tipos nuevos |
+| react-router-dom | 6.x | 7.x | API de rutas completamente diferente |
+| TailwindCSS | 3.x | 4.x | Config basada en CSS, sin tailwind.config |
+| Vite | 6.x | 8.x | Cambios en configuración y plugins |
+| TypeScript | 5.x | 6.x | Nuevas reglas de tipos |
+| Zustand | 4.x | 5.x | Cambios en API de create |
+| ESLint | 9.x | 10.x | Cambios en sistema de config |
+
+---
+
+## 22. Checklist general de implementación
 
 ### Landing page (delixon-web) — Completado
 - [x] Estructura de carpetas por sección (`layout/`, `hero/`, `problem/`, `solution/`, `how-it-works/`, `waitlist/`)
@@ -1614,6 +1687,14 @@ La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de 
 - [ ] Sistema de plugins
 - [ ] Marketplace de templates y recipes
 - [ ] Soporte multi-editor (Cursor, WebStorm, Neovim, Zed)
+
+### Mantenimiento — Completado
+- [x] Actualización de todas las dependencias npm a última versión estable (2026-03-25)
+- [x] Actualización de todas las dependencias Rust/Cargo a última versión estable (2026-03-25)
+- [x] Versiones exactas fijadas (sin `^`) para evitar actualizaciones involuntarias
+- [x] 0 vulnerabilidades en `npm audit`
+- [x] Mock system para desarrollo en navegador (safeInvoke + datos mock)
+- [x] Future flags de React Router v7 activadas (sin warnings en consola)
 
 ---
 
