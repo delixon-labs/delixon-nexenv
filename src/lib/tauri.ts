@@ -2,6 +2,16 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { Project, CreateProjectInput, RuntimeConfig, ProjectStatus } from "@/types/project";
 import type { DelixonConfig } from "@/types/config";
 import { DEFAULT_CONFIG } from "@/types/config";
+import type { HealthReport, DoctorReport, PortConflict, PortInfo } from "@/types/health";
+import type { GitStatus, GitCommit } from "@/types/git";
+import type { DockerComposeStatus } from "@/types/docker";
+import type { ScriptResult } from "@/types/scripts";
+import type { ProjectNote } from "@/types/notes";
+import type { ProjectProcess } from "@/types/processes";
+import type { Recipe, RecipePreview, RecipeApplyResult } from "@/types/recipes";
+import type { Technology } from "@/types/catalog";
+import type { ScaffoldConfig, ScaffoldPreview, ValidationResult } from "@/types/scaffold";
+import type { Snapshot, SnapshotDiff, EnvSnapshot, EnvDiff } from "@/types/versioning";
 
 // --- Mock data para desarrollo en navegador ---
 
@@ -142,7 +152,21 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     }
 
     case "detect_project_stack":
-      return Promise.resolve({ runtimes: [], tags: [] } as T);
+      return Promise.resolve({ runtimes: [], tags: [], packageManager: null, orm: null, auth: null, ci: null, testing: null, docker: null, linter: null, isFullstack: false, hasEnvExample: false, hasReadme: false, hasTypes: false, readinessScore: { total: 0, max: 10, breakdown: [], suggestions: [] } } as T);
+
+    case "scan_and_register": {
+      const regProject: Project = {
+        id: `mock-reg-${Date.now()}`,
+        name: (args?.name as string) || "registered",
+        path: (args?.path as string) || "/tmp/registered",
+        runtimes: [],
+        status: "active",
+        createdAt: new Date().toISOString(),
+        tags: [],
+      };
+      mockProjects.push(regProject);
+      return Promise.resolve(regProject as T);
+    }
 
     case "get_config":
       return Promise.resolve(DEFAULT_CONFIG as T);
@@ -162,6 +186,100 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     case "open_in_editor":
       console.info(`[mock] ${cmd} (simulado en navegador)`);
       return Promise.resolve(undefined as T);
+
+    case "check_project_health":
+      return Promise.resolve({ projectId: args?.projectId ?? "", projectName: "mock", overall: "ok", checks: [{ name: "Directorio", status: "ok", message: "Existe", fixSuggestion: "" }] } as T);
+
+    case "run_doctor":
+      return Promise.resolve({ checks: [{ name: "Git", ok: true, message: "git version 2.43" }], overallOk: true } as T);
+
+    case "detect_port_conflicts":
+      return Promise.resolve([] as T);
+
+    case "list_project_ports":
+      return Promise.resolve([] as T);
+
+    case "git_status":
+      return Promise.resolve({ branch: "main", isClean: true, modifiedFiles: 0, untrackedFiles: 0, ahead: 0, behind: 0, hasRemote: true, lastCommit: null } as T);
+
+    case "git_log":
+      return Promise.resolve([] as T);
+
+    case "docker_status":
+      return Promise.resolve({ hasCompose: false, services: [], composeFile: "" } as T);
+
+    case "docker_up":
+    case "docker_down":
+      return Promise.resolve("ok" as T);
+
+    case "docker_logs":
+      return Promise.resolve("" as T);
+
+    case "list_project_scripts":
+      return Promise.resolve([] as T);
+
+    case "run_project_script":
+      return Promise.resolve({ script: "", command: "", exitCode: 0, stdout: "", stderr: "" } as T);
+
+    case "get_notes":
+      return Promise.resolve([] as T);
+
+    case "add_note":
+      return Promise.resolve({ id: `mock-note-${Date.now()}`, text: args?.text ?? "", createdAt: new Date().toISOString() } as T);
+
+    case "delete_note":
+      return Promise.resolve(undefined as T);
+
+    case "list_project_processes":
+      return Promise.resolve([] as T);
+
+    case "kill_process":
+      return Promise.resolve(undefined as T);
+
+    case "list_recipes":
+      return Promise.resolve([] as T);
+
+    case "preview_recipe":
+      return Promise.resolve({ recipe: { id: "", name: "", description: "", category: "", filesToCreate: [], depsToInstall: [], devDepsToInstall: [], envVarsToAdd: {}, scriptsToAdd: {} }, filesThatExist: [] } as T);
+
+    case "apply_recipe":
+      return Promise.resolve({ recipeId: args?.recipeId ?? "", filesCreated: [], filesSkipped: [], envVarsAdded: [] } as T);
+
+    case "list_catalog":
+      return Promise.resolve([] as T);
+
+    case "get_catalog_tech":
+      return Promise.resolve(null as T);
+
+    case "list_catalog_categories":
+      return Promise.resolve([] as T);
+
+    case "validate_stack":
+      return Promise.resolve({ valid: true, issues: [], resolvedDependencies: [], portAssignments: {}, suggestions: [] } as T);
+
+    case "preview_scaffold":
+      return Promise.resolve({ files: [], validation: { valid: true, issues: [], resolvedDependencies: [], portAssignments: {}, suggestions: [] } } as T);
+
+    case "generate_scaffold":
+      return Promise.resolve({ id: `mock-scaffold-${Date.now()}`, name: args?.name ?? "", path: "", runtimes: [], status: "active", createdAt: new Date().toISOString(), tags: [] } as T);
+
+    case "save_snapshot":
+      return Promise.resolve({ version: 1, timestamp: new Date().toISOString(), manifest: {} } as T);
+
+    case "list_snapshots":
+      return Promise.resolve([] as T);
+
+    case "diff_snapshots":
+      return Promise.resolve({ fromVersion: 0, toVersion: 0, addedTechs: [], removedTechs: [], addedRecipes: [] } as T);
+
+    case "rollback_snapshot":
+      return Promise.resolve(undefined as T);
+
+    case "take_env_snapshot":
+      return Promise.resolve({ timestamp: new Date().toISOString(), runtimes: [], depsHash: "" } as T);
+
+    case "diff_env_snapshot":
+      return Promise.resolve(null as T);
 
     default:
       return Promise.reject(`[mock] Comando no implementado: ${cmd}`);
@@ -261,13 +379,48 @@ export async function createFromTemplate(
 
 // --- Detection ---
 
+export interface ScoreItem {
+  name: string;
+  points: number;
+  maxPoints: number;
+  present: boolean;
+}
+
+export interface ReadinessScore {
+  total: number;
+  max: number;
+  breakdown: ScoreItem[];
+  suggestions: string[];
+}
+
+export interface DockerInfo {
+  hasDockerfile: boolean;
+  hasCompose: boolean;
+}
+
 export interface DetectedStack {
   runtimes: { runtime: string; version: string }[];
   tags: string[];
+  packageManager: string | null;
+  orm: string | null;
+  auth: string | null;
+  ci: string | null;
+  testing: string | null;
+  docker: DockerInfo | null;
+  linter: string | null;
+  isFullstack: boolean;
+  hasEnvExample: boolean;
+  hasReadme: boolean;
+  hasTypes: boolean;
+  readinessScore: ReadinessScore;
 }
 
 export async function detectProjectStack(path: string): Promise<DetectedStack> {
   return safeInvoke<DetectedStack>("detect_project_stack", { path });
+}
+
+export async function scanAndRegister(path: string, name: string): Promise<Project> {
+  return safeInvoke<Project>("scan_and_register", { path, name });
 }
 
 // --- Config ---
@@ -304,4 +457,156 @@ export async function openTerminal(projectId: string): Promise<void> {
 
 export async function openInEditor(projectPath: string, editor?: string): Promise<void> {
   return safeInvoke<void>("open_in_editor", { projectPath, editor });
+}
+
+// --- Health ---
+
+export async function checkProjectHealth(projectId: string): Promise<HealthReport> {
+  return safeInvoke<HealthReport>("check_project_health", { projectId });
+}
+
+export async function runDoctor(): Promise<DoctorReport> {
+  return safeInvoke<DoctorReport>("run_doctor");
+}
+
+export async function detectPortConflicts(): Promise<PortConflict[]> {
+  return safeInvoke<PortConflict[]>("detect_port_conflicts");
+}
+
+export async function listProjectPorts(): Promise<PortInfo[]> {
+  return safeInvoke<PortInfo[]>("list_project_ports");
+}
+
+// --- Git ---
+
+export async function gitStatus(projectId: string): Promise<GitStatus> {
+  return safeInvoke<GitStatus>("git_status", { projectId });
+}
+
+export async function gitLog(projectId: string, count: number): Promise<GitCommit[]> {
+  return safeInvoke<GitCommit[]>("git_log", { projectId, count });
+}
+
+// --- Docker ---
+
+export async function dockerStatus(projectId: string): Promise<DockerComposeStatus> {
+  return safeInvoke<DockerComposeStatus>("docker_status", { projectId });
+}
+
+export async function dockerUp(projectId: string): Promise<string> {
+  return safeInvoke<string>("docker_up", { projectId });
+}
+
+export async function dockerDown(projectId: string): Promise<string> {
+  return safeInvoke<string>("docker_down", { projectId });
+}
+
+export async function dockerLogs(projectId: string, lines: number): Promise<string> {
+  return safeInvoke<string>("docker_logs", { projectId, lines });
+}
+
+// --- Scripts ---
+
+export async function listProjectScripts(projectId: string): Promise<[string, string][]> {
+  return safeInvoke<[string, string][]>("list_project_scripts", { projectId });
+}
+
+export async function runProjectScript(projectId: string, scriptName: string): Promise<ScriptResult> {
+  return safeInvoke<ScriptResult>("run_project_script", { projectId, scriptName });
+}
+
+// --- Notes ---
+
+export async function getNotes(projectId: string): Promise<ProjectNote[]> {
+  return safeInvoke<ProjectNote[]>("get_notes", { projectId });
+}
+
+export async function addNote(projectId: string, text: string): Promise<ProjectNote> {
+  return safeInvoke<ProjectNote>("add_note", { projectId, text });
+}
+
+export async function deleteNote(projectId: string, noteId: string): Promise<void> {
+  return safeInvoke<void>("delete_note", { projectId, noteId });
+}
+
+// --- Processes ---
+
+export async function listProjectProcesses(projectId: string): Promise<ProjectProcess[]> {
+  return safeInvoke<ProjectProcess[]>("list_project_processes", { projectId });
+}
+
+export async function killProcess(pid: number): Promise<void> {
+  return safeInvoke<void>("kill_process", { pid });
+}
+
+// --- Recipes ---
+
+export async function listRecipes(): Promise<Recipe[]> {
+  return safeInvoke<Recipe[]>("list_recipes");
+}
+
+export async function previewRecipe(projectId: string, recipeId: string): Promise<RecipePreview> {
+  return safeInvoke<RecipePreview>("preview_recipe", { projectId, recipeId });
+}
+
+export async function applyRecipe(projectId: string, recipeId: string): Promise<RecipeApplyResult> {
+  return safeInvoke<RecipeApplyResult>("apply_recipe", { projectId, recipeId });
+}
+
+// --- Catalog ---
+
+export async function listCatalog(): Promise<Technology[]> {
+  return safeInvoke<Technology[]>("list_catalog");
+}
+
+export async function getCatalogTech(id: string): Promise<Technology | null> {
+  return safeInvoke<Technology | null>("get_catalog_tech", { id });
+}
+
+export async function listCatalogCategories(): Promise<string[]> {
+  return safeInvoke<string[]>("list_catalog_categories");
+}
+
+// --- Rules ---
+
+export async function validateStack(technologies: string[]): Promise<ValidationResult> {
+  return safeInvoke<ValidationResult>("validate_stack", { technologies });
+}
+
+// --- Scaffold ---
+
+export async function previewScaffold(config: ScaffoldConfig): Promise<ScaffoldPreview> {
+  return safeInvoke<ScaffoldPreview>("preview_scaffold", { config });
+}
+
+export async function generateScaffold(config: ScaffoldConfig): Promise<Project> {
+  return safeInvoke<Project>("generate_scaffold", { config });
+}
+
+// --- Versioning ---
+
+export async function saveSnapshot(projectId: string): Promise<Snapshot> {
+  return safeInvoke<Snapshot>("save_snapshot", { projectId });
+}
+
+export async function listSnapshots(projectId: string): Promise<Snapshot[]> {
+  return safeInvoke<Snapshot[]>("list_snapshots", { projectId });
+}
+
+export async function diffSnapshots(projectId: string, v1: number, v2: number): Promise<SnapshotDiff> {
+  return safeInvoke<SnapshotDiff>("diff_snapshots", { projectId, v1, v2 });
+}
+
+export async function rollbackSnapshot(projectId: string, version: number): Promise<void> {
+  return safeInvoke<void>("rollback_snapshot", { projectId, version });
+}
+
+// --- Env Snapshots ---
+
+export async function takeEnvSnapshot(projectId: string): Promise<EnvSnapshot> {
+  return safeInvoke<EnvSnapshot>("take_env_snapshot", { projectId });
+}
+
+export async function diffEnvSnapshot(projectId: string): Promise<EnvDiff | null> {
+  return safeInvoke<EnvDiff | null>("diff_env_snapshot", { projectId });
 }

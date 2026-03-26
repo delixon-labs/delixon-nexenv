@@ -9,6 +9,7 @@ build/
 src-tauri/target/
 
 # Entorno local (nunca al repo)
+.env
 .env.local
 .env.*.local
 

@@ -3,11 +3,13 @@ import { useProjectsStore } from "@/stores/projects";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
 import ImportProjectModal from "@/components/dashboard/ImportProjectModal";
+import RegisterProjectModal from "@/components/dashboard/RegisterProjectModal";
 
 export default function Dashboard() {
   const { projects, isLoading, error, searchQuery, fetchProjects, setSearchQuery } =
     useProjectsStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importFileContent, setImportFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,6 +64,15 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowRegisterModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            Registrar existente
+          </button>
           <button
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
@@ -172,6 +183,13 @@ export default function Dashboard() {
       <CreateProjectModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      {/* Register modal */}
+      <RegisterProjectModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSuccess={() => fetchProjects()}
       />
 
       {/* Import modal */}

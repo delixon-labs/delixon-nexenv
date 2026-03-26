@@ -81,14 +81,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_is_port_in_use() {
-        // Port 0 lets OS pick a free port — should always succeed
-        assert!(!is_port_in_use(0) || is_port_in_use(0)); // just don't panic
+    fn test_is_port_in_use_high_port() {
+        // Port 59999 is very unlikely to be in use
+        let result = is_port_in_use(59999);
+        assert!(!result, "Port 59999 should not be in use in test environment");
     }
 
     #[test]
     fn test_detect_conflicts_empty() {
         let result = detect_port_conflicts(&[]).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_list_ports_empty() {
+        let result = list_project_ports(&[]).unwrap();
         assert!(result.is_empty());
     }
 }
