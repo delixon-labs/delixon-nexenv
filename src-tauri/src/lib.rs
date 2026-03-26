@@ -3,7 +3,7 @@ mod commands;
 pub mod core;
 
 #[cfg(feature = "tauri-app")]
-use commands::{catalog, config, detection, environments, manifest, portable, projects, rules, runtimes, shell, templates, vscode};
+use commands::{catalog, config, detection, environments, health, manifest, portable, projects, rules, runtimes, shell, templates, vscode};
 
 #[cfg(feature = "tauri-app")]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -37,6 +37,10 @@ pub fn run() {
             catalog::get_catalog_tech,
             catalog::list_catalog_categories,
             rules::validate_stack,
+            health::check_project_health,
+            health::run_doctor,
+            health::detect_port_conflicts,
+            health::list_project_ports,
         ])
         .run(tauri::generate_context!())
         .expect("Error al iniciar Delixon");

@@ -1,8 +1,11 @@
 pub mod catalog;
 pub mod config;
 pub mod detection;
+pub mod doctor;
 pub mod error;
+pub mod health;
 pub mod manifest;
+pub mod ports;
 pub mod models;
 pub mod portable;
 pub mod storage;

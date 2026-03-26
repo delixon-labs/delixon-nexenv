@@ -2,6 +2,7 @@ pub mod catalog;
 pub mod config;
 pub mod detection;
 pub mod environments;
+pub mod health;
 pub mod manifest;
 pub mod portable;
 pub mod projects;

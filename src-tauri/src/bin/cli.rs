@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use delixon_lib::core::{catalog, config, detection, manifest, portable, rules, storage, templates};
+use delixon_lib::core::{catalog, config, detection, doctor, health, manifest, portable, ports, rules, storage, templates};
 
 #[derive(Parser)]
 #[command(name = "delixon", version = "1.0.0", about = "Workspace manager for developers")]
@@ -84,6 +84,15 @@ enum Commands {
         /// IDs de tecnologias a validar
         techs: Vec<String>,
     },
+
+    /// Ejecuta health checks para un proyecto
+    Health {
+        /// Nombre del proyecto
+        project: String,
+    },
+
+    /// Muestra puertos en uso por proyectos
+    Ports,
 }
 
 #[derive(Subcommand)]
@@ -121,6 +130,8 @@ fn run_command(cmd: Commands) -> Result<(), String> {
         Commands::Manifest { project } => cmd_manifest(&project),
         Commands::Catalog { id } => cmd_catalog(id.as_deref()),
         Commands::Validate { techs } => cmd_validate(&techs),
+        Commands::Health { project } => cmd_health(&project),
+        Commands::Ports => cmd_ports(),
     }
 }
 
@@ -282,57 +293,17 @@ fn cmd_doctor() -> Result<(), String> {
     println!("{}", "Delixon Doctor".bold());
     println!("{}", "=".repeat(40));
 
-    // Check data dir
-    let data_dir = delixon_lib::core::utils::platform::get_data_dir();
-    match &data_dir {
-        Some(dir) => {
-            if dir.exists() {
-                println!("{} Directorio de datos: {}", "ok".green(), dir.display());
-            } else {
-                println!("{} Directorio de datos no existe (se creara al primer uso)", "!!".yellow());
-            }
-        }
-        None => println!("{} No se pudo determinar el directorio de datos", "ERR".red()),
+    let report = doctor::run_doctor().map_err(|e| e.to_string())?;
+
+    for check in &report.checks {
+        let icon = if check.ok { "ok".green() } else { "!!".yellow() };
+        println!("  {} {}: {}", icon, check.name.bold(), check.message);
     }
 
-    // Check config
-    match config::load_config() {
-        Ok(cfg) => {
-            println!("{} Config: editor={}, tema={}, idioma={}", "ok".green(), cfg.default_editor, cfg.theme, cfg.language);
-        }
-        Err(e) => println!("{} Config: {}", "ERR".red(), e),
-    }
-
-    // Check projects
-    match storage::load_projects() {
-        Ok(projects) => println!("{} Proyectos registrados: {}", "ok".green(), projects.len()),
-        Err(e) => println!("{} Proyectos: {}", "ERR".red(), e),
-    }
-
-    // Check runtimes
-    println!("\n{}", "Runtimes:".bold());
-    let runtimes = [("node", "--version"), ("python", "--version"), ("rustc", "--version"), ("go", "version")];
-    for (cmd, arg) in &runtimes {
-        match which::which(cmd) {
-            Ok(path) => {
-                let version = std::process::Command::new(cmd)
-                    .arg(arg)
-                    .output()
-                    .ok()
-                    .and_then(|o| String::from_utf8(o.stdout).ok())
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_else(|| "?".to_string());
-                println!("  {} {} {} ({})", "ok".green(), cmd, version, path.display().to_string().dimmed());
-            }
-            Err(_) => println!("  {} {} no encontrado", "--".dimmed(), cmd),
-        }
-    }
-
-    // Check editor
-    let cfg = config::load_config().unwrap_or_default();
-    match which::which(&cfg.default_editor) {
-        Ok(_) => println!("\n{} Editor '{}' disponible", "ok".green(), cfg.default_editor),
-        Err(_) => println!("\n{} Editor '{}' no encontrado en PATH", "!!".yellow(), cfg.default_editor),
+    if report.overall_ok {
+        println!("\n{}", "Todo en orden.".green().bold());
+    } else {
+        println!("\n{}", "Hay items que requieren atencion.".yellow());
     }
 
     Ok(())
@@ -438,6 +409,72 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
             let m = manifest::generate_manifest_from_project(project);
             manifest::save_manifest(&project.path, &m).map_err(|e| e.to_string())?;
             println!("{} Manifest generado en {}/.delixon/manifest.yaml", "ok".green().bold(), project.path);
+        }
+    }
+    Ok(())
+}
+
+fn cmd_health(project_name: &str) -> Result<(), String> {
+    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let lower = project_name.to_lowercase();
+    let project = projects
+        .iter()
+        .find(|p| p.name.to_lowercase().contains(&lower))
+        .ok_or_else(|| format!("No se encontro proyecto '{}'", project_name))?;
+
+    let report = health::check_project_health(project).map_err(|e| e.to_string())?;
+
+    let overall_icon = match report.overall {
+        health::HealthStatus::Ok => "OK".green().bold(),
+        health::HealthStatus::Warning => "!!".yellow().bold(),
+        health::HealthStatus::Error => "ERR".red().bold(),
+    };
+
+    println!("{} Health: {} {}", overall_icon, report.project_name.bold(), format!("({})", report.project_id).dimmed());
+    println!("{}", "=".repeat(50));
+
+    for check in &report.checks {
+        let icon = match check.status {
+            health::HealthStatus::Ok => "ok".green(),
+            health::HealthStatus::Warning => "!!".yellow(),
+            health::HealthStatus::Error => "ERR".red(),
+        };
+        println!("  {} {}: {}", icon, check.name.bold(), check.message);
+        if !check.fix_suggestion.is_empty() && check.status != health::HealthStatus::Ok {
+            println!("     {} {}", "fix:".dimmed(), check.fix_suggestion.dimmed());
+        }
+    }
+    Ok(())
+}
+
+fn cmd_ports() -> Result<(), String> {
+    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+
+    let port_list = ports::list_project_ports(&projects).map_err(|e| e.to_string())?;
+    let conflicts = ports::detect_port_conflicts(&projects).map_err(|e| e.to_string())?;
+
+    if port_list.is_empty() {
+        println!("{}", "No hay puertos registrados en los manifests de proyectos.".dimmed());
+        return Ok(());
+    }
+
+    println!("{}", "Puertos por proyecto:".bold());
+    println!("{:<8} {:<25} {}", "PUERTO".bold(), "PROYECTO".bold(), "EN USO".bold());
+    println!("{}", "-".repeat(50));
+    for p in &port_list {
+        let in_use = if p.in_use { "si".red() } else { "no".green() };
+        println!(":{:<7} {:<25} {}", p.port, p.project, in_use);
+    }
+
+    if !conflicts.is_empty() {
+        println!("\n{}", "Conflictos detectados:".red().bold());
+        for c in &conflicts {
+            println!(
+                "  {} Puerto {} compartido por: {}",
+                "!!".yellow(),
+                c.port,
+                c.projects.join(", ")
+            );
         }
     }
     Ok(())
