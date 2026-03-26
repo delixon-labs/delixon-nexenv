@@ -538,7 +538,7 @@ fn cmd_env(project_name: &str, action: EnvAction) -> Result<(), String> {
             let mut vars = storage::load_env_vars(&project.id).map_err(|e| e.to_string())?;
             vars.insert(key.clone(), value.clone());
             storage::save_env_vars(&project.id, &vars).map_err(|e| e.to_string())?;
-            println!("{} {}={}", "ok".green().bold(), key, value);
+            println!("{} {} configurada", "ok".green().bold(), key);
         }
     }
     Ok(())

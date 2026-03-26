@@ -1,24 +1,10 @@
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::core::error::DelixonError;
 use crate::core::models::project::Project;
-use crate::core::utils::fs::ensure_dir;
+use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
-
-/// Escribe un archivo con permisos restrictivos (600 en Unix)
-fn write_private(path: &Path, data: &str) -> Result<(), DelixonError> {
-    std::fs::write(path, data)?;
-
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let perms = std::fs::Permissions::from_mode(0o600);
-        std::fs::set_permissions(path, perms)?;
-    }
-
-    Ok(())
-}
 
 fn data_dir() -> Result<PathBuf, DelixonError> {
     get_data_dir().ok_or_else(|| {

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 use crate::core::error::DelixonError;
-use crate::core::utils::fs::ensure_dir;
+use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -43,7 +43,7 @@ pub fn add_note(project_id: &str, text: &str) -> Result<ProjectNote, DelixonErro
 
     let file = notes_file(project_id)?;
     let data = serde_json::to_string_pretty(&notes)?;
-    std::fs::write(&file, data)?;
+    write_private(&file, &data)?;
 
     Ok(note)
 }
@@ -54,7 +54,7 @@ pub fn delete_note(project_id: &str, note_id: &str) -> Result<(), DelixonError> 
 
     let file = notes_file(project_id)?;
     let data = serde_json::to_string_pretty(&notes)?;
-    std::fs::write(&file, data)?;
+    write_private(&file, &data)?;
 
     Ok(())
 }

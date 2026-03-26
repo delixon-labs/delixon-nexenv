@@ -34,6 +34,8 @@ pub fn run_script(project_path: &str, script_name: &str) -> Result<ScriptResult,
         DelixonError::InvalidConfig(format!("Script no encontrado: {}", script_name))
     })?;
 
+    validate_script_command(command)?;
+
     let (shell, flag) = if cfg!(windows) {
         ("cmd", "/C")
     } else {
@@ -52,6 +54,43 @@ pub fn run_script(project_path: &str, script_name: &str) -> Result<ScriptResult,
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
         stderr: String::from_utf8_lossy(&output.stderr).to_string(),
     })
+}
+
+const BLOCKED_PATTERNS: &[&str] = &[
+    "rm -rf /",
+    "rm -rf ~",
+    "mkfs",
+    "dd if=",
+    ":(){",
+    "chmod -R 777 /",
+    "curl|sh",
+    "wget|sh",
+    "curl|bash",
+    "wget|bash",
+    "> /dev/sd",
+    "shutdown",
+    "reboot",
+    "poweroff",
+    "init 0",
+    "init 6",
+];
+
+fn validate_script_command(command: &str) -> Result<(), DelixonError> {
+    let lower = command.to_lowercase();
+    for pattern in BLOCKED_PATTERNS {
+        if lower.contains(pattern) {
+            return Err(DelixonError::InvalidConfig(format!(
+                "Comando bloqueado por seguridad: contiene '{}'",
+                pattern
+            )));
+        }
+    }
+    if command.len() > 500 {
+        return Err(DelixonError::InvalidConfig(
+            "Comando demasiado largo (max 500 caracteres)".to_string(),
+        ));
+    }
+    Ok(())
 }
 
 #[cfg(test)]

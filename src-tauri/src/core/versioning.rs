@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use crate::core::error::DelixonError;
 use crate::core::manifest::{self, ProjectManifest};
-use crate::core::utils::fs::ensure_dir;
+use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -49,7 +49,7 @@ pub fn save_snapshot(project_id: &str, project_path: &str) -> Result<Snapshot, D
 
     let file = dir.join(format!("v{}.json", next_version));
     let data = serde_json::to_string_pretty(&snapshot)?;
-    std::fs::write(&file, data)?;
+    write_private(&file, &data)?;
 
     Ok(snapshot)
 }
