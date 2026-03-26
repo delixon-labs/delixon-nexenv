@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::models::config::DelixonConfig;
 use crate::models::project::Project;
 use crate::utils::fs::ensure_dir;
 use crate::utils::platform::get_data_dir;
@@ -12,10 +11,6 @@ fn data_dir() -> Result<PathBuf, String> {
 
 fn projects_file() -> Result<PathBuf, String> {
     Ok(data_dir()?.join("projects.json"))
-}
-
-fn config_file() -> Result<PathBuf, String> {
-    Ok(data_dir()?.join("config.json"))
 }
 
 fn envs_dir() -> Result<PathBuf, String> {
@@ -50,30 +45,6 @@ pub fn save_projects(projects: &[Project]) -> Result<(), String> {
         .map_err(|e| format!("Error serializando proyectos: {}", e))?;
     std::fs::write(&path, data)
         .map_err(|e| format!("Error escribiendo projects.json: {}", e))
-}
-
-// --- Config ---
-
-pub fn load_config() -> Result<DelixonConfig, String> {
-    let path = config_file()?;
-    if !path.exists() {
-        let config = DelixonConfig::default();
-        save_config(&config)?;
-        return Ok(config);
-    }
-    let data = std::fs::read_to_string(&path)
-        .map_err(|e| format!("Error leyendo config.json: {}", e))?;
-    serde_json::from_str(&data)
-        .map_err(|e| format!("Error parseando config.json: {}", e))
-}
-
-pub fn save_config(config: &DelixonConfig) -> Result<(), String> {
-    init_data_dir()?;
-    let path = config_file()?;
-    let data = serde_json::to_string_pretty(config)
-        .map_err(|e| format!("Error serializando config: {}", e))?;
-    std::fs::write(&path, data)
-        .map_err(|e| format!("Error escribiendo config.json: {}", e))
 }
 
 // --- Variables de entorno por proyecto ---

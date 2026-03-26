@@ -39,10 +39,11 @@ jobs:
       - name: Run frontend tests
         run: npm run test -- --run
 
+      - name: Rust check
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
-      - name: Build Tauri app
-        run: npm run tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      - name: Build frontend
+        run: npm run build
