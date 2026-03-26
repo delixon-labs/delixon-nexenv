@@ -26,8 +26,9 @@
 16. [Landing page y waitlist](#16-landing-page-y-waitlist)
 17. [Opinión sincera y riesgos](#17-opinión-sincera-y-riesgos)
 18. [Resumen ejecutivo](#18-resumen-ejecutivo)
-19. [Glosario de tecnologías y siglas](#19-glosario-de-tecnologías-y-siglas)
-20. [Checklist general de implementación](#20-checklist-general-de-implementación)
+19. [Análisis de opinión final — Integración](#19-análisis-de-opinión-final--integración-stackpilot--delixon)
+20. [Glosario de tecnologías y siglas](#20-glosario-de-tecnologías-y-siglas)
+21. [Checklist general de implementación](#21-checklist-general-de-implementación)
 
 ---
 
@@ -370,9 +371,16 @@ Delixon no es solo un gestor de workspaces. Su verdadera visión es convertirse 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Capa 1 (Workspace)** — El core. Aislamiento, env vars, runtimes, terminal, dashboard.
-**Capa 2 (Scaffolding)** — Motor de generación de proyectos integrado. No solo "abrir un proyecto existente", sino crearlo desde cero.
-**Capa 3 (Inteligencia)** — Asistente que aprende, audita, sugiere y automatiza.
+**Capa 1 (Workspace)** — El core. Aislamiento, env vars, runtimes, terminal, dashboard. Lo que hace que Delixon sea útil TODOS los días.
+**Capa 2 (Scaffolding)** — Motor de generación y composición. No solo "abrir un proyecto existente", sino crearlo, escanearlo, evolucionar su stack, y validar su arquitectura.
+**Capa 3 (Inteligencia)** — Asistente que aprende, audita, sugiere y automatiza. Solo cuando las capas 1 y 2 estén sólidas.
+
+**Transversal: Núcleo declarativo** — El `project manifest` que unifica toda la información del proyecto (techs, versiones, servicios, env vars, health checks, comandos, nivel de madurez). Todas las capas leen y escriben sobre él. Sin este núcleo, la integración es frágil.
+
+**Capas de implementación** (no confundir con capas del producto):
+- **Capa A (base estructural):** catálogo + reglas + manifest + templates + recipes + scan → sin esto lo demás es difícil de mantener
+- **Capa B (operación local):** env vars + runtimes + terminal + VSCode + Docker services + health + doctor → aquí Delixon gana valor real diario
+- **Capa C (confianza y evolución):** diff/rollback + perfiles madurez + recomendaciones + hardening → aquí se vuelve algo serio
 
 ### 7.1 Capa 2: Motor de scaffolding
 
@@ -665,48 +673,139 @@ on_open:
 
 ## 9. Integración con StackPilot
 
+### Visión central
+
+> **Delixon es el sistema operativo local del developer.**
+> **StackPilot es su motor de generación y composición de proyectos.**
+
+No es "Delixon + otra cosa pegada". Es **Delixon con un engine de scaffolding/composición por debajo**. El usuario nunca ve "StackPilot" — ve Delixon haciendo cosas potentes.
+
+```
+Delixon = gestión, aislamiento, operación y experiencia diaria
+Stack engine = creación, expansión, validación y evolución del stack
+```
+
+La fuerza real está en la combinación: no solo genera proyectos (eso lo hacen muchos), y no solo gestiona entornos (eso lo hace direnv). **Delixon crea, entiende, ejecuta, aísla, amplía, valida y repara proyectos localmente desde una sola app.**
+
 ### Origen
 
-StackPilot (repo `Xplus-Technologies-open-source/StackPilot`) es un proyecto de código abierto que se desarrolló en paralelo. Está enfocado en **scaffolding inteligente para proyectos nuevos**: ayudar al programador en la configuración inicial, planificación del stack, y generación de estructura de proyecto con buenas prácticas.
+StackPilot (repo `Xplus-Technologies-open-source/StackPilot`) se desarrolló en paralelo, enfocado en scaffolding inteligente: configuración inicial, planificación del stack, y generación de estructura con buenas prácticas. Delixon absorbe ese motor como capacidad interna.
 
-### Qué aporta StackPilot a Delixon
+### Qué aporta cada uno
 
-| Capacidad de StackPilot | Estado | Aporte a Delixon |
-|---|---|---|
-| Catálogo de 83 tecnologías en YAML con metadatos ricos | ✅ Implementado | Motor de Capa 2 — registro tecnológico declarativo |
-| RulesEngine (validación de compatibilidades, auto-resolución de dependencias) | ✅ Implementado | Validación inteligente al crear proyectos |
-| ScaffoldOrchestrator (genera docker-compose, .env, README, CI/CD, scripts) | ✅ Implementado | Generación de proyecto completa |
-| TechInstaller (lógica específica por tecnología: ORM init, auth routes) | ✅ Implementado | Recipes — agregar módulos a proyectos |
-| 20 templates predefinidos (T3 Stack, MERN, SaaS Starter, etc.) | ✅ Implementado | Templates listos para usar |
-| Full-stack detection (frontend/ + backend/ separados automáticamente) | ✅ Implementado | Estructura inteligente de proyectos |
-| Versionado de stacks (save, diff, rollback) | ✅ Implementado | Historial de cambios del stack |
-| Docker Compose management (up/down/status/logs) | ✅ Implementado | Gestión de servicios de infra |
-| Health checks por tecnología (command, endpoint, interval) | ✅ Implementado | Monitoreo de servicios |
-| 23 comandos CLI | ✅ Implementado | Base para CLI futuro de Delixon |
-| Perfiles de madurez (rapid/standard/production/enterprise) | ✅ Implementado | Production hardening |
-| doctor command (verificar requisitos del sistema) | ✅ Implementado | Diagnóstico de entorno |
+| Aspecto | Delixon (Capa 1 — Workspace) | StackPilot (Capa 2 — Scaffolding) | Decisión final |
+|---|---|---|---|
+| Proyecto management (CRUD) | ✅ Funcional (Rust + React) | ✅ Funcional (SQLite + CLI) | **Delixon** — UI nativa Tauri, persistencia JSON |
+| Env vars aisladas | ✅ JSON por proyecto | ❌ Solo genera .env.example | **Delixon** — Core de Capa 1 |
+| Runtime detection | ✅ Node, Python, Rust, Go | ❌ Asume instalado | **Delixon** — Detecta y activa |
+| Abrir en VSCode | ✅ Funcional | ❌ No tiene | **Delixon** |
+| Terminal aislada | ✅ Con env vars cargadas | ❌ No tiene | **Delixon** |
+| Dashboard UI | ✅ React + Tailwind, 4 páginas | ✅ React + Tailwind, 7 páginas | **Delixon** — Una sola UI unificada |
+| Templates | ❌ 7 carpetas vacías | ✅ 20 templates completos | **StackPilot** — Migrar 8-10 sólidos, no los 20 |
+| Catálogo tecnológico | ❌ No existe | ✅ 83 tecnologías en YAML | **StackPilot** — Migrar 25-30 prioritarias, calidad > cantidad |
+| Scaffolding real | ❌ No implementado | ✅ Genera proyectos completos | **StackPilot** — ScaffoldOrchestrator como motor interno |
+| Validación de stacks | ❌ No existe | ✅ RulesEngine | **StackPilot** — Con niveles: válido / advertencia / no recomendado / incompatible |
+| Docker management | ❌ No tiene | ✅ up/down/status/logs | **StackPilot** — Solo para servicios, nunca para runtimes |
+| CLI | ❌ No tiene | ✅ 23 comandos | **Híbrido** — 5-8 comandos básicos en mediano plazo (open, create, scan, add, doctor, ps) |
+| Versionado de stacks | ❌ No tiene | ✅ save/diff/rollback | **StackPilot** — Incluir en mediano plazo, reduce miedo a tocar el proyecto |
+| Health checks | ❌ No tiene | ✅ Por tecnología | **StackPilot** — Subir a corto plazo, sin esto el dashboard es decorativo |
+| Doctor command | ❌ No tiene | ✅ Verifica requisitos | **StackPilot** — Subir a corto plazo, es lo primero que un usuario nuevo necesita |
+| Perfiles de madurez | ❌ No tiene | ✅ rapid/standard/production/enterprise | **StackPilot** — Que cambien archivos reales, no solo etiquetas |
+| Full-stack detection | ❌ No tiene | ✅ frontend/ + backend/ automático | **StackPilot** — Incluir en scan de proyectos existentes |
+| Settings persistentes | ✅ Editor, tema, idioma, runtimes | ✅ Editor, package manager | **Delixon** — Unificar preferencias |
+| TechInstaller | ❌ No tiene | ✅ Lógica por tecnología | **StackPilot** — Es el motor interno de las recipes |
+| Config DB | ✅ JSON local | ✅ SQLite | **JSON corto plazo** — Evaluar SQLite si escala a equipos |
 
-### Qué aporta Delixon que StackPilot NO tiene
+### Ideas de StackPilot que NO se integran (o se postergan)
 
-| Capacidad de Delixon | Estado | Diferencial |
-|---|---|---|
-| Aislamiento de env vars por proyecto | ✅ Implementado | Core de Capa 1 — StackPilot solo genera .env |
-| Detección de runtimes instalados | ✅ Implementado | StackPilot asume que están instalados |
-| Apertura en VSCode con contexto | ✅ Implementado | StackPilot no integra con editor |
-| Terminal aislada con env vars cargadas | ✅ Implementado | StackPilot no tiene terminal |
-| Dashboard de proyectos (UI nativa Tauri) | ✅ Implementado | StackPilot tiene UI pero no gestión de workspace |
-| Settings (editor, tema, idioma, runtimes) | ✅ Implementado | Preferencias persistentes |
-| Persistencia JSON local | ✅ Implementado | StackPilot usa SQLite |
+| Concepto | Razón |
+|---|---|
+| 23 comandos CLI completos | Solo 5-8 básicos en mediano plazo. GUI primero |
+| DevContainers generation (.devcontainer/) | Va contra la filosofía "sin Docker para dev". Solo como export opcional futuro |
+| Monorepo con Turborepo | Delixon es monolito Tauri. No aplica |
+| User tech notes (rating personal) | Nice-to-have tardío, no resuelve problema core |
+| SQLite como DB local | JSON funciona para <100 proyectos. Evaluar a futuro |
 
-### Visión de integración
+### El núcleo declarativo común (CRÍTICO)
 
-La idea es **fusionar ambos en un solo producto**: Delixon como la app, con el motor de StackPilot integrado como Capa 2. El resultado es una herramienta que:
+Sin una capa declarativa compartida, la integración será frágil — "una colección de botones" en vez de un sistema coherente.
 
-1. **Crea proyectos nuevos** con stack validado, estructura profesional, y todo configurado (lo que hace StackPilot)
-2. **Gestiona proyectos existentes** con aislamiento, env vars, runtimes, y apertura instantánea (lo que hace Delixon)
-3. **Evoluciona proyectos** con recipes, auditoría, y versionado (lo que ambos aportan)
+**Project Manifest** — formato interno que define cada proyecto:
 
-No se pierde la óptica de StackPilot (ayudar en la configuración inicial y planificación con consejos de estructura y diseño estable del proyecto). Se integra como la experiencia de "crear proyecto nuevo" dentro de Delixon.
+```yaml
+# .delixon/manifest.yaml (generado automáticamente, editable)
+name: mi-saas
+type: saas-b2b
+profile: standard
+runtime: node@20
+technologies:
+  - nextjs@14
+  - prisma@5
+  - postgresql@16
+  - tailwindcss@3
+  - nextauth@4
+services:
+  - type: postgresql
+    port: 5432
+    docker: true
+    health_check: "pg_isready -U postgres"
+  - type: redis
+    port: 6379
+    docker: true
+    health_check: "redis-cli ping"
+env_vars:
+  required: [DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL]
+  optional: [REDIS_URL, STRIPE_KEY]
+commands:
+  dev: "npm run dev"
+  build: "npm run build"
+  test: "npm run test"
+  lint: "npm run lint"
+ports: [3000, 5432, 6379]
+recipes_applied: [auth-nextauth, database-prisma, docker-services]
+```
+
+**Este manifiesto es la columna vertebral.** Todo lo demás (dashboard, health checks, doctor, scan, recipes, versionado) lee y escribe sobre él. Sin él, cada feature es un silo independiente.
+
+### Flujo ideal de la integración
+
+```
+1. CREAR o IMPORTAR
+   ├── Nuevo: elegir tipo → proponer stack → validar reglas → generar
+   └── Existente: scan → detectar stack → generar manifest → registrar
+
+2. CONFIGURAR (automático)
+   ├── Env vars aisladas
+   ├── Runtime correcto activado
+   ├── Servicios Docker levantados
+   ├── Puertos verificados
+   └── Health check: todo OK
+
+3. TRABAJAR (día a día)
+   ├── Abrir en VSCode con contexto
+   ├── Terminal aislada con env vars
+   ├── Dashboard con estado real de todos los proyectos
+   ├── Doctor: ¿qué falta? ¿qué se rompió?
+   └── Health: ¿DB arriba? ¿puertos libres? ¿deps ok?
+
+4. EVOLUCIONAR
+   ├── Recipes: agregar auth, payments, testing, docker
+   ├── Preview de cambios antes de aplicar
+   ├── Versionado: save → diff → rollback si no convence
+   └── Perfiles de madurez: subir de rapid a production
+
+5. COMPARTIR
+   ├── Archivo .delixon → otro dev reproduce el entorno en 5 min
+   ├── .delixon-team → config de equipo sincronizada
+   └── Secrets vault → no más "pásame el .env por Slack"
+```
+
+### Lo que NO es la integración
+
+- **No es meter StackPilot como módulo externo** — es absorber sus capacidades como motor interno
+- **No es tener dos UIs** — es una sola app (Delixon) con más capacidades
+- **No es copiar todo** — es migrar lo valioso (catálogo, reglas, scaffold, recipes, health) y descartar lo que no aplica (monorepo, devcontainers, 23 CLI commands)
+- **No es priorizar cantidad** — 25 tecnologías sólidas > 83 a medias; 8 templates probados > 20 sin mantener
 
 ---
 
@@ -728,7 +827,7 @@ No se pierde la óptica de StackPilot (ayudar en la configuración inicial y pla
 - [x] Sidebar con navegación y proyectos recientes
 - [x] Persistencia local (JSON en `~/.local/share/delixon/`)
 
-**StackPilot (Capa 2 — Scaffolding, repo separado):**
+**StackPilot (motor de scaffolding, repo separado — pendiente de absorción):**
 - [x] 83 tecnologías en catálogo YAML con metadatos completos
 - [x] RulesEngine: validación, dependencias automáticas, conflictos, puertos
 - [x] ScaffoldOrchestrator: genera docker-compose, .env, README, CI/CD, scripts
@@ -738,6 +837,9 @@ No se pierde la óptica de StackPilot (ayudar en la configuración inicial y pla
 - [x] Full-stack detection (frontend/ + backend/)
 - [x] Versionado de stacks (save/diff/rollback)
 - [x] Docker management (up/down/status/logs)
+- [x] Health checks por tecnología (command, endpoint, interval)
+- [x] Perfiles de madurez (rapid/standard/production/enterprise)
+- [x] Doctor command (verificar requisitos del sistema)
 - [x] Desktop app con Tauri 2
 
 **Landing page (delixon-web):**
@@ -747,75 +849,123 @@ No se pierde la óptica de StackPilot (ayudar en la configuración inicial y pla
 
 ### CORTO PLAZO (1-3 meses) — "Que funcione de verdad"
 
-> Prioridad: completar Capa 1 + integrar el motor de StackPilot como Capa 2
+> **Capa A — Base estructural + Capa B — Operación local fuerte**
+>
+> Sin la base declarativa, todo lo demás será frágil. Sin operación local útil, nadie lo usa dos veces.
 
-**Capa 1 — Completar workspace:**
-- [ ] Historial de terminal aislado por proyecto (los scripts .ps1/.sh ya existen, falta integrar)
+**P0 — Núcleo declarativo (la columna vertebral):**
+- [ ] Definir formato de `project manifest` (.delixon/manifest.yaml) — el formato que unifica toda la info del proyecto
+- [ ] Migrar catálogo YAML de StackPilot → seleccionar las 25-30 tecnologías prioritarias, validar que cada una compila
+- [ ] Integrar RulesEngine con niveles de compatibilidad: `válido` / `advertencia` / `no recomendado` / `incompatible`
+- [ ] Generar manifest automáticamente al crear o importar un proyecto
+
+**P0 — Completar workspace (Capa 1):**
+- [ ] Historial de terminal aislado por proyecto
 - [ ] Activación automática de runtimes al abrir proyecto (ya detecta, falta activar)
 - [ ] Exportar/importar configuración de proyecto (archivo `.delixon`)
 - [ ] Detección de conflictos de puertos entre proyectos
-- [ ] Poblar las 3 plantillas prioritarias: Node+Express, React+Vite, Python+FastAPI
 
-**Capa 2 — Integrar motor de StackPilot:**
-- [ ] Migrar el catálogo YAML de tecnologías al repo de Delixon
-- [ ] Integrar RulesEngine en el backend Rust (o como módulo Node invocable)
-- [ ] Conectar el flujo de "crear proyecto" del dashboard con el ScaffoldOrchestrator
-- [ ] Adaptar la UI de templates para mostrar los 20 templates de StackPilot
-- [ ] Integrar TechInstaller para la instalación por tecnología
-- [ ] Comando `doctor`: verificar que las herramientas necesarias están instaladas
+**P1 — Crear proyectos reales (integrar motor de StackPilot):**
+- [ ] Conectar flujo "crear proyecto" del dashboard con ScaffoldOrchestrator
+- [ ] 8-10 templates sólidos y probados (no 20 a medias): Node+Express, React+Vite, Next.js fullstack, Python+FastAPI, SaaS Starter, API REST, Desktop Tauri, Monorepo base
+- [ ] Cada template genera: estructura, deps, scripts, docker-compose (si necesita servicios), .env.example, README, Makefile/scripts básicos
+- [ ] Integrar TechInstaller como motor interno de recipes
+- [ ] Perfiles de madurez aplicados al scaffold: rapid (mínimo), standard (linter+tests+docker), production (CI+health+logging+CORS)
 
-**Entregable:** MVP donde puedas CREAR proyectos completos con stack validado Y gestionar proyectos existentes con env vars aisladas.
+**P1 — Diagnosticar (lo que hace que Delixon sea útil el día 1):**
+- [ ] `doctor` del sistema: verificar runtimes, Docker, Git, VSCode, permisos, PATH, versiones mínimas
+- [ ] Health checks por proyecto: deps instaladas, DB accesible, puertos libres, env vars presentes, servicios Docker en marcha
+- [ ] Dashboard que muestre estado REAL (🟢 OK / 🟡 warning / 🔴 error) — no solo lista de proyectos
+
+**Entregable:** MVP donde puedas CREAR proyectos completos con stack validado, IMPORTAR proyectos existentes, y ver el ESTADO REAL de cada uno. El manifiesto existe y todo lee/escribe sobre él.
 
 ### MEDIANO PLAZO (3-6 meses) — "Que sea útil de verdad"
 
-> Prioridad: madurez de Capa 1 + Capa 2 completa
+> **Capa B completa + inicio de Capa C (confianza y evolución)**
+>
+> Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Delixon me dice qué falla".
 
-- [ ] Recipes: agregar módulos a proyectos existentes (`delixon add auth`, `delixon add database`)
-- [ ] Análisis de proyecto existente (`delixon scan` — detectar stack, sugerir mejoras, dar score)
-- [ ] Dashboard con health checks por proyecto (build OK, vulnerabilidades, dependencias)
-- [ ] Contexto de Git integrado (rama activa, cambios pendientes, PRs abiertas)
-- [ ] Terminal integrada dentro de Delixon (panel embebido, no ventana externa)
-- [ ] Gestión de runtimes: instalar/cambiar versiones desde la app
+**P1 — Scan de proyectos existentes (duplica el público objetivo):**
+- [ ] `delixon scan ./mi-proyecto` → detectar: lenguaje, framework, package manager, ORM, DB, scripts, env vars, servicios, puertos, Docker, estructura frontend/backend
+- [ ] Generar manifest desde scan → registrar proyecto → gestionar con Delixon
+- [ ] Score de production-readiness con recomendaciones actionables
+- [ ] Sugerir recipes para mejorar el score
+
+**P1 — Recipes (lo que hace que Delixon sirva después del día 1):**
+- [ ] Sistema de recipes con TechInstaller como motor: `delixon add auth`, `delixon add database`, `delixon add docker`, `delixon add testing`
+- [ ] Preview de cambios antes de aplicar (qué archivos se crean/modifican)
+- [ ] Recipes disponibles: Auth, Base de datos, Pagos, Email, Testing, CI/CD, Docker services, Admin panel, Observabilidad
+
+**P2 — Versionado de stacks (reduce el miedo):**
+- [ ] Save del estado del stack antes de cambios
+- [ ] Diff visual entre versiones (qué se añadió, qué cambió)
+- [ ] Rollback de recipe si no convence
+- [ ] Historial de evolución del proyecto
+
+**P2 — Operación diaria avanzada:**
 - [ ] Docker Compose management integrado (up/down/status/logs desde Delixon)
-- [ ] Snapshots de entorno (debugging de "ayer funcionaba, hoy no")
+- [ ] Terminal integrada dentro de Delixon (panel embebido)
+- [ ] Contexto de Git integrado (rama, cambios pendientes, PRs)
 - [ ] Scripts con alias unificados (`delixon run start` sin importar el stack)
 - [ ] Gestión de procesos en background (`delixon ps`, `delixon logs`)
-- [ ] Notificaciones de dependencias desactualizadas o con vulnerabilidades
-- [ ] Versionado de stacks integrado (historial de cambios del stack del proyecto)
-- [ ] Editor visual de plantillas
+- [ ] Snapshots de entorno (debugging de "ayer funcionaba, hoy no")
+- [ ] Gestión de runtimes: instalar/cambiar versiones desde la app
+- [ ] Notificaciones de dependencias desactualizadas o vulnerables
+
+**P2 — CLI básico (para power users):**
+- [ ] 5-8 comandos: `delixon open`, `delixon create`, `delixon scan`, `delixon add`, `delixon doctor`, `delixon ps`, `delixon run`
+- [ ] GUI sigue siendo la experiencia principal; CLI es complemento
 
 ### LARGO PLAZO (6-12 meses) — "Que sea indispensable"
 
-> Prioridad: equipos + cross-platform + CLI
+> **Capa C completa + equipos + cross-platform**
+>
+> Lo que monetiza: equipos pagan, individuos no.
 
+**P3 — Equipos:**
 - [ ] Exportación de configuración de equipo (`.delixon-team`)
-- [ ] Onboarding automatizado para nuevos miembros
-- [ ] Secrets vault encriptado (AES-256) para compartir credenciales de equipo
+- [ ] Onboarding automatizado: nuevo dev → `delixon setup` → entorno completo en 5 min
+- [ ] Secrets vault encriptado (AES-256) para compartir credenciales
 - [ ] Project notes / contexto rápido (retomar proyectos olvidados en 10 segundos)
+
+**P3 — Cross-platform:**
 - [ ] Soporte completo en Ubuntu/Debian y macOS
 - [ ] Adaptación de rutas, permisos y comportamientos por SO
 - [ ] CI/CD para builds en los tres sistemas operativos
-- [ ] CLI headless para servidores y automatización
-- [ ] Control de versiones de plantillas y configuraciones
+
+**P3 — Madurez:**
+- [ ] Perfiles de madurez completos que cambien archivos, deps, estructura y validaciones reales
+- [ ] Generación orientada por tipo de producto ("¿Qué vas a construir?" → stack recomendado)
 - [ ] Soporte multi-editor: Cursor, WebStorm, Neovim, Zed
+- [ ] Control de versiones de plantillas y configuraciones
+- [ ] Editor visual de plantillas
 
 ### VISIÓN FUTURA — "El sueño" (12+ meses, no comprometido)
 
-> Ideas ambiciosas que dependen de validación del mercado y recursos. No se implementarán hasta que las fases anteriores estén sólidas.
+> Ideas ambiciosas que dependen de validación del mercado y recursos. No se implementarán hasta que las fases anteriores estén sólidas. Esto no es un compromiso, es una dirección.
 
 - [ ] Asistente IA con aprendizaje adaptativo (recuerda preferencias, sugiere stacks)
 - [ ] Agentes especializados: SecurityGuard, CodeReviewer, TestBuilder, PerfAnalyzer, DocWriter
 - [ ] Pipeline de auditoría completa (seguridad + calidad + tests + performance en un comando)
-- [ ] Modo "arquitecto asistente" (describe lo que quieres construir → stack recomendado)
-- [ ] Catálogos corporativos (tecnologías aprobadas/prohibidas por la empresa)
+- [ ] Modo "arquitecto asistente" (describe lo que quieres → stack recomendado con estimación de coste)
+- [ ] Catálogos corporativos (tecnologías aprobadas/prohibidas por empresa)
 - [ ] Templates privadas de organización con políticas y cobertura mínima
-- [ ] Generación orientada por tipo de producto ("Quiero un SaaS" → stack completo)
-- [ ] Production hardening avanzado (perfiles rapid/standard/production/enterprise)
 - [ ] Sistema de plugins (la comunidad extiende Delixon)
 - [ ] Marketplace de templates y recipes
 - [ ] Gestión de múltiples proyectos en producción (modo servidor)
 - [ ] Integración con herramientas de monitoreo (Grafana, Prometheus)
-- [ ] Exportación automática de decisiones técnicas (por qué se eligió cada tecnología)
+- [ ] Exportación automática de decisiones técnicas
+- [ ] DevContainers export (para equipos que lo requieran)
+
+### Tabla resumen de prioridades
+
+| Prioridad | Qué | Por qué | Cuándo |
+|---|---|---|---|
+| **P0** | Manifest + catálogo + reglas + workspace completo | Sin base declarativa todo es frágil | Corto (1-3m) |
+| **P1** | Templates + scaffold + recipes + scan + health + doctor | Lo que atrae Y retiene usuarios | Corto→Mediano |
+| **P2** | Versionado + Docker mgmt + terminal + CLI + Git context | Lo que genera confianza y poder | Mediano (3-6m) |
+| **P3** | Equipos + cross-platform + perfiles madurez + multi-editor | Lo que monetiza | Largo (6-12m) |
+| **P4** | IA + agentes + marketplace + plugins + catálogos corp | Lo que diferencia a largo plazo | Futuro (12+m) |
 
 ---
 
@@ -1153,32 +1303,46 @@ En fase de waitlist, NO mostrar precios, descarga, ni planes. El mensaje es "ap�
 ## 18. Resumen ejecutivo
 
 ```
-DELIXON — Visión completa
+DELIXON — El sistema operativo local del developer
 
 MISIÓN:
-  Eliminar toda fricción entre "quiero trabajar en mi proyecto"
-  y "estoy trabajando en mi proyecto".
+  Crear, entender, ejecutar, aislar, ampliar, validar y reparar
+  proyectos localmente desde una sola app.
 
-CAPAS:
+IDENTIDAD:
+  Delixon = gestión, aislamiento, operación y experiencia diaria
+  Stack engine (ex-StackPilot) = creación, expansión, validación del stack
+  → Un solo producto. El usuario nunca ve "dos cosas".
+
+COLUMNA VERTEBRAL:
+  Project Manifest → formato declarativo que unifica toda la info
+  del proyecto (techs, servicios, env vars, health, comandos, madurez).
+  Todas las features leen y escriben sobre él.
+
+CAPAS DEL PRODUCTO:
   1. Workspace → Aislamiento, env vars, runtimes, terminal, dashboard
-  2. Scaffolding → Motor de stacks, +80 tecnologías, templates, recipes
-  3. Inteligencia → IA adaptativa, agentes especializados, auditoría
+  2. Scaffolding → Motor de stacks, catálogo, templates, recipes, scan
+  3. Inteligencia → IA adaptativa, agentes, auditoría (solo si 1+2 están sólidas)
 
 DIFERENCIAL:
   - Única herramienta que integra las 3 capas
   - Sin Docker para el dev (solo para servicios de infra)
   - App nativa de 5MB (Tauri, no Electron)
-  - Archivo .delixon para onboarding de equipo en 5 minutos
+  - Archivo .delixon para onboarding de equipo en 5 min
   - Funciona offline, todo local, zero vendor lock-in
+  - Sirve para proyectos NUEVOS y EXISTENTES (scan + import)
+  - Doctor + Health = sabe qué falta y cómo arreglarlo
 
 ROADMAP:
-  Corto (1-4m) → Core workspace funcional + 3 templates + landing con waitlist
-  Medio (3-6m) → Motor scaffolding + recipes + scan proyectos + health checks
-  Largo (6-12m) → IA + agentes + equipos + marketplace + cross-platform
+  P0 Corto (1-3m) → Manifest + catálogo + reglas + workspace completo + doctor + health
+  P1 Corto→Medio → Templates reales + scaffold + recipes + scan de existentes
+  P2 Medio (3-6m) → Versionado stacks + Docker mgmt + terminal + CLI básico + Git
+  P3 Largo (6-12m) → Equipos + cross-platform + perfiles madurez + multi-editor
+  P4 Futuro (12+m) → IA + agentes + marketplace + plugins (el sueño)
 
 COMPETENCIA:
-  mise = CLI puro, sin GUI, sin scaffolding, sin IA
-  DevContainers = Pesado, requiere Docker, sin dashboard
+  mise = CLI puro, sin GUI, sin scaffolding, sin health checks
+  DevContainers = Pesado, requiere Docker, sin dashboard, sin scan
   direnv = Solo env vars
   Delixon = Todo integrado en una app nativa moderna
 
@@ -1189,12 +1353,83 @@ PÚBLICO:
 
 MODELO:
   Gratis para individual
-  Pro para equipos (catálogos, templates privadas, políticas)
+  Pro para equipos (catálogos, templates privadas, políticas, vault)
 ```
 
 ---
 
-## 19. Glosario de tecnologías y siglas
+## 19. Análisis de opinión final — Integración StackPilot + Delixon
+
+> Este análisis evalúa cada aspecto de la integración entre StackPilot y Delixon con una opinión objetiva sobre qué debería tener el producto final, qué priorizar, y qué descartar.
+
+### 19.1 Ideas de StackPilot integradas al plan
+
+| Concepto de StackPilot | Cómo se integró en el plan | Opinión final — Qué debería tener Delixon |
+|---|---|---|
+| Catálogo de 83 tecnologías en YAML | → "Catálogo tecnológico declarativo" con +80 techs | **Sí, pero empezar con 25-30 sólidas.** 83 es inmantenible sin equipo. Calidad > cantidad. Las 30 más usadas cubren el 90% de stacks reales |
+| Validación de compatibilidades | → "Validación inteligente de stacks" | **Sí, con niveles.** No solo compatible/incompatible: `válido` / `válido con advertencia` / `no recomendado` / `incompatible`. Esto orienta, no solo bloquea |
+| Templates prearmados (T3, MERN, SaaS) | → "Templates prearmados" (8 listados) | **Sí, pero 8-10 máximo, modulares.** Templates base + recipes encima. No 200 templates rígidos inmantenibles |
+| Generación por tipo de producto | → "Generación orientada por tipo" | **Mediano plazo, no MVP.** Requiere que el catálogo y las reglas estén sólidos primero. Es una capa de UX encima, no una prioridad técnica |
+| Recipes | → "Recipes: módulos que se añaden" | **Sí, absolutamente prioritario.** Es lo que hace que Delixon sirva DESPUÉS del día 1. Sin recipes solo genera; con recipes evoluciona |
+| Perfiles de madurez | → "Production hardening" con 4 perfiles | **Sí, pero que cambien cosas reales** (archivos, deps, validaciones, warnings). No solo una etiqueta visual |
+| Análisis de proyecto existente | → "delixon scan" | **Sí, prioridad alta.** Sin esto, Delixon solo sirve para proyectos nuevos. Con scan, sirve para adoptar los existentes. Eso duplica el público objetivo |
+| Docker Compose solo para servicios | → Misma filosofía adoptada | **Sí, mantener firme.** Runtimes nativos + Docker solo para postgres, redis, rabbitmq, etc. Es el diferencial vs DevContainers |
+
+### 19.2 Ideas de StackPilot que quedaron fuera — Evaluación
+
+| Concepto de StackPilot | Por qué no entró | Opinión final |
+|---|---|---|
+| 23 comandos CLI completos | Delixon prioriza GUI, CLI era Fase 5 | **Mover a mediano plazo.** No 23, pero 5-8 comandos básicos (`open`, `create`, `scan`, `add`, `doctor`, `ps`) sí. Muchos devs prefieren CLI para acciones rápidas |
+| Versionado de stacks (save/diff/rollback) | No aparecía en el plan | **Incluir en mediano plazo.** Es lo que reduce el miedo a tocar el proyecto. "Puedo revertir" = confianza = uso real |
+| TechInstaller (lógica específica) | Mencionado en recipes superficialmente | **Incluir como motor interno de recipes.** Cada recipe necesita un installer que sepa qué hacer por tecnología |
+| SQLite como DB local | Delixon usa JSON | **Mantener JSON corto plazo, evaluar SQLite a futuro.** JSON funciona para <100 proyectos. Si escala a equipos, SQLite o similar será necesario |
+| DevContainers generation | No mencionado | **No prioritario.** Va contra la filosofía "sin Docker para dev". Solo como export opcional para equipos que lo requieran |
+| Makefile + scripts auxiliares | No mencionado | **Incluir como parte del scaffold.** Un `scripts/dev.sh` o `Makefile` básico es best practice. El scaffold debería generarlo |
+| Health checks por tecnología | Solo mencionado superficialmente | **Subir a corto plazo.** Sin health checks, el dashboard es decorativo. Con ellos, es útil cada día |
+| Doctor command | No incluido | **Incluir en corto plazo.** Es la primera cosa que un usuario nuevo necesita: "¿estoy listo para usar esto?" |
+| Full-stack detection (frontend/+backend/) | No mencionado explícitamente | **Incluir en scan.** El scan debe detectar automáticamente la estructura frontend/backend y actuar en consecuencia |
+| User tech notes (rating personal) | No incluido | **No prioritario.** Nice-to-have tardío, no resuelve problema core |
+
+### 19.3 Visión final — Qué debe ser Delixon
+
+| Aspecto | Estado actual | Opinión final — Cómo debería funcionar |
+|---|---|---|
+| **Identidad** | Gestor de workspaces + scaffolding | **"Sistema operativo local del developer"** — gestiona TODO el ciclo de vida local: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar, reparar |
+| **Núcleo declarativo** | No existe | **PRIORIDAD MÁXIMA.** Un `project manifest` que unifique: techs, versiones, deps, servicios, env vars, health checks, comandos, nivel de madurez. Sin esto, la integración será frágil |
+| **Flujo de creación** | CRUD básico en Delixon | **Flujo completo:** elegir tipo → proponer stack → validar → generar → registrar → aislar → configurar → listo para trabajar. Un solo flujo, no dos apps |
+| **Scan/import** | No implementado | **Igual de importante que crear.** La mayoría de devs ya tienen proyectos. Scan → detectar → registrar → gestionar. Sin esto pierdes al 70% del público |
+| **Health + Doctor** | No implementado | **Doctor del sistema** (prerequisitos, runtimes, permisos) + **Health del proyecto** (deps, DB, puertos, env vars, servicios). Esto es lo que hace que Delixon sea útil TODOS los días |
+| **Versionado de stack** | No implementado | **Incluir en mediano.** Preview de cambios + aplicar + rollback. Reduce miedo, aumenta confianza. Delixon como "editor de arquitectura local" |
+| **CLI** | No existe | **5-8 comandos básicos en mediano plazo.** GUI primero, pero CLI para power users que quieren `delixon open mi-proyecto` desde terminal |
+| **Templates** | 7 vacíos en Delixon, 20 en StackPilot | **8-10 sólidos + recipes modulares.** No más. La fuerza está en composición, no en cantidad |
+| **Docker** | No integrado en Delixon | **Solo servicios.** up/down/status/logs + health checks + detección de puertos + plantillas docker por stack |
+| **Perfiles madurez** | Solo en el plan | **rapid/standard/production/enterprise** que cambien archivos reales, deps, estructura, validaciones. No etiquetas |
+
+### 19.4 Priorización final recomendada
+
+| Prioridad | Qué | Por qué |
+|---|---|---|
+| **P0 — Base** | Manifiesto de proyecto + catálogo tecnológico + reglas de compatibilidad | Sin esto todo lo demás es frágil. Es la columna vertebral |
+| **P1 — Crear** | Templates reales (8-10) + scaffold + recipes + scan de existentes | Lo que atrae usuarios: "creé un proyecto en 2 min" y "importé mi proyecto viejo" |
+| **P1 — Operar** | Health checks + doctor + Docker services + env vars aisladas | Lo que retiene usuarios: "Delixon me dice qué falla y cómo arreglarlo" |
+| **P2 — Evolucionar** | Versionado de stacks + diff/rollback + perfiles de madurez | Lo que genera confianza: "puedo tocar mi proyecto sin miedo" |
+| **P2 — Expandir** | CLI básico (5-8 cmds) + terminal integrada + scripts unificados | Lo que los power users piden desde el día 1 |
+| **P3 — Equipos** | `.delixon-team` + onboarding + secrets vault + multi-editor | Lo que monetiza: equipos pagan, individuos no |
+| **P4 — Sueño** | IA + agentes + marketplace + plugins + catálogos corporativos | Lo que diferencia a largo plazo, pero solo si lo anterior está sólido |
+
+### 19.5 Conclusión
+
+> **La mejor integración no es "Delixon + StackPilot pegados". Es Delixon con un engine de scaffolding/composición por debajo.**
+
+La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de entornos para convertirse en **el sistema operativo local del developer**: una sola app que crea, entiende, ejecuta, aísla, amplía, valida y repara proyectos.
+
+**Lo crítico:** sin el núcleo declarativo (project manifest), la integración será vistosa pero frágil — "una colección de botones" en vez de un sistema coherente. El manifiesto es la columna vertebral sobre la que todo lo demás se construye.
+
+**La trampa a evitar:** no competir en cantidad (83 techs, 20 templates, 23 CLI commands). Competir en **calidad de la experiencia completa** — 25 tecnologías sólidas, 8 templates probados, y un flujo que funcione de extremo a extremo.
+
+---
+
+## 20. Glosario de tecnologías y siglas
 
 ### Siglas y acrónimos
 
@@ -1291,7 +1526,7 @@ MODELO:
 
 ---
 
-## 20. Checklist general de implementación
+## 21. Checklist general de implementación
 
 ### Landing page (delixon-web) — Completado
 - [x] Estructura de carpetas por sección (`layout/`, `hero/`, `problem/`, `solution/`, `how-it-works/`, `waitlist/`)
