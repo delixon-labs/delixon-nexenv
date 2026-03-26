@@ -161,4 +161,96 @@ mod tests {
         assert!(list.is_empty());
         let _ = std::fs::remove_dir_all(snapshots_dir("nonexistent-snap-project").unwrap());
     }
+
+    #[test]
+    fn test_diff_snapshots() {
+        let dir = tempfile::tempdir().unwrap();
+        let project_path = dir.path().to_str().unwrap();
+        let pid = "test-snap-diff";
+
+        // v1: nodejs only
+        let m1 = ProjectManifest {
+            name: "test".to_string(),
+            technologies: vec!["nodejs".to_string()],
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m1).unwrap();
+        save_snapshot(pid, project_path).unwrap();
+
+        // v2: nodejs + react + recipe applied
+        let m2 = ProjectManifest {
+            name: "test".to_string(),
+            technologies: vec!["nodejs".to_string(), "react".to_string()],
+            recipes_applied: vec!["testing-vitest".to_string()],
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m2).unwrap();
+        save_snapshot(pid, project_path).unwrap();
+
+        let diff = diff_snapshots(pid, 1, 2).unwrap();
+        assert!(diff.added_techs.contains(&"react".to_string()));
+        assert!(diff.removed_techs.is_empty());
+        assert!(diff.added_recipes.contains(&"testing-vitest".to_string()));
+
+        let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
+    }
+
+    #[test]
+    fn test_rollback_snapshot() {
+        let dir = tempfile::tempdir().unwrap();
+        let project_path = dir.path().to_str().unwrap();
+        let pid = "test-snap-rollback";
+
+        // Save v1 with nodejs
+        let m1 = ProjectManifest {
+            name: "original".to_string(),
+            runtime: "node".to_string(),
+            technologies: vec!["nodejs".to_string()],
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m1).unwrap();
+        save_snapshot(pid, project_path).unwrap();
+
+        // Change manifest
+        let m2 = ProjectManifest {
+            name: "changed".to_string(),
+            runtime: "python".to_string(),
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m2).unwrap();
+
+        // Rollback to v1
+        rollback_snapshot(pid, project_path, 1).unwrap();
+        let restored = manifest::load_manifest(project_path).unwrap().unwrap();
+        assert_eq!(restored.name, "original");
+        assert_eq!(restored.runtime, "node");
+
+        let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
+    }
+
+    #[test]
+    fn test_snapshot_version_increments() {
+        let dir = tempfile::tempdir().unwrap();
+        let project_path = dir.path().to_str().unwrap();
+        let pid = "test-snap-incr";
+
+        let m = ProjectManifest {
+            name: "test".to_string(),
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m).unwrap();
+
+        let s1 = save_snapshot(pid, project_path).unwrap();
+        let s2 = save_snapshot(pid, project_path).unwrap();
+        let s3 = save_snapshot(pid, project_path).unwrap();
+
+        assert_eq!(s1.version, 1);
+        assert_eq!(s2.version, 2);
+        assert_eq!(s3.version, 3);
+
+        let list = list_snapshots(pid).unwrap();
+        assert_eq!(list.len(), 3);
+
+        let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
+    }
 }

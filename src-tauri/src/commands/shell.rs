@@ -97,9 +97,10 @@ fn try_powershell(project_path: &str, env_vars: &std::collections::HashMap<Strin
 }
 
 fn try_cmd(project_path: &str, env_vars: &std::collections::HashMap<String, String>) -> bool {
+    let safe_path = project_path.replace('"', "");
     let mut cmd = Command::new("cmd");
     cmd.arg("/c").arg("start").arg("cmd").arg("/k")
-        .arg(format!("cd /d \"{}\"", project_path));
+        .arg(format!("cd /d \"{}\"", safe_path));
     for (k, v) in env_vars {
         cmd.env(k, v);
     }
@@ -208,7 +209,8 @@ fn try_linux_terminals(project_path: &str, env_vars: &std::collections::HashMap<
 
     // xterm fallback
     if which::which("xterm").is_ok() {
-        let shell_cmd = format!("cd '{}' && exec $SHELL", project_path);
+        let safe_path = project_path.replace('\'', "'\\''");
+        let shell_cmd = format!("cd '{}' && exec $SHELL", safe_path);
         let mut cmd = Command::new("xterm");
         cmd.arg("-e").arg("sh").arg("-c").arg(&shell_cmd);
         for (k, v) in env_vars {

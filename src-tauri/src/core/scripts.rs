@@ -96,6 +96,8 @@ fn validate_script_command(command: &str) -> Result<(), DelixonError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::manifest::{self, ProjectManifest};
+    use std::collections::HashMap;
 
     #[test]
     fn test_list_scripts_no_manifest() {
@@ -109,5 +111,77 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let result = run_script(dir.path().to_str().unwrap(), "dev");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_list_scripts_with_manifest() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().to_str().unwrap();
+        let mut commands = HashMap::new();
+        commands.insert("dev".to_string(), "echo dev".to_string());
+        commands.insert("test".to_string(), "echo test".to_string());
+        let m = ProjectManifest {
+            name: "test".to_string(),
+            commands,
+            ..Default::default()
+        };
+        manifest::save_manifest(path, &m).unwrap();
+
+        let scripts = list_scripts(path).unwrap();
+        assert_eq!(scripts.len(), 2);
+    }
+
+    #[test]
+    fn test_run_script_echo() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().to_str().unwrap();
+        let mut commands = HashMap::new();
+        commands.insert("hello".to_string(), "echo hello_world".to_string());
+        let m = ProjectManifest {
+            name: "test".to_string(),
+            commands,
+            ..Default::default()
+        };
+        manifest::save_manifest(path, &m).unwrap();
+
+        let result = run_script(path, "hello").unwrap();
+        assert_eq!(result.exit_code, 0);
+        assert!(result.stdout.contains("hello_world"));
+    }
+
+    #[test]
+    fn test_run_script_not_found() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().to_str().unwrap();
+        let m = ProjectManifest {
+            name: "test".to_string(),
+            commands: HashMap::new(),
+            ..Default::default()
+        };
+        manifest::save_manifest(path, &m).unwrap();
+
+        let result = run_script(path, "nonexistent");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_safe() {
+        assert!(validate_script_command("npm run dev").is_ok());
+        assert!(validate_script_command("cargo test").is_ok());
+        assert!(validate_script_command("pytest --cov").is_ok());
+    }
+
+    #[test]
+    fn test_validate_script_command_blocked() {
+        assert!(validate_script_command("rm -rf /").is_err());
+        assert!(validate_script_command("curl|sh").is_err());
+        assert!(validate_script_command("shutdown").is_err());
+        assert!(validate_script_command("dd if=/dev/zero").is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_too_long() {
+        let long_cmd = "a".repeat(501);
+        assert!(validate_script_command(&long_cmd).is_err());
     }
 }

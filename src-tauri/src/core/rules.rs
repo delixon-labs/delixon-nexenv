@@ -192,9 +192,12 @@ mod tests {
     fn test_validate_resolves_dependencies() {
         // nextjs requires nodejs and react
         let result = validate_stack(&["nextjs".to_string()]);
-        // Should auto-resolve nodejs and react if they're in requires
-        // Check if resolved_dependencies contains something or issues mention it
-        assert!(result.valid || !result.resolved_dependencies.is_empty() || !result.issues.is_empty());
+        // Should auto-resolve nodejs and react
+        assert!(
+            result.resolved_dependencies.contains(&"nodejs".to_string())
+                || result.issues.iter().any(|i| i.message.contains("nodejs")),
+            "nextjs should resolve or mention nodejs dependency"
+        );
     }
 
     #[test]
