@@ -7,10 +7,15 @@ license = "MIT"
 repository = "https://github.com/deli-technology/delixon-app"
 edition = "2021"
 rust-version = "1.77"
+default-run = "delixon"
 
 [lib]
 name = "delixon_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "delixon"
+path = "src/main.rs"
 
 [[bin]]
 name = "delixon-cli"
