@@ -1,0 +1,25 @@
+id: mysql
+name: MySQL
+category: database
+description: Popular open source relational database
+website: https://mysql.com
+versions: [{version: "9.0"}, {version: "8.4"}]
+defaultVersion: "9.0"
+defaultPort: 3306
+requires: []
+incompatibleWith: [mariadb]
+suggestedWith: [prisma, typeorm]
+officialScaffold: null
+dockerImage: mysql:9.0
+healthCheck:
+  command: mysqladmin ping -h localhost
+  interval: 5s
+  timeout: 5s
+  retries: 5
+envVars:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: app
+  DATABASE_URL: mysql://root:root@localhost:3306/app
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [mysql, sql, relational]

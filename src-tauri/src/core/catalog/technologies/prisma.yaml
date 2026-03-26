@@ -1,0 +1,23 @@
+id: prisma
+name: Prisma ORM
+category: orm
+description: Next-generation Node.js and TypeScript ORM with auto-generated query builder and migrations
+website: https://www.prisma.io
+versions:
+  - {version: "6.5", lts: true}
+  - {version: "6.4"}
+  - {version: "5.22"}
+  - {version: "5.21"}
+defaultVersion: "6.5"
+requires: [nodejs]
+incompatibleWith: [typeorm, drizzle, mongoose]
+suggestedWith: [postgresql, nextjs, typescript]
+officialScaffold: "npx prisma init"
+dockerImage: null
+healthCheck:
+  command: npx prisma db execute --stdin <<< "SELECT 1"
+envVars:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
+configFiles: [prisma/schema.prisma]
+lastVerified: "2026-03-22"
+tags: [prisma, orm, typescript, database, migrations, query-builder]

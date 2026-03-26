@@ -129,6 +129,10 @@ pub fn create_from_template(
     projects.push(project.clone());
     storage::save_projects(&projects)?;
 
+    // Generar manifest automaticamente
+    let manifest = crate::core::manifest::generate_manifest_from_project(&project);
+    let _ = crate::core::manifest::save_manifest(project_path, &manifest);
+
     Ok(project)
 }
 

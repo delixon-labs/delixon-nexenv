@@ -1,0 +1,30 @@
+id: python
+name: Python
+category: runtime
+description: General-purpose programming language
+website: https://python.org
+versions:
+  - version: "3.13"
+  - version: "3.12"
+    lts: true
+  - version: "3.11"
+defaultVersion: "3.12"
+defaultPort: 8000
+requires: []
+incompatibleWith: []
+suggestedWith: []
+officialScaffold: null
+dockerImage: python:3.12-slim
+healthCheck:
+  endpoint: http://localhost:8000/health
+  interval: 10s
+  timeout: 5s
+  retries: 3
+envVars:
+  PYTHONUNBUFFERED: "1"
+  PYTHON_ENV: development
+configFiles:
+  - pyproject.toml
+  - requirements.txt
+lastVerified: "2026-03-22"
+tags: [python, runtime, server, scripting]

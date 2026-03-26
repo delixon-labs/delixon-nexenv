@@ -1,9 +1,12 @@
+pub mod catalog;
 pub mod config;
 pub mod detection;
 pub mod error;
+pub mod manifest;
 pub mod models;
 pub mod portable;
 pub mod storage;
+pub mod rules;
 pub mod templates;
 pub mod utils;
 pub mod vscode;

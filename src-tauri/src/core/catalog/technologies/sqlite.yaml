@@ -1,0 +1,19 @@
+id: sqlite
+name: SQLite
+category: database
+description: Self-contained, serverless SQL database engine
+website: https://sqlite.org
+versions:
+  - version: "3.47"
+  - version: "3.46"
+defaultVersion: "3.47"
+requires: []
+incompatibleWith: []
+suggestedWith: [prisma, drizzle]
+officialScaffold: null
+dockerImage: null
+envVars:
+  DATABASE_URL: "file:./dev.db"
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [sqlite, sql, embedded, serverless, database, lightweight]

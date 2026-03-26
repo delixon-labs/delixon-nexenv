@@ -1,0 +1,23 @@
+id: rust
+name: Rust
+category: runtime
+description: Systems programming language focused on safety and performance
+website: https://www.rust-lang.org
+versions:
+  - version: "1.84"
+  - version: "1.83"
+defaultVersion: "1.84"
+defaultPort: 8080
+requires: []
+incompatibleWith: []
+suggestedWith: []
+officialScaffold: cargo init
+dockerImage: rust:1.84-slim
+healthCheck:
+  endpoint: http://localhost:8080/health
+envVars: {}
+configFiles:
+  - Cargo.toml
+  - Cargo.lock
+lastVerified: "2026-03-22"
+tags: [rust, runtime, compiled, systems]

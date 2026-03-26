@@ -1,8 +1,11 @@
+pub mod catalog;
 pub mod config;
 pub mod detection;
 pub mod environments;
+pub mod manifest;
 pub mod portable;
 pub mod projects;
+pub mod rules;
 pub mod runtimes;
 pub mod shell;
 pub mod templates;

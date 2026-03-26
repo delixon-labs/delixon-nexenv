@@ -1,0 +1,17 @@
+id: express
+name: Express
+category: backend
+description: Minimal Node.js web framework
+website: https://expressjs.com
+versions: [{version: "5"}, {version: "4"}]
+defaultVersion: "5"
+defaultPort: 3001
+requires: [nodejs]
+incompatibleWith: [nestjs]
+suggestedWith: [typescript, postgresql]
+officialScaffold: null
+dockerImage: null
+envVars: {PORT: "3001"}
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [express, nodejs, api, rest]

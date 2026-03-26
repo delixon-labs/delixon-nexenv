@@ -1,0 +1,17 @@
+id: fastapi
+name: FastAPI
+category: backend
+description: Modern Python web framework with automatic API docs
+website: https://fastapi.tiangolo.com
+versions: [{version: "0.115"}]
+defaultVersion: "0.115"
+defaultPort: 8000
+requires: [python]
+incompatibleWith: [django, flask]
+suggestedWith: [postgresql, sqlalchemy, redis]
+officialScaffold: null
+dockerImage: null
+envVars: {HOST: "0.0.0.0", PORT: "8000"}
+configFiles: [requirements.txt, pyproject.toml]
+lastVerified: "2026-03-22"
+tags: [fastapi, python, api, async]

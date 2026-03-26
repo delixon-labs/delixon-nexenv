@@ -1,0 +1,17 @@
+id: fastify
+name: Fastify
+category: backend
+description: Fast and low overhead Node.js web framework
+website: https://fastify.dev
+versions: [{version: "5"}, {version: "4"}]
+defaultVersion: "5"
+defaultPort: 3001
+requires: [nodejs]
+incompatibleWith: [nestjs]
+suggestedWith: [typescript, postgresql, prisma]
+officialScaffold: npx fastify-cli generate
+dockerImage: null
+envVars: {PORT: "3001"}
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [fastify, nodejs, api, fast]

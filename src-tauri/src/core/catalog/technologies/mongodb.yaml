@@ -1,0 +1,25 @@
+id: mongodb
+name: MongoDB
+category: database
+description: Document-oriented NoSQL database
+website: https://mongodb.com
+versions: [{version: "8.0"}, {version: "7.0"}]
+defaultVersion: "8.0"
+defaultPort: 27017
+requires: []
+incompatibleWith: []
+suggestedWith: []
+officialScaffold: null
+dockerImage: mongo:8.0
+healthCheck:
+  command: mongosh --eval "db.adminCommand('ping')"
+  interval: 10s
+  timeout: 5s
+  retries: 3
+envVars:
+  MONGO_INITDB_ROOT_USERNAME: admin
+  MONGO_INITDB_ROOT_PASSWORD: admin
+  MONGODB_URL: mongodb://admin:admin@localhost:27017/app?authSource=admin
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [mongodb, nosql, document]

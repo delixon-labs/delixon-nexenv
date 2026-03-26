@@ -120,6 +120,12 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
         { name: "Rust", version: "1.94.0", path: "C:/Users/user/.cargo/bin/rustc.exe" },
       ] as T);
 
+    case "get_manifest":
+      return Promise.resolve({ name: "mock", projectType: "api", profile: "standard", runtime: "node", technologies: ["node"], services: [], envVars: { required: [], optional: [] }, commands: { dev: "npm run dev" }, ports: [3000], recipesApplied: [], healthChecks: [] } as T);
+
+    case "regenerate_manifest":
+      return Promise.resolve({ name: "mock", projectType: "api", profile: "standard", runtime: "node", technologies: ["node"], services: [], envVars: { required: [], optional: [] }, commands: { dev: "npm run dev" }, ports: [3000], recipesApplied: [], healthChecks: [] } as T);
+
     case "create_from_template": {
       const tplProject: Project = {
         id: `mock-tpl-${Date.now()}`,
@@ -217,6 +223,30 @@ export interface DetectedRuntime {
 
 export async function detectRuntimes(): Promise<DetectedRuntime[]> {
   return safeInvoke<DetectedRuntime[]>("detect_runtimes");
+}
+
+// --- Manifest ---
+
+export interface ProjectManifest {
+  name: string;
+  projectType: string;
+  profile: string;
+  runtime: string;
+  technologies: string[];
+  services: { name: string; docker: boolean; port: number; healthCheck: string }[];
+  envVars: { required: string[]; optional: string[] };
+  commands: Record<string, string>;
+  ports: number[];
+  recipesApplied: string[];
+  healthChecks: { name: string; command: string; endpoint: string }[];
+}
+
+export async function getManifest(projectId: string): Promise<ProjectManifest | null> {
+  return safeInvoke<ProjectManifest | null>("get_manifest", { projectId });
+}
+
+export async function regenerateManifest(projectId: string): Promise<ProjectManifest> {
+  return safeInvoke<ProjectManifest>("regenerate_manifest", { projectId });
 }
 
 // --- Templates ---

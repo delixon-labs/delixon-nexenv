@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use delixon_lib::core::{config, detection, portable, storage, templates};
+use delixon_lib::core::{catalog, config, detection, manifest, portable, rules, storage, templates};
 
 #[derive(Parser)]
 #[command(name = "delixon", version = "1.0.0", about = "Workspace manager for developers")]
@@ -66,6 +66,24 @@ enum Commands {
         #[arg(long)]
         path: String,
     },
+
+    /// Muestra el manifest de un proyecto
+    Manifest {
+        /// Nombre del proyecto
+        project: String,
+    },
+
+    /// Navega el catalogo de tecnologias
+    Catalog {
+        /// ID de tecnologia (opcional, sin ID lista todas)
+        id: Option<String>,
+    },
+
+    /// Valida una combinacion de tecnologias
+    Validate {
+        /// IDs de tecnologias a validar
+        techs: Vec<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -100,6 +118,9 @@ fn run_command(cmd: Commands) -> Result<(), String> {
         Commands::Env { project, action } => cmd_env(&project, action),
         Commands::Export { project, output } => cmd_export(&project, output.as_deref()),
         Commands::Import { file, path } => cmd_import(&file, &path),
+        Commands::Manifest { project } => cmd_manifest(&project),
+        Commands::Catalog { id } => cmd_catalog(id.as_deref()),
+        Commands::Validate { techs } => cmd_validate(&techs),
     }
 }
 
@@ -374,5 +395,172 @@ fn cmd_import(file: &str, path: &str) -> Result<(), String> {
         project.name,
         project.path
     );
+    Ok(())
+}
+
+fn cmd_manifest(project_name: &str) -> Result<(), String> {
+    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let lower = project_name.to_lowercase();
+    let project = projects
+        .iter()
+        .find(|p| p.name.to_lowercase().contains(&lower))
+        .ok_or_else(|| format!("No se encontro proyecto '{}'", project_name))?;
+
+    match manifest::load_manifest(&project.path).map_err(|e| e.to_string())? {
+        Some(m) => {
+            println!("{} {}", "Manifest:".bold(), project.name);
+            println!("{}", "=".repeat(40));
+            println!("Tipo:      {}", m.project_type.cyan());
+            println!("Perfil:    {}", m.profile);
+            println!("Runtime:   {}", m.runtime.green());
+            if !m.technologies.is_empty() {
+                println!("Techs:     {}", m.technologies.join(", "));
+            }
+            if !m.ports.is_empty() {
+                let ports: Vec<String> = m.ports.iter().map(|p| p.to_string()).collect();
+                println!("Puertos:   {}", ports.join(", "));
+            }
+            if !m.commands.is_empty() {
+                println!("\n{}", "Comandos:".bold());
+                for (key, val) in &m.commands {
+                    println!("  {:<10} {}", key.bold(), val);
+                }
+            }
+            if !m.services.is_empty() {
+                println!("\n{}", "Servicios:".bold());
+                for svc in &m.services {
+                    println!("  {} (puerto {})", svc.name, svc.port);
+                }
+            }
+        }
+        None => {
+            println!("{}", "No se encontro manifest. Generando...".yellow());
+            let m = manifest::generate_manifest_from_project(project);
+            manifest::save_manifest(&project.path, &m).map_err(|e| e.to_string())?;
+            println!("{} Manifest generado en {}/.delixon/manifest.yaml", "ok".green().bold(), project.path);
+        }
+    }
+    Ok(())
+}
+
+fn cmd_validate(techs: &[String]) -> Result<(), String> {
+    if techs.is_empty() {
+        return Err("Especifica al menos una tecnologia para validar".to_string());
+    }
+
+    println!(
+        "{} {}",
+        "Validando:".cyan().bold(),
+        techs.join(", ")
+    );
+
+    let result = rules::validate_stack(techs);
+
+    if result.valid {
+        println!("\n{} Stack valido", "OK".green().bold());
+    } else {
+        println!("\n{} Stack tiene errores", "ERROR".red().bold());
+    }
+
+    for issue in &result.issues {
+        let prefix = match issue.level {
+            rules::IssueLevel::Error => "ERR".red().bold(),
+            rules::IssueLevel::Warning => "!!".yellow().bold(),
+            rules::IssueLevel::Info => ">>".cyan(),
+        };
+        println!("  {} {}", prefix, issue.message);
+    }
+
+    if !result.resolved_dependencies.is_empty() {
+        println!(
+            "\n{} {}",
+            "Dependencias resueltas:".bold(),
+            result.resolved_dependencies.join(", ").green()
+        );
+    }
+
+    if !result.port_assignments.is_empty() {
+        println!("\n{}", "Puertos asignados:".bold());
+        let mut ports: Vec<_> = result.port_assignments.iter().collect();
+        ports.sort_by_key(|(_, p)| *p);
+        for (tech, port) in ports {
+            println!("  {:<20} :{}", tech, port);
+        }
+    }
+
+    if !result.suggestions.is_empty() {
+        println!(
+            "\n{} {}",
+            "Sugerencias:".dimmed(),
+            result.suggestions.join(", ").dimmed()
+        );
+    }
+
+    Ok(())
+}
+
+fn cmd_catalog(id: Option<&str>) -> Result<(), String> {
+    let techs = catalog::load_all_technologies();
+
+    if let Some(tech_id) = id {
+        let tech = techs
+            .iter()
+            .find(|t| t.id == tech_id)
+            .ok_or_else(|| format!("Tecnologia no encontrada: {}", tech_id))?;
+
+        println!("{} {}", tech.name.bold(), format!("({})", tech.id).dimmed());
+        println!("{}", "=".repeat(50));
+        println!("Categoria:    {}", tech.category.cyan());
+        println!("Descripcion:  {}", tech.description);
+        if !tech.default_version.is_empty() {
+            println!("Version:      {}", tech.default_version.green());
+        }
+        if tech.default_port > 0 {
+            println!("Puerto:       {}", tech.default_port);
+        }
+        if !tech.docker_image.is_empty() {
+            println!("Docker:       {}", tech.docker_image);
+        }
+        if !tech.requires.is_empty() {
+            println!("Requiere:     {}", tech.requires.join(", "));
+        }
+        if !tech.incompatible_with.is_empty() {
+            println!("Incompatible: {}", tech.incompatible_with.join(", ").red());
+        }
+        if !tech.suggested_with.is_empty() {
+            println!("Sugerido con: {}", tech.suggested_with.join(", ").green());
+        }
+        if !tech.env_vars.is_empty() {
+            println!("\n{}", "Variables de entorno:".bold());
+            for (k, v) in &tech.env_vars {
+                println!("  {}={}", k, v.dimmed());
+            }
+        }
+        if !tech.tags.is_empty() {
+            println!("\nTags: {}", tech.tags.join(", ").dimmed());
+        }
+    } else {
+        println!("{} ({} tecnologias)", "Catalogo Delixon".bold(), techs.len());
+        println!("{}", "=".repeat(60));
+
+        let categories = catalog::all_categories();
+        for cat in &categories {
+            let cat_techs: Vec<&catalog::Technology> =
+                techs.iter().filter(|t| t.category == *cat).collect();
+            println!(
+                "\n{} ({})",
+                cat.to_uppercase().cyan().bold(),
+                cat_techs.len()
+            );
+            for tech in cat_techs {
+                let port = if tech.default_port > 0 {
+                    format!(":{}", tech.default_port)
+                } else {
+                    String::new()
+                };
+                println!("  {:<20} {}{}", tech.id, tech.name, port.dimmed());
+            }
+        }
+    }
     Ok(())
 }

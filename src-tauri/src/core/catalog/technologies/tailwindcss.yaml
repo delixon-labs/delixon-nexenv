@@ -1,0 +1,20 @@
+id: tailwindcss
+name: Tailwind CSS
+category: styling
+description: Utility-first CSS framework for rapid UI development
+website: https://tailwindcss.com
+versions:
+  - version: "4.1"
+  - version: "4.0"
+  - version: "3.4"
+  - version: "3.3"
+defaultVersion: "4.1"
+requires: [nodejs]
+incompatibleWith: []
+suggestedWith: [react, nextjs, vue]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: [tailwind.config.js, tailwind.config.ts, postcss.config.js]
+lastVerified: "2026-03-22"
+tags: [tailwind, css, utility-first, styling, responsive]

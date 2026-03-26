@@ -1,0 +1,20 @@
+id: shadcn-ui
+name: shadcn/ui
+category: styling
+description: Beautifully designed components built with Radix UI and Tailwind CSS
+website: https://ui.shadcn.com
+versions:
+  - version: "2.2"
+  - version: "2.1"
+  - version: "2.0"
+  - version: "1.0"
+defaultVersion: "2.2"
+requires: [nodejs, react, tailwindcss]
+incompatibleWith: [chakra-ui, material-ui]
+suggestedWith: [nextjs, typescript]
+officialScaffold: npx shadcn@latest init
+dockerImage: null
+envVars: {}
+configFiles: [components.json]
+lastVerified: "2026-03-22"
+tags: [shadcn, ui, components, radix, tailwind, styling]

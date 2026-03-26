@@ -1,0 +1,18 @@
+id: github-actions
+name: GitHub Actions
+category: devops
+description: CI/CD platform integrated with GitHub for automating build, test, and deploy workflows
+website: https://github.com/features/actions
+versions:
+  - version: "3"
+  - version: "2"
+defaultVersion: "3"
+requires: []
+incompatibleWith: []
+suggestedWith: [docker]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: [.github/workflows/ci.yml]
+lastVerified: "2026-03-22"
+tags: [github-actions, ci, cd, automation, devops]

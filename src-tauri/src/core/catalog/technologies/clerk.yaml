@@ -1,0 +1,29 @@
+id: clerk
+name: Clerk
+category: auth
+description: Drop-in authentication and user management with prebuilt UI components and multi-tenant support
+website: https://clerk.com
+versions:
+  - version: "6.0"
+  - version: "5.12"
+    lts: true
+  - version: "4.29"
+    eol: "2025-01-01"
+defaultVersion: "6.0"
+requires: [nodejs]
+incompatibleWith: [nextauth, supabase-auth, lucia]
+suggestedWith: [nextjs, react]
+officialScaffold: npx create-next-app@latest --example with-clerk
+dockerImage: null
+healthCheck:
+  endpoint: /api/clerk/health
+  interval: "30s"
+  timeout: "5s"
+  retries: 3
+envVars:
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_your-key
+  CLERK_SECRET_KEY: sk_test_your-key
+configFiles:
+  - middleware.ts
+lastVerified: "2026-03-22"
+tags: [auth, clerk, authentication, user-management, oauth, sso, multi-tenant]

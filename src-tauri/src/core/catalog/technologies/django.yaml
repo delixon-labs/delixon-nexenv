@@ -1,0 +1,17 @@
+id: django
+name: Django
+category: backend
+description: High-level Python web framework
+website: https://djangoproject.com
+versions: [{version: "5.1"}, {version: "5.0"}]
+defaultVersion: "5.1"
+defaultPort: 8000
+requires: [python]
+incompatibleWith: [fastapi, flask]
+suggestedWith: [postgresql]
+officialScaffold: django-admin startproject
+dockerImage: null
+envVars: {DJANGO_SETTINGS_MODULE: "config.settings", DEBUG: "True"}
+configFiles: [manage.py, requirements.txt]
+lastVerified: "2026-03-22"
+tags: [django, python, fullstack, batteries]

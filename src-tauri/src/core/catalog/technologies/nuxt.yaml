@@ -1,0 +1,18 @@
+id: nuxt
+name: Nuxt
+category: frontend
+description: Full-stack Vue framework
+website: https://nuxt.com
+versions:
+  - version: "3"
+defaultVersion: "3"
+defaultPort: 3000
+requires: [nodejs, vue]
+incompatibleWith: [nextjs, sveltekit, angular, remix]
+suggestedWith: [typescript, tailwindcss]
+officialScaffold: npx nuxi init
+dockerImage: null
+envVars: {}
+configFiles: [nuxt.config.ts]
+lastVerified: "2026-03-22"
+tags: [nuxt, vue, ssr, fullstack]

@@ -1,4 +1,5 @@
 use crate::core::config;
+use crate::core::manifest;
 use crate::core::models::project::{CreateProjectInput, Project, ProjectStatus, RuntimeConfig};
 use crate::core::storage;
 use tauri::command;
@@ -61,6 +62,10 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
 
     projects.push(project.clone());
     storage::save_projects(&projects).map_err(|e| e.to_string())?;
+
+    // Generar manifest automaticamente
+    let m = manifest::generate_manifest_from_project(&project);
+    let _ = manifest::save_manifest(&project.path, &m);
 
     Ok(project)
 }

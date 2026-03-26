@@ -1,0 +1,22 @@
+id: nextjs
+name: Next.js
+category: frontend
+description: Full-stack React framework with SSR, SSG, and API routes
+website: https://nextjs.org
+versions:
+  - version: "15"
+  - version: "14"
+defaultVersion: "15"
+defaultPort: 3000
+requires: [nodejs, react]
+incompatibleWith: [nuxt, sveltekit, angular, remix]
+suggestedWith: [typescript, tailwindcss, prisma]
+officialScaffold: npx create-next-app@latest
+dockerImage: null
+envVars:
+  NEXT_PUBLIC_API_URL: http://localhost:8000
+configFiles:
+  - next.config.js
+  - tsconfig.json
+lastVerified: "2026-03-22"
+tags: [nextjs, react, ssr, fullstack, frontend]

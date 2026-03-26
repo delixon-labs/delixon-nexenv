@@ -1,0 +1,30 @@
+id: nestjs
+name: NestJS
+category: backend
+description: Progressive Node.js framework for building scalable server-side applications
+website: https://nestjs.com
+versions:
+  - version: "11"
+  - version: "10"
+    lts: true
+defaultVersion: "11"
+defaultPort: 3000
+requires: [nodejs, typescript]
+incompatibleWith: [express, fastify]
+suggestedWith: [prisma, postgresql]
+officialScaffold: "npx @nestjs/cli new"
+dockerImage: null
+healthCheck:
+  endpoint: http://localhost:3000
+  interval: 10s
+  timeout: 5s
+  retries: 3
+envVars:
+  NODE_ENV: development
+  PORT: "3000"
+configFiles:
+  - nest-cli.json
+  - tsconfig.json
+  - package.json
+lastVerified: "2026-03-22"
+tags: [nestjs, nodejs, typescript, backend, framework, enterprise]

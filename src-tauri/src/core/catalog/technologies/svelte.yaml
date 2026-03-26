@@ -1,0 +1,19 @@
+id: svelte
+name: Svelte
+category: frontend
+description: Compile-time UI framework
+website: https://svelte.dev
+versions:
+  - version: "5"
+  - version: "4"
+defaultVersion: "5"
+defaultPort: 5173
+requires: [nodejs]
+incompatibleWith: [qwik, solidjs]
+suggestedWith: [typescript, tailwindcss]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: [svelte.config.js]
+lastVerified: "2026-03-22"
+tags: [svelte, frontend, compiler]

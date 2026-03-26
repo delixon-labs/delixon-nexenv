@@ -1,0 +1,18 @@
+id: vue
+name: Vue.js
+category: frontend
+description: Progressive JavaScript framework
+website: https://vuejs.org
+versions:
+  - version: "3"
+defaultVersion: "3"
+defaultPort: 5173
+requires: [nodejs]
+incompatibleWith: [qwik, solidjs]
+suggestedWith: [typescript, tailwindcss]
+officialScaffold: npm create vue@latest
+dockerImage: null
+envVars: {}
+configFiles: [vite.config.ts]
+lastVerified: "2026-03-22"
+tags: [vue, frontend, spa]

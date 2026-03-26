@@ -1,0 +1,19 @@
+id: react
+name: React
+category: frontend
+description: Library for building user interfaces
+website: https://react.dev
+versions:
+  - version: "19"
+  - version: "18"
+defaultVersion: "19"
+defaultPort: 3000
+requires: [nodejs]
+incompatibleWith: [qwik, solidjs]
+suggestedWith: [typescript, tailwindcss]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [react, frontend, ui, spa]

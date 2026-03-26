@@ -1,0 +1,21 @@
+id: sqlalchemy
+name: SQLAlchemy
+category: orm
+description: The Python SQL toolkit and Object Relational Mapper for full database access
+website: https://www.sqlalchemy.org
+versions:
+  - {version: "2.0", lts: true}
+  - {version: "1.4"}
+defaultVersion: "2.0"
+requires: [python]
+incompatibleWith: [django-orm]
+suggestedWith: [fastapi, postgresql]
+officialScaffold: null
+dockerImage: null
+healthCheck:
+  command: python -c "from sqlalchemy import create_engine; engine = create_engine('${DATABASE_URL}'); engine.connect()"
+envVars:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
+configFiles: [alembic.ini, alembic/]
+lastVerified: "2026-03-22"
+tags: [sqlalchemy, orm, python, database, migrations, alembic, sql]

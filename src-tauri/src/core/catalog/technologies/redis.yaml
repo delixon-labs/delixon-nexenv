@@ -1,0 +1,23 @@
+id: redis
+name: Redis
+category: database
+description: In-memory data store for caching, queues, and sessions
+website: https://redis.io
+versions: [{version: "7"}]
+defaultVersion: "7"
+defaultPort: 6379
+requires: []
+incompatibleWith: []
+suggestedWith: []
+officialScaffold: null
+dockerImage: redis:7-alpine
+healthCheck:
+  command: redis-cli ping
+  interval: 5s
+  timeout: 5s
+  retries: 5
+envVars:
+  REDIS_URL: redis://localhost:6379/0
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [redis, cache, queue, sessions, nosql]

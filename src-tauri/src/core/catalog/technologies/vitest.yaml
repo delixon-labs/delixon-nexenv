@@ -1,0 +1,20 @@
+id: vitest
+name: Vitest
+category: devops
+description: Fast Vite-native unit test framework for modern JavaScript projects
+website: https://vitest.dev
+versions:
+  - version: "3.1"
+  - version: "3.0"
+  - version: "2.1"
+  - version: "1.6"
+defaultVersion: "3.1"
+requires: [nodejs]
+incompatibleWith: [jest]
+suggestedWith: [typescript]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: [vitest.config.ts]
+lastVerified: "2026-03-22"
+tags: [vitest, testing, unit-testing, vite, devops]

@@ -1,0 +1,26 @@
+id: postgresql
+name: PostgreSQL
+category: database
+description: Advanced open source relational database
+website: https://postgresql.org
+versions: [{version: "17"}, {version: "16", lts: true}]
+defaultVersion: "17"
+defaultPort: 5432
+requires: []
+incompatibleWith: []
+suggestedWith: [prisma, drizzle, sqlalchemy]
+officialScaffold: null
+dockerImage: postgres:17
+healthCheck:
+  command: pg_isready -U postgres
+  interval: 5s
+  timeout: 5s
+  retries: 5
+envVars:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: app
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
+configFiles: []
+lastVerified: "2026-03-22"
+tags: [postgresql, postgres, sql, relational]

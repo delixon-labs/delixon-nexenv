@@ -1,0 +1,23 @@
+id: drizzle
+name: Drizzle ORM
+category: orm
+description: Lightweight TypeScript ORM with SQL-like syntax and zero dependencies
+website: https://orm.drizzle.team
+versions:
+  - {version: "0.40"}
+  - {version: "0.39"}
+  - {version: "0.38"}
+  - {version: "0.37"}
+defaultVersion: "0.40"
+requires: [nodejs]
+incompatibleWith: [typeorm, prisma, mongoose]
+suggestedWith: [postgresql, typescript]
+officialScaffold: "npx drizzle-kit init"
+dockerImage: null
+healthCheck:
+  command: npx drizzle-kit check
+envVars:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
+configFiles: [drizzle.config.ts]
+lastVerified: "2026-03-22"
+tags: [drizzle, orm, typescript, database, migrations, sql, lightweight]

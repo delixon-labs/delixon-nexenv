@@ -1,0 +1,31 @@
+id: nextauth
+name: NextAuth.js (Auth.js)
+category: auth
+description: Authentication library for Next.js with OAuth, credentials, and database session support
+website: https://authjs.dev
+versions:
+  - version: "5.0"
+  - version: "4.24"
+    lts: true
+  - version: "4.23"
+  - version: "3.29"
+    eol: "2023-01-01"
+defaultVersion: "5.0"
+requires: [nodejs, nextjs]
+incompatibleWith: [clerk, supabase-auth, lucia]
+suggestedWith: [prisma, postgresql]
+officialScaffold: null
+dockerImage: null
+healthCheck:
+  endpoint: /api/auth/session
+  interval: "30s"
+  timeout: "5s"
+  retries: 3
+envVars:
+  NEXTAUTH_SECRET: your-secret-key
+  NEXTAUTH_URL: http://localhost:3000
+configFiles:
+  - auth.ts
+  - "[...nextauth].ts"
+lastVerified: "2026-03-22"
+tags: [auth, nextauth, authjs, oauth, jwt, session, authentication]

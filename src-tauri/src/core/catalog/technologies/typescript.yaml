@@ -1,0 +1,20 @@
+id: typescript
+name: TypeScript
+category: devops
+description: Strongly typed programming language that builds on JavaScript
+website: https://www.typescriptlang.org
+versions:
+  - version: "5.8"
+  - version: "5.7"
+  - version: "5.6"
+  - version: "5.5"
+defaultVersion: "5.8"
+requires: [nodejs]
+incompatibleWith: []
+suggestedWith: [vitest, biome]
+officialScaffold: null
+dockerImage: null
+envVars: {}
+configFiles: [tsconfig.json]
+lastVerified: "2026-03-22"
+tags: [typescript, types, language, devops]

@@ -1,0 +1,31 @@
+id: nodejs
+name: Node.js
+category: runtime
+description: JavaScript runtime built on V8
+website: https://nodejs.org
+versions:
+  - version: "24"
+  - version: "22"
+    lts: true
+  - version: "20"
+    lts: true
+defaultVersion: "22"
+defaultPort: 3000
+requires: []
+incompatibleWith: []
+suggestedWith: [typescript]
+officialScaffold: null
+dockerImage: node:22-alpine
+healthCheck:
+  endpoint: http://localhost:3000
+  interval: 10s
+  timeout: 5s
+  retries: 3
+envVars:
+  NODE_ENV: development
+  PORT: "3000"
+configFiles:
+  - package.json
+  - tsconfig.json
+lastVerified: "2026-03-22"
+tags: [javascript, typescript, runtime, server]

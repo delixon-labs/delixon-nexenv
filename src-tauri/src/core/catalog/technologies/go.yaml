@@ -1,0 +1,27 @@
+id: go
+name: Go
+category: runtime
+description: Statically typed, compiled language by Google
+website: https://go.dev
+versions:
+  - version: "1.23"
+  - version: "1.22"
+defaultVersion: "1.23"
+defaultPort: 8080
+requires: []
+incompatibleWith: []
+suggestedWith: []
+officialScaffold: null
+dockerImage: golang:1.23-alpine
+healthCheck:
+  endpoint: http://localhost:8080/health
+  interval: 10s
+  timeout: 5s
+  retries: 3
+envVars:
+  GO_ENV: development
+configFiles:
+  - go.mod
+  - go.sum
+lastVerified: "2026-03-22"
+tags: [go, golang, runtime, compiled]
