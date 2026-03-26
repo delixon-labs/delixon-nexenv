@@ -173,7 +173,7 @@ export default function Settings() {
           Acerca de
         </h2>
         <div className="rounded-xl bg-gray-900 border border-gray-800 px-4 py-4">
-          <p className="text-sm text-white font-medium">Delixon v0.1.0</p>
+          <p className="text-sm text-white font-medium">Delixon v1.0.0</p>
           <p className="text-xs text-gray-500 mt-1">
             Gestor de workspaces para desarrolladores
           </p>

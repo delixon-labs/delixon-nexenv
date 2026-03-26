@@ -847,11 +847,18 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [x] Waitlist backend: Fastify + PostgreSQL + Docker
 - [x] Admin panel, referidos, double opt-in
 
+### Principio rector
+
+> **"Primero indispensable. Luego potente. Después ambicioso."**
+>
+> Hoy, "indispensable" para Delixon es: manifest, open, doctor, health, scan, CLI, 3-5 templates perfectos, 2-4 recipes impecables. Todo lo demás puede esperar.
+
 ### CORTO PLAZO (1-3 meses) — "Que funcione de verdad"
 
-> **Capa A — Base estructural + Capa B — Operación local fuerte**
+> **Base declarativa + operación local + CLI + cross-platform desde el día 1.**
 >
 > Sin la base declarativa, todo lo demás será frágil. Sin operación local útil, nadie lo usa dos veces.
+> Sin CLI, pierdes a la mayoría de devs. Sin Linux, pierdes a la mitad del público.
 
 **P0 — Núcleo declarativo (la columna vertebral):**
 - [ ] Definir formato de `project manifest` (.delixon/manifest.yaml) — el formato que unifica toda la info del proyecto
@@ -865,36 +872,57 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [ ] Exportar/importar configuración de proyecto (archivo `.delixon`)
 - [ ] Detección de conflictos de puertos entre proyectos
 
+**P0 — CLI desde el día 1 (los devs viven en la terminal):**
+- [ ] Arquitectura CLI con subcomandos (clap en Rust o binario separado que invoque el mismo core)
+- [ ] `delixon list` — listar proyectos registrados con estado
+- [ ] `delixon open <nombre>` — abrir proyecto en editor con entorno cargado
+- [ ] `delixon doctor` — verificar runtimes, Docker, Git, VSCode, permisos, PATH
+- [ ] `delixon scan <ruta>` — detectar stack de un proyecto existente y registrarlo
+- [ ] La CLI y la GUI comparten el mismo core (misma lógica, mismos datos, misma persistencia)
+- [ ] Instalable globalmente: el dev escribe `delixon` desde cualquier terminal
+
+> **Decisión de diseño:** CLI y GUI son dos interfaces al mismo motor. No son productos separados, no compiten. La CLI es para acciones rápidas, la GUI es para explorar y configurar. Ambas leen/escriben sobre el mismo manifest y la misma persistencia JSON.
+
+**P0 — Cross-platform desde el día 1 (Windows + Linux + macOS):**
+- [ ] Tauri ya compila cross-platform — aprovecharlo desde el inicio
+- [ ] Adaptación de rutas y permisos por SO (el código Rust ya tiene lógica para Windows y Linux)
+- [ ] CI/CD con GitHub Actions: build y test en Windows, Ubuntu y macOS en cada PR
+- [ ] Documentar diferencias por SO: rutas de datos, terminales disponibles, binarios detectados
+- [ ] Probar la CLI en los tres SO (es más crítico que la GUI al inicio)
+
+> **Por qué no esperar:** El 50%+ de los developers objetivo usan Linux o macOS. Retrasar cross-platform es retrasar la adopción. Además, Tauri + Rust hacen que el coste de mantener 3 plataformas sea bajo desde el inicio. El verdadero coste de "agregar Linux después" es acumular decisiones Windows-only que luego cuestan mucho revertir.
+
 **P1 — Crear proyectos reales (integrar motor de StackPilot):**
-- [ ] Conectar flujo "crear proyecto" del dashboard con ScaffoldOrchestrator
-- [ ] 8-10 templates sólidos y probados (no 20 a medias): Node+Express, React+Vite, Next.js fullstack, Python+FastAPI, SaaS Starter, API REST, Desktop Tauri, Monorepo base
+- [ ] Conectar flujo "crear proyecto" del dashboard y CLI con ScaffoldOrchestrator
+- [ ] 3-5 templates sólidos, probados y que compilen: Node+Express, React+Vite, Python+FastAPI, Next.js fullstack, Desktop Tauri
 - [ ] Cada template genera: estructura, deps, scripts, docker-compose (si necesita servicios), .env.example, README, Makefile/scripts básicos
-- [ ] Integrar TechInstaller como motor interno de recipes
-- [ ] Perfiles de madurez aplicados al scaffold: rapid (mínimo), standard (linter+tests+docker), production (CI+health+logging+CORS)
+- [ ] Tests automatizados de generación: cada template se genera y arranca sin errores
+- [ ] `delixon create` desde CLI con selección interactiva de stack
 
 **P1 — Diagnosticar (lo que hace que Delixon sea útil el día 1):**
 - [ ] `doctor` del sistema: verificar runtimes, Docker, Git, VSCode, permisos, PATH, versiones mínimas
 - [ ] Health checks por proyecto: deps instaladas, DB accesible, puertos libres, env vars presentes, servicios Docker en marcha
-- [ ] Dashboard que muestre estado REAL (🟢 OK / 🟡 warning / 🔴 error) — no solo lista de proyectos
-
-**Entregable:** MVP donde puedas CREAR proyectos completos con stack validado, IMPORTAR proyectos existentes, y ver el ESTADO REAL de cada uno. El manifiesto existe y todo lee/escribe sobre él.
-
-### MEDIANO PLAZO (3-6 meses) — "Que sea útil de verdad"
-
-> **Capa B completa + inicio de Capa C (confianza y evolución)**
->
-> Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Delixon me dice qué falla".
+- [ ] Dashboard que muestre estado REAL (verde OK / amarillo warning / rojo error) — no solo lista de proyectos
+- [ ] `delixon health <proyecto>` desde CLI
 
 **P1 — Scan de proyectos existentes (duplica el público objetivo):**
 - [ ] `delixon scan ./mi-proyecto` → detectar: lenguaje, framework, package manager, ORM, DB, scripts, env vars, servicios, puertos, Docker, estructura frontend/backend
 - [ ] Generar manifest desde scan → registrar proyecto → gestionar con Delixon
 - [ ] Score de production-readiness con recomendaciones actionables
-- [ ] Sugerir recipes para mejorar el score
+
+**Entregable:** MVP donde puedas CREAR proyectos completos desde GUI o CLI, IMPORTAR proyectos existentes con scan, ver el ESTADO REAL de cada uno, y todo funciona en Windows, Linux y macOS. El manifiesto existe y todo lee/escribe sobre él.
+
+### MEDIANO PLAZO (3-6 meses) — "Que sea útil de verdad"
+
+> **Operación diaria completa + evolución de proyectos**
+>
+> Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Delixon me dice qué falla".
 
 **P1 — Recipes (lo que hace que Delixon sirva después del día 1):**
 - [ ] Sistema de recipes con TechInstaller como motor: `delixon add auth`, `delixon add database`, `delixon add docker`, `delixon add testing`
 - [ ] Preview de cambios antes de aplicar (qué archivos se crean/modifican)
-- [ ] Recipes disponibles: Auth, Base de datos, Pagos, Email, Testing, CI/CD, Docker services, Admin panel, Observabilidad
+- [ ] 2-4 recipes impecables primero: Auth, Base de datos, Testing, Docker services
+- [ ] Más recipes después: Pagos, Email, CI/CD, Admin panel, Observabilidad
 
 **P2 — Versionado de stacks (reduce el miedo):**
 - [ ] Save del estado del stack antes de cambios
@@ -912,13 +940,14 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [ ] Gestión de runtimes: instalar/cambiar versiones desde la app
 - [ ] Notificaciones de dependencias desactualizadas o vulnerables
 
-**P2 — CLI básico (para power users):**
-- [ ] 5-8 comandos: `delixon open`, `delixon create`, `delixon scan`, `delixon add`, `delixon doctor`, `delixon ps`, `delixon run`
-- [ ] GUI sigue siendo la experiencia principal; CLI es complemento
+**P2 — CLI avanzado:**
+- [ ] Completar a 8-10 comandos: `delixon add`, `delixon ps`, `delixon run`, `delixon logs`, `delixon env`
+- [ ] Autocompletado para bash/zsh/fish
+- [ ] Output formateado (colores, tablas, spinners)
 
 ### LARGO PLAZO (6-12 meses) — "Que sea indispensable"
 
-> **Capa C completa + equipos + cross-platform**
+> **Equipos + madurez del producto**
 >
 > Lo que monetiza: equipos pagan, individuos no.
 
@@ -928,17 +957,13 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [ ] Secrets vault encriptado (AES-256) para compartir credenciales
 - [ ] Project notes / contexto rápido (retomar proyectos olvidados en 10 segundos)
 
-**P3 — Cross-platform:**
-- [ ] Soporte completo en Ubuntu/Debian y macOS
-- [ ] Adaptación de rutas, permisos y comportamientos por SO
-- [ ] CI/CD para builds en los tres sistemas operativos
-
 **P3 — Madurez:**
 - [ ] Perfiles de madurez completos que cambien archivos, deps, estructura y validaciones reales
 - [ ] Generación orientada por tipo de producto ("¿Qué vas a construir?" → stack recomendado)
 - [ ] Soporte multi-editor: Cursor, WebStorm, Neovim, Zed
 - [ ] Control de versiones de plantillas y configuraciones
-- [ ] Editor visual de plantillas
+- [ ] 8-10 templates sólidos (expandir desde los 3-5 iniciales)
+- [ ] Catálogo completo de 25-30 tecnologías probadas
 
 ### VISIÓN FUTURA — "El sueño" (12+ meses, no comprometido)
 
@@ -956,15 +981,17 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [ ] Integración con herramientas de monitoreo (Grafana, Prometheus)
 - [ ] Exportación automática de decisiones técnicas
 - [ ] DevContainers export (para equipos que lo requieran)
+- [ ] Editor visual de plantillas
 
 ### Tabla resumen de prioridades
 
 | Prioridad | Qué | Por qué | Cuándo |
 |---|---|---|---|
-| **P0** | Manifest + catálogo + reglas + workspace completo | Sin base declarativa todo es frágil | Corto (1-3m) |
-| **P1** | Templates + scaffold + recipes + scan + health + doctor | Lo que atrae Y retiene usuarios | Corto→Mediano |
-| **P2** | Versionado + Docker mgmt + terminal + CLI + Git context | Lo que genera confianza y poder | Mediano (3-6m) |
-| **P3** | Equipos + cross-platform + perfiles madurez + multi-editor | Lo que monetiza | Largo (6-12m) |
+| **P0** | Manifest + workspace + CLI + cross-platform | La base: sin esto no hay producto serio | Corto (1-3m) |
+| **P1** | Templates (3-5) + scaffold + scan + health + doctor | Lo que atrae Y retiene usuarios | Corto (1-3m) |
+| **P1** | Recipes (2-4 impecables) | Lo que hace útil después del día 1 | Corto→Mediano |
+| **P2** | Versionado + Docker mgmt + terminal + CLI avanzado + Git | Lo que genera confianza y poder | Mediano (3-6m) |
+| **P3** | Equipos + perfiles madurez + multi-editor + más templates | Lo que monetiza | Largo (6-12m) |
 | **P4** | IA + agentes + marketplace + plugins + catálogos corp | Lo que diferencia a largo plazo | Futuro (12+m) |
 
 ---
@@ -1536,34 +1563,39 @@ La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de 
 
 | Paquete | Versión | Tipo | Notas |
 |---|---|---|---|
-| **react** | 18.3.1 | dependencies | Última estable de React 18 (React 19 requiere migración) |
-| **react-dom** | 18.3.1 | dependencies | Sigue la versión de React |
-| **react-router-dom** | 6.30.3 | dependencies | Última estable de v6 (v7 requiere migración) |
+| **react** | 19.2.4 | dependencies | React 19 (migrado desde 18) |
+| **react-dom** | 19.2.4 | dependencies | Sigue la versión de React |
+| **react-router-dom** | 7.13.2 | dependencies | Router v7 (migrado desde v6) |
 | **@tanstack/react-query** | 5.95.2 | dependencies | Manejo de datos asíncronos |
 | **@tauri-apps/api** | 2.10.1 | dependencies | API core de Tauri v2 |
 | **@tauri-apps/plugin-fs** | 2.4.5 | dependencies | Plugin de filesystem |
 | **@tauri-apps/plugin-process** | 2.3.1 | dependencies | Plugin de procesos |
 | **@tauri-apps/plugin-shell** | 2.3.5 | dependencies | Plugin de shell |
 | **clsx** | 2.1.1 | dependencies | Utilidad para clases CSS |
-| **tailwind-merge** | 2.6.1 | dependencies | Merge inteligente de clases Tailwind |
-| **zustand** | 4.5.7 | dependencies | Estado global (v5 requiere migración) |
+| **tailwind-merge** | 3.5.0 | dependencies | Merge inteligente de clases Tailwind (migrado desde v2) |
+| **zustand** | 5.0.12 | dependencies | Estado global (migrado desde v4, API `create<T>()()`) |
 | **@eslint/js** | 9.39.4 | devDependencies | Config base de ESLint |
+| **@tailwindcss/vite** | 4.2.2 | devDependencies | Plugin Vite para Tailwind 4 (reemplaza postcss plugin) |
 | **@tauri-apps/cli** | 2.10.1 | devDependencies | CLI de Tauri |
 | **@types/node** | 22.16.4 | devDependencies | Tipos de Node.js |
-| **@types/react** | 18.3.28 | devDependencies | Tipos de React 18 |
-| **@types/react-dom** | 18.3.7 | devDependencies | Tipos de React DOM 18 |
+| **@types/react** | 19.2.14 | devDependencies | Tipos de React 19 |
+| **@types/react-dom** | 19.2.3 | devDependencies | Tipos de React DOM 19 |
 | **@typescript-eslint/eslint-plugin** | 8.57.2 | devDependencies | Reglas ESLint para TS |
 | **@typescript-eslint/parser** | 8.57.2 | devDependencies | Parser ESLint para TS |
 | **@vitejs/plugin-react** | 4.7.0 | devDependencies | Plugin React para Vite |
-| **autoprefixer** | 10.4.27 | devDependencies | Autoprefixer CSS |
-| **eslint** | 9.39.4 | devDependencies | Linter (v10 requiere migración) |
+| **eslint** | 9.39.4 | devDependencies | Linter |
 | **eslint-plugin-react-hooks** | 5.2.0 | devDependencies | Reglas de hooks |
-| **postcss** | 8.5.8 | devDependencies | Procesador CSS |
 | **prettier** | 3.8.1 | devDependencies | Formateador de código |
-| **tailwindcss** | 3.4.19 | devDependencies | Última estable de v3 (v4 requiere migración) |
-| **typescript** | 5.9.3 | devDependencies | Última estable de TS 5 (v6 requiere migración) |
-| **vite** | 6.4.1 | devDependencies | Bundler (v8 requiere migración) |
-| **vitest** | 3.2.4 | devDependencies | Testing (v4 requiere migración) |
+| **tailwindcss** | 4.2.2 | devDependencies | Tailwind CSS v4 (migrado desde v3, config en CSS) |
+| **typescript** | 5.9.3 | devDependencies | TypeScript |
+| **vite** | 6.4.1 | devDependencies | Bundler |
+| **vitest** | 3.2.4 | devDependencies | Testing |
+
+**Eliminados en la migración a Tailwind 4:**
+- `autoprefixer` — integrado en Tailwind 4
+- `postcss` — reemplazado por `@tailwindcss/vite` plugin
+- `tailwind.config.ts` — configuración movida a `@theme {}` en `index.css`
+- `postcss.config.js` — no necesario con el plugin de Vite
 
 ### Backend (Cargo — Cargo.toml)
 
@@ -1577,25 +1609,24 @@ La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de 
 | **serde** | 1.0.228 | Serialización/deserialización |
 | **serde_json** | 1.0.149 | JSON |
 | **tokio** | 1.50.0 | Runtime asíncrono |
-| **which** | 6.0.3 | Detección de binarios (v8 requiere migración) |
-| **dirs** | 5.0.1 | Rutas del sistema (v6 requiere migración) |
-| **thiserror** | 1.0.69 | Manejo de errores (v2 requiere migración) |
+| **which** | 8.0.2 | Detección de binarios (migrado desde v6) |
+| **dirs** | 6.0.0 | Rutas del sistema (migrado desde v5) |
+| **thiserror** | 2.0.18 | Manejo de errores (migrado desde v1) |
 | **uuid** | 1.22.0 | Generación de UUIDs |
 | **chrono** | 0.4.44 | Fechas y tiempos |
 
-### Migraciones mayores pendientes (futuro)
+### Migraciones mayores completadas (2026-03-25)
 
-Estas actualizaciones requieren trabajo de migración dedicado y no deben hacerse junto con features:
-
-| Paquete | Actual | Objetivo | Impacto |
+| Paquete | Anterior | Actual | Cambios realizados |
 |---|---|---|---|
-| React | 18.x | 19.x | Breaking changes en APIs, tipos nuevos |
-| react-router-dom | 6.x | 7.x | API de rutas completamente diferente |
-| TailwindCSS | 3.x | 4.x | Config basada en CSS, sin tailwind.config |
-| Vite | 6.x | 8.x | Cambios en configuración y plugins |
-| TypeScript | 5.x | 6.x | Nuevas reglas de tipos |
-| Zustand | 4.x | 5.x | Cambios en API de create |
-| ESLint | 9.x | 10.x | Cambios en sistema de config |
+| React | 18.3.1 | 19.2.4 | Imports simplificados, tipos actualizados |
+| react-router-dom | 6.30.3 | 7.13.2 | Eliminados future flags (ahora son default) |
+| TailwindCSS | 3.4.19 | 4.2.2 | Config movida a `@theme {}` en CSS, plugin Vite |
+| Zustand | 4.5.7 | 5.0.12 | API `create<T>()()` con doble invocación |
+| tailwind-merge | 2.6.1 | 3.5.0 | API compatible, internos actualizados |
+| which (Rust) | 6.0.3 | 8.0.2 | API compatible |
+| dirs (Rust) | 5.0.1 | 6.0.0 | API compatible |
+| thiserror (Rust) | 1.0.69 | 2.0.18 | API compatible |
 
 ---
 
@@ -1689,12 +1720,15 @@ Estas actualizaciones requieren trabajo de migración dedicado y no deben hacers
 - [ ] Soporte multi-editor (Cursor, WebStorm, Neovim, Zed)
 
 ### Mantenimiento — Completado
-- [x] Actualización de todas las dependencias npm a última versión estable (2026-03-25)
-- [x] Actualización de todas las dependencias Rust/Cargo a última versión estable (2026-03-25)
+- [x] Migración completa a React 19 (2026-03-25)
+- [x] Migración completa a React Router 7 (2026-03-25)
+- [x] Migración completa a Tailwind CSS 4 con `@tailwindcss/vite` plugin (2026-03-25)
+- [x] Migración completa a Zustand 5 con API `create<T>()()` (2026-03-25)
+- [x] Migración de dependencias Rust: which 8, dirs 6, thiserror 2 (2026-03-25)
+- [x] Eliminados `tailwind.config.ts`, `postcss.config.js`, `autoprefixer` (obsoletos en TW4)
 - [x] Versiones exactas fijadas (sin `^`) para evitar actualizaciones involuntarias
 - [x] 0 vulnerabilidades en `npm audit`
 - [x] Mock system para desarrollo en navegador (safeInvoke + datos mock)
-- [x] Future flags de React Router v7 activadas (sin warnings en consola)
 
 ---
 

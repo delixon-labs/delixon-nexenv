@@ -1,6 +1,6 @@
 [package]
 name = "delixon"
-version = "0.1.0"
+version = "1.0.0"
 description = "Gestor de workspaces para desarrolladores"
 authors = ["dRaydel"]
 license = "MIT"
@@ -23,9 +23,9 @@ tauri-plugin-process = "=2.3.1"
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.149"
 tokio = { version = "=1.50.0", features = ["full"] }
-which = "=6.0.3"
-dirs = "=5.0.1"
-thiserror = "=1.0.69"
+which = "=8.0.2"
+dirs = "=6.0.0"
+thiserror = "=2.0.18"
 uuid = { version = "=1.22.0", features = ["v4"] }
 chrono = { version = "=0.4.44", features = ["serde"] }
 

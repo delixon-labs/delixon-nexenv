@@ -8,7 +8,7 @@ export interface DelixonConfig {
 }
 
 export const DEFAULT_CONFIG: DelixonConfig = {
-  version: "0.1.0",
+  version: "1.0.0",
   dataDir: "",
   defaultEditor: "code",
   theme: "dark",

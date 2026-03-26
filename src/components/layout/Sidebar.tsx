@@ -103,7 +103,7 @@ export default function Sidebar() {
       {/* Footer */}
       {!sidebarCollapsed && (
         <div className="px-4 py-3 border-t border-gray-800">
-          <p className="text-xs text-gray-600">Delixon v0.1.0</p>
+          <p className="text-xs text-gray-600">Delixon v1.0.0</p>
         </div>
       )}
     </aside>

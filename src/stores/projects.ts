@@ -15,7 +15,7 @@ interface ProjectsState {
   setSearchQuery: (query: string) => void;
 }
 
-export const useProjectsStore = create<ProjectsState>((set, get) => ({
+export const useProjectsStore = create<ProjectsState>()((set, get) => ({
   projects: [],
   isLoading: false,
   error: null,

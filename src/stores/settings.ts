@@ -10,7 +10,7 @@ interface SettingsState {
   toggleSidebar: () => void;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>()((set) => ({
   config: DEFAULT_CONFIG,
   sidebarCollapsed: false,
 
