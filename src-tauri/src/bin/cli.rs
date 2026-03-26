@@ -1,6 +1,9 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use delixon_lib::core::{catalog, config, detection, doctor, health, manifest, portable, ports, rules, storage, templates};
+use delixon_lib::core::{
+    catalog, config, detection, docker, doctor, git, health, manifest, notes,
+    portable, ports, recipes, rules, scaffold, scripts, snapshots, storage, templates, versioning,
+};
 
 #[derive(Parser)]
 #[command(name = "delixon", version = "1.0.0", about = "Workspace manager for developers")]
@@ -93,6 +96,139 @@ enum Commands {
 
     /// Muestra puertos en uso por proyectos
     Ports,
+
+    /// Genera un proyecto desde scaffold
+    New {
+        /// Nombre del proyecto
+        name: String,
+        /// Ruta donde crear
+        #[arg(long)]
+        path: String,
+        /// Tipo de proyecto (api/frontend/fullstack/cli/desktop)
+        #[arg(long, default_value = "api")]
+        r#type: String,
+        /// Perfil (rapid/standard/production)
+        #[arg(long, default_value = "standard")]
+        profile: String,
+        /// Tecnologias (separadas por coma)
+        #[arg(long, value_delimiter = ',')]
+        techs: Vec<String>,
+    },
+
+    /// Aplica una recipe a un proyecto
+    Add {
+        /// ID de recipe (testing-vitest, docker, ci-github, etc.)
+        recipe: String,
+        /// Nombre del proyecto
+        #[arg(long)]
+        project: Option<String>,
+        /// Solo preview, no aplicar
+        #[arg(long)]
+        preview: bool,
+    },
+
+    /// Lista recipes disponibles
+    Recipes,
+
+    /// Muestra estado Git del proyecto
+    Status {
+        /// Nombre del proyecto
+        project: String,
+    },
+
+    /// Docker Compose management
+    #[command(subcommand)]
+    Docker(DockerAction),
+
+    /// Ejecuta un script del manifest
+    Run {
+        /// Nombre del script
+        script: String,
+        /// Nombre del proyecto
+        #[arg(long)]
+        project: Option<String>,
+    },
+
+    /// Guarda/lista/restaura snapshots del manifest
+    #[command(subcommand)]
+    Snapshot(SnapshotAction),
+
+    /// Muestra cambios de entorno desde ultimo snapshot
+    Diff {
+        /// Nombre del proyecto
+        project: String,
+    },
+
+    /// Gestiona notas de proyecto
+    Note {
+        /// Nombre del proyecto
+        project: String,
+        /// Texto de la nota (si se omite, lista notas existentes)
+        text: Option<String>,
+    },
+
+    /// Lista procesos en puertos del proyecto
+    Ps {
+        /// Nombre del proyecto (opcional)
+        project: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum DockerAction {
+    /// Inicia servicios
+    Up {
+        /// Nombre del proyecto
+        project: String,
+    },
+    /// Detiene servicios
+    Down {
+        /// Nombre del proyecto
+        project: String,
+    },
+    /// Muestra estado de servicios
+    Status {
+        /// Nombre del proyecto
+        project: String,
+    },
+    /// Muestra logs
+    Logs {
+        /// Nombre del proyecto
+        project: String,
+        /// Lineas a mostrar
+        #[arg(long, default_value = "50")]
+        lines: u32,
+    },
+}
+
+#[derive(Subcommand)]
+enum SnapshotAction {
+    /// Guarda snapshot actual
+    Save {
+        /// Nombre del proyecto
+        project: String,
+    },
+    /// Lista snapshots
+    List {
+        /// Nombre del proyecto
+        project: String,
+    },
+    /// Compara dos versiones
+    Diff {
+        /// Nombre del proyecto
+        project: String,
+        /// Version origen
+        v1: u32,
+        /// Version destino
+        v2: u32,
+    },
+    /// Restaura manifest a version anterior
+    Rollback {
+        /// Nombre del proyecto
+        project: String,
+        /// Version a restaurar
+        version: u32,
+    },
 }
 
 #[derive(Subcommand)]
@@ -132,6 +268,16 @@ fn run_command(cmd: Commands) -> Result<(), String> {
         Commands::Validate { techs } => cmd_validate(&techs),
         Commands::Health { project } => cmd_health(&project),
         Commands::Ports => cmd_ports(),
+        Commands::New { name, path, r#type, profile, techs } => cmd_new(&name, &path, &r#type, &profile, &techs),
+        Commands::Add { recipe, project, preview } => cmd_add(&recipe, project.as_deref(), preview),
+        Commands::Recipes => cmd_recipes(),
+        Commands::Status { project } => cmd_status(&project),
+        Commands::Docker(action) => cmd_docker(action),
+        Commands::Run { script, project } => cmd_run(&script, project.as_deref()),
+        Commands::Snapshot(action) => cmd_snapshot(action),
+        Commands::Diff { project } => cmd_diff(&project),
+        Commands::Note { project, text } => cmd_note(&project, text.as_deref()),
+        Commands::Ps { project } => cmd_ps(project.as_deref()),
     }
 }
 
@@ -284,6 +430,66 @@ fn cmd_scan(path: &str) -> Result<(), String> {
     if !stack.tags.is_empty() {
         println!("\n{}", "Tags:".bold());
         println!("  {}", stack.tags.join(", ").cyan());
+    }
+
+    // Extended detection info
+    if let Some(ref pm) = stack.package_manager {
+        println!("\n{} {}", "Package manager:".bold(), pm.green());
+    }
+    if let Some(ref orm) = stack.orm {
+        println!("{} {}", "ORM:".bold(), orm.green());
+    }
+    if let Some(ref auth) = stack.auth {
+        println!("{} {}", "Auth:".bold(), auth.green());
+    }
+    if let Some(ref ci) = stack.ci {
+        println!("{} {}", "CI/CD:".bold(), ci.green());
+    }
+    if let Some(ref testing) = stack.testing {
+        println!("{} {}", "Testing:".bold(), testing.green());
+    }
+    if let Some(ref linter) = stack.linter {
+        println!("{} {}", "Linter:".bold(), linter.green());
+    }
+    if let Some(ref docker) = stack.docker {
+        let parts: Vec<&str> = [
+            if docker.has_dockerfile { Some("Dockerfile") } else { None },
+            if docker.has_compose { Some("Compose") } else { None },
+        ]
+        .iter()
+        .filter_map(|x| *x)
+        .collect();
+        println!("{} {}", "Docker:".bold(), parts.join(" + ").green());
+    }
+    if stack.is_fullstack {
+        println!("{} {}", "Estructura:".bold(), "fullstack".cyan());
+    }
+
+    // Readiness Score
+    let score = &stack.readiness_score;
+    let score_color = if score.total >= 8 {
+        format!("{}/{}",score.total, score.max).green().bold()
+    } else if score.total >= 5 {
+        format!("{}/{}", score.total, score.max).yellow().bold()
+    } else {
+        format!("{}/{}", score.total, score.max).red().bold()
+    };
+    println!("\n{} {}", "Readiness Score:".bold(), score_color);
+
+    for item in &score.breakdown {
+        let icon = if item.present { "ok".green() } else { "--".dimmed() };
+        println!(
+            "  {} {:<15} {}/{}",
+            icon, item.name, item.points, item.max_points
+        );
+    }
+
+    if !score.suggestions.is_empty() {
+        println!(
+            "\n{} {}",
+            "Recipes sugeridas:".dimmed(),
+            score.suggestions.join(", ").yellow()
+        );
     }
 
     Ok(())
@@ -533,6 +739,375 @@ fn cmd_validate(techs: &[String]) -> Result<(), String> {
         );
     }
 
+    Ok(())
+}
+
+fn find_project(name: &str) -> Result<delixon_lib::core::models::project::Project, String> {
+    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let lower = name.to_lowercase();
+    projects
+        .into_iter()
+        .find(|p| p.name.to_lowercase().contains(&lower))
+        .ok_or_else(|| format!("No se encontro proyecto '{}'", name))
+}
+
+fn cmd_new(name: &str, path: &str, project_type: &str, profile: &str, techs: &[String]) -> Result<(), String> {
+    println!(
+        "{} proyecto '{}' tipo={} perfil={}",
+        "Generando".green().bold(),
+        name.bold(),
+        project_type.cyan(),
+        profile
+    );
+
+    let config = scaffold::ScaffoldConfig {
+        name: name.to_string(),
+        project_type: project_type.to_string(),
+        profile: profile.to_string(),
+        technologies: techs.to_vec(),
+        path: path.to_string(),
+    };
+
+    let result = scaffold::generate_project(&config).map_err(|e| e.to_string())?;
+
+    println!("\n{}", "Archivos creados:".bold());
+    for f in &result.files_created {
+        println!("  {} {}", "+".green(), f);
+    }
+
+    if !result.validation.issues.is_empty() {
+        println!("\n{}", "Validacion:".bold());
+        for issue in &result.validation.issues {
+            let prefix = match issue.level {
+                rules::IssueLevel::Error => "ERR".red().bold(),
+                rules::IssueLevel::Warning => "!!".yellow().bold(),
+                rules::IssueLevel::Info => ">>".cyan(),
+            };
+            println!("  {} {}", prefix, issue.message);
+        }
+    }
+
+    // Register the project
+    let now = chrono::Utc::now().to_rfc3339();
+    let project = delixon_lib::core::models::project::Project {
+        id: uuid::Uuid::new_v4().to_string(),
+        name: name.to_string(),
+        path: path.to_string(),
+        description: None,
+        runtimes: vec![],
+        status: delixon_lib::core::models::project::ProjectStatus::Active,
+        created_at: now.clone(),
+        last_opened_at: Some(now),
+        template_id: None,
+        tags: techs.to_vec(),
+    };
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    projects.push(project);
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+
+    println!("\n{} Proyecto generado y registrado en {}", "ok".green().bold(), path);
+    Ok(())
+}
+
+fn cmd_add(recipe_id: &str, project_name: Option<&str>, preview_only: bool) -> Result<(), String> {
+    if preview_only {
+        let project_path = if let Some(name) = project_name {
+            find_project(name)?.path
+        } else {
+            ".".to_string()
+        };
+
+        let preview = recipes::preview_recipe(&project_path, recipe_id).map_err(|e| e.to_string())?;
+        println!("{} {}", "Recipe:".bold(), preview.recipe.name);
+        println!("{}", preview.recipe.description.dimmed());
+        println!("\n{}", "Archivos:".bold());
+        for f in &preview.recipe.files_to_create {
+            let exists = preview.files_that_exist.contains(&f.path);
+            let icon = if exists { "EXISTS".yellow() } else { "+".green() };
+            println!("  {} {}", icon, f.path);
+        }
+        return Ok(());
+    }
+
+    let project_path = if let Some(name) = project_name {
+        find_project(name)?.path
+    } else {
+        ".".to_string()
+    };
+
+    println!(
+        "{} recipe '{}'...",
+        "Aplicando".green().bold(),
+        recipe_id
+    );
+
+    let result = recipes::apply_recipe(&project_path, recipe_id).map_err(|e| e.to_string())?;
+
+    for f in &result.files_created {
+        println!("  {} {}", "+".green(), f);
+    }
+    for f in &result.files_skipped {
+        println!("  {} {} (ya existe)", "~".yellow(), f);
+    }
+    if !result.env_vars_added.is_empty() {
+        println!("  {} .env.example: {}", "+".green(), result.env_vars_added.join(", "));
+    }
+
+    println!("{} Recipe aplicada", "ok".green().bold());
+    Ok(())
+}
+
+fn cmd_recipes() -> Result<(), String> {
+    let recipes = recipes::list_recipes();
+    println!("{} ({} disponibles)", "Recipes Delixon".bold(), recipes.len());
+    println!("{}", "=".repeat(50));
+    for r in &recipes {
+        println!("  {:<20} {} [{}]", r.id.green(), r.description, r.category.dimmed());
+    }
+    Ok(())
+}
+
+fn cmd_status(project_name: &str) -> Result<(), String> {
+    let project = find_project(project_name)?;
+
+    println!("{} {}", "Proyecto:".bold(), project.name);
+    println!("{}", "-".repeat(40));
+
+    // Git status
+    match git::git_status(&project.path) {
+        Ok(gs) => {
+            let branch_info = if gs.has_remote {
+                if gs.ahead > 0 || gs.behind > 0 {
+                    format!("{} (+{} -{}) ", gs.branch, gs.ahead, gs.behind)
+                } else {
+                    format!("{} (up to date) ", gs.branch)
+                }
+            } else {
+                format!("{} (sin remote) ", gs.branch)
+            };
+            println!("  {} {}", "Git:".bold(), branch_info);
+
+            if gs.is_clean {
+                println!("  {} Working tree limpio", "ok".green());
+            } else {
+                println!("  {} {} modificados, {} sin trackear", "!!".yellow(), gs.modified_files, gs.untracked_files);
+            }
+
+            if let Some(commit) = &gs.last_commit {
+                println!("  {} {} {}", "Ultimo:".dimmed(), commit.hash[..7].to_string().cyan(), commit.message);
+            }
+        }
+        Err(_) => {
+            println!("  {} No es un repositorio Git", "!!".yellow());
+        }
+    }
+
+    // Health summary
+    let report = health::check_project_health(&project).map_err(|e| e.to_string())?;
+    let icon = match report.overall {
+        health::HealthStatus::Ok => "ok".green().bold(),
+        health::HealthStatus::Warning => "!!".yellow().bold(),
+        health::HealthStatus::Error => "ERR".red().bold(),
+    };
+    let ok_count = report.checks.iter().filter(|c| c.status == health::HealthStatus::Ok).count();
+    println!("\n  {} Health: {}/{} checks ok", icon, ok_count, report.checks.len());
+
+    Ok(())
+}
+
+fn cmd_docker(action: DockerAction) -> Result<(), String> {
+    match action {
+        DockerAction::Up { project } => {
+            let p = find_project(&project)?;
+            println!("{} servicios de {}...", "Iniciando".green().bold(), p.name);
+            let output = docker::compose_up(&p.path).map_err(|e| e.to_string())?;
+            println!("{}", output);
+            println!("{} Servicios iniciados", "ok".green().bold());
+            Ok(())
+        }
+        DockerAction::Down { project } => {
+            let p = find_project(&project)?;
+            println!("{} servicios de {}...", "Deteniendo".yellow().bold(), p.name);
+            let output = docker::compose_down(&p.path).map_err(|e| e.to_string())?;
+            println!("{}", output);
+            println!("{} Servicios detenidos", "ok".green().bold());
+            Ok(())
+        }
+        DockerAction::Status { project } => {
+            let p = find_project(&project)?;
+            let status = docker::compose_status(&p.path).map_err(|e| e.to_string())?;
+            if !status.has_compose {
+                println!("{}", "No hay docker-compose en este proyecto".dimmed());
+                return Ok(());
+            }
+            println!("{} {}", "Docker Compose:".bold(), status.compose_file);
+            if status.services.is_empty() {
+                println!("  {}", "No hay servicios corriendo".dimmed());
+            } else {
+                for svc in &status.services {
+                    println!("  {} {} {}", svc.name.green(), svc.status, svc.ports.dimmed());
+                }
+            }
+            Ok(())
+        }
+        DockerAction::Logs { project, lines } => {
+            let p = find_project(&project)?;
+            let logs = docker::compose_logs(&p.path, lines).map_err(|e| e.to_string())?;
+            println!("{}", logs);
+            Ok(())
+        }
+    }
+}
+
+fn cmd_run(script: &str, project_name: Option<&str>) -> Result<(), String> {
+    let project_path = if let Some(name) = project_name {
+        find_project(name)?.path
+    } else {
+        ".".to_string()
+    };
+
+    let available = scripts::list_scripts(&project_path).map_err(|e| e.to_string())?;
+    if available.is_empty() {
+        println!("{}", "No hay scripts definidos en el manifest".dimmed());
+        return Ok(());
+    }
+
+    if script == "list" || script == "ls" {
+        println!("{}", "Scripts disponibles:".bold());
+        for (name, cmd) in &available {
+            println!("  {:<15} {}", name.green(), cmd);
+        }
+        return Ok(());
+    }
+
+    println!("{} {}...", "Ejecutando".cyan().bold(), script);
+    let result = scripts::run_script(&project_path, script).map_err(|e| e.to_string())?;
+    println!("{}", result.stdout);
+    if !result.stderr.is_empty() {
+        eprintln!("{}", result.stderr);
+    }
+    if result.exit_code != 0 {
+        println!("{} Exit code: {}", "!!".yellow(), result.exit_code);
+    }
+    Ok(())
+}
+
+fn cmd_snapshot(action: SnapshotAction) -> Result<(), String> {
+    match action {
+        SnapshotAction::Save { project } => {
+            let p = find_project(&project)?;
+            let snap = versioning::save_snapshot(&p.id, &p.path).map_err(|e| e.to_string())?;
+            println!("{} Snapshot v{} guardado", "ok".green().bold(), snap.version);
+            Ok(())
+        }
+        SnapshotAction::List { project } => {
+            let p = find_project(&project)?;
+            let list = versioning::list_snapshots(&p.id).map_err(|e| e.to_string())?;
+            if list.is_empty() {
+                println!("{}", "No hay snapshots".dimmed());
+                return Ok(());
+            }
+            println!("{}", "Snapshots:".bold());
+            for s in &list {
+                println!("  v{:<5} {}", s.version, s.timestamp.dimmed());
+            }
+            Ok(())
+        }
+        SnapshotAction::Diff { project, v1, v2 } => {
+            let p = find_project(&project)?;
+            let diff = versioning::diff_snapshots(&p.id, v1, v2).map_err(|e| e.to_string())?;
+            println!("{} v{} vs v{}", "Diff:".bold(), v1, v2);
+            for t in &diff.added_techs {
+                println!("  {} {}", "+".green(), t);
+            }
+            for t in &diff.removed_techs {
+                println!("  {} {}", "-".red(), t);
+            }
+            for r in &diff.added_recipes {
+                println!("  {} recipe: {}", "+".green(), r);
+            }
+            if diff.added_techs.is_empty() && diff.removed_techs.is_empty() && diff.added_recipes.is_empty() {
+                println!("  {}", "Sin cambios".dimmed());
+            }
+            Ok(())
+        }
+        SnapshotAction::Rollback { project, version } => {
+            let p = find_project(&project)?;
+            versioning::rollback_snapshot(&p.id, &p.path, version).map_err(|e| e.to_string())?;
+            println!("{} Manifest restaurado a v{}", "ok".green().bold(), version);
+            Ok(())
+        }
+    }
+}
+
+fn cmd_diff(project_name: &str) -> Result<(), String> {
+    let project = find_project(project_name)?;
+    match snapshots::diff_snapshot(&project.id, &project.path) {
+        Ok(Some(diff)) => {
+            if diff.changed_runtimes.is_empty() && !diff.deps_changed {
+                println!("{} Sin cambios desde ultimo snapshot", "ok".green());
+            } else {
+                if !diff.changed_runtimes.is_empty() {
+                    println!("{}", "Runtimes cambiados:".bold());
+                    for c in &diff.changed_runtimes {
+                        println!("  {} {} -> {}", c.name, c.old_version.red(), c.new_version.green());
+                    }
+                }
+                if diff.deps_changed {
+                    println!("{} Dependencias cambiaron desde ultimo snapshot", "!!".yellow());
+                }
+            }
+            Ok(())
+        }
+        Ok(None) => {
+            println!("{}", "No hay snapshot previo. Tomando uno ahora...".dimmed());
+            snapshots::take_snapshot(&project.id, &project.path).map_err(|e| e.to_string())?;
+            println!("{} Snapshot tomado", "ok".green().bold());
+            Ok(())
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn cmd_note(project_name: &str, text: Option<&str>) -> Result<(), String> {
+    let project = find_project(project_name)?;
+
+    match text {
+        Some(t) => {
+            let note = notes::add_note(&project.id, t).map_err(|e| e.to_string())?;
+            println!("{} Nota agregada ({})", "ok".green().bold(), note.id[..8].to_string().dimmed());
+            Ok(())
+        }
+        None => {
+            let project_notes = notes::get_notes(&project.id).map_err(|e| e.to_string())?;
+            if project_notes.is_empty() {
+                println!("{}", "No hay notas".dimmed());
+            } else {
+                println!("{} ({} notas)", project.name.bold(), project_notes.len());
+                for n in &project_notes {
+                    println!("  {} {} {}", n.id[..8].to_string().dimmed(), n.created_at[..10].to_string().dimmed(), n.text);
+                }
+            }
+            Ok(())
+        }
+    }
+}
+
+fn cmd_ps(project_name: Option<&str>) -> Result<(), String> {
+    if let Some(name) = project_name {
+        let project = find_project(name)?;
+        let procs = delixon_lib::core::processes::list_processes_on_ports(&project.path).map_err(|e| e.to_string())?;
+        if procs.is_empty() {
+            println!("{}", "No hay procesos en los puertos del proyecto".dimmed());
+        } else {
+            println!("{:<10} {:<20} {}", "PID".bold(), "NOMBRE".bold(), "PUERTO".bold());
+            for p in &procs {
+                println!("{:<10} {:<20} :{}", p.pid, p.name, p.port.unwrap_or(0));
+            }
+        }
+    } else {
+        println!("{}", "Especifica un proyecto: delixon ps <nombre>".dimmed());
+    }
     Ok(())
 }
 

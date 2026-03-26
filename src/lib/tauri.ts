@@ -142,7 +142,21 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     }
 
     case "detect_project_stack":
-      return Promise.resolve({ runtimes: [], tags: [] } as T);
+      return Promise.resolve({ runtimes: [], tags: [], packageManager: null, orm: null, auth: null, ci: null, testing: null, docker: null, linter: null, isFullstack: false, hasEnvExample: false, hasReadme: false, hasTypes: false, readinessScore: { total: 0, max: 10, breakdown: [], suggestions: [] } } as T);
+
+    case "scan_and_register": {
+      const regProject: Project = {
+        id: `mock-reg-${Date.now()}`,
+        name: (args?.name as string) || "registered",
+        path: (args?.path as string) || "/tmp/registered",
+        runtimes: [],
+        status: "active",
+        createdAt: new Date().toISOString(),
+        tags: [],
+      };
+      mockProjects.push(regProject);
+      return Promise.resolve(regProject as T);
+    }
 
     case "get_config":
       return Promise.resolve(DEFAULT_CONFIG as T);
@@ -261,13 +275,48 @@ export async function createFromTemplate(
 
 // --- Detection ---
 
+export interface ScoreItem {
+  name: string;
+  points: number;
+  maxPoints: number;
+  present: boolean;
+}
+
+export interface ReadinessScore {
+  total: number;
+  max: number;
+  breakdown: ScoreItem[];
+  suggestions: string[];
+}
+
+export interface DockerInfo {
+  hasDockerfile: boolean;
+  hasCompose: boolean;
+}
+
 export interface DetectedStack {
   runtimes: { runtime: string; version: string }[];
   tags: string[];
+  packageManager: string | null;
+  orm: string | null;
+  auth: string | null;
+  ci: string | null;
+  testing: string | null;
+  docker: DockerInfo | null;
+  linter: string | null;
+  isFullstack: boolean;
+  hasEnvExample: boolean;
+  hasReadme: boolean;
+  hasTypes: boolean;
+  readinessScore: ReadinessScore;
 }
 
 export async function detectProjectStack(path: string): Promise<DetectedStack> {
   return safeInvoke<DetectedStack>("detect_project_stack", { path });
+}
+
+export async function scanAndRegister(path: string, name: string): Promise<Project> {
+  return safeInvoke<Project>("scan_and_register", { path, name });
 }
 
 // --- Config ---
