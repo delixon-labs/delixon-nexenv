@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
 import type { Project } from "@/types/project";
@@ -19,12 +19,7 @@ export default function ProjectDetail() {
   const [envSaved, setEnvSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  useEffect(() => {
-    if (!id) return;
-    loadProject();
-  }, [id]);
-
-  async function loadProject() {
+  const loadProject = useCallback(async () => {
     if (!id) return;
     setIsLoading(true);
     try {
@@ -39,7 +34,12 @@ export default function ProjectDetail() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    loadProject();
+  }, [id, loadProject]);
 
   async function handleSaveEnvVars() {
     if (!id) return;
