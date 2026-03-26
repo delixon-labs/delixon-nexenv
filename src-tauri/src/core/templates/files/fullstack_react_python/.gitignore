@@ -1,0 +1,9 @@
+node_modules/
+dist/
+__pycache__/
+*.py[cod]
+venv/
+.env
+db.sqlite3
+*.log
+*.egg-info/

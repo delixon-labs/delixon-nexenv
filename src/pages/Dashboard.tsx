@@ -1,12 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useProjectsStore } from "@/stores/projects";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 import CreateProjectModal from "@/components/dashboard/CreateProjectModal";
+import ImportProjectModal from "@/components/dashboard/ImportProjectModal";
 
 export default function Dashboard() {
   const { projects, isLoading, error, searchQuery, fetchProjects, setSearchQuery } =
     useProjectsStore();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importFileContent, setImportFileContent] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportError(null);
+
+    try {
+      const json = await file.text();
+      setImportFileContent(json);
+    } catch (err) {
+      setImportError(String(err));
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   useEffect(() => {
     fetchProjects();
@@ -42,16 +61,40 @@ export default function Dashboard() {
               : `${projects.length} proyecto${projects.length !== 1 ? "s" : ""} registrado${projects.length !== 1 ? "s" : ""}`}
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Nuevo proyecto
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            Importar
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".delixon"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nuevo proyecto
+          </button>
+        </div>
       </div>
+
+      {importError && (
+        <div className="mb-4 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          Error importando: {importError}
+        </div>
+      )}
 
       {/* Search */}
       {projects.length > 0 && (
@@ -130,6 +173,16 @@ export default function Dashboard() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
       />
+
+      {/* Import modal */}
+      {importFileContent && (
+        <ImportProjectModal
+          isOpen={true}
+          onClose={() => setImportFileContent(null)}
+          fileContent={importFileContent}
+          onSuccess={() => fetchProjects()}
+        />
+      )}
     </div>
   );
 }

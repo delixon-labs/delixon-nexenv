@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Template } from "@/types/template";
+import UseTemplateModal from "@/components/templates/UseTemplateModal";
 
 const BUILT_IN_TEMPLATES: Template[] = [
   {
@@ -81,13 +83,15 @@ const RUNTIME_COLORS: Record<string, string> = {
 };
 
 export default function Templates() {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+
   return (
     <div className="p-6 lg:p-8 max-w-7xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Plantillas</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Plantillas oficiales con mejores practicas. Selecciona una al crear un
-          nuevo proyecto.
+          Plantillas oficiales con mejores practicas. Haz clic en "Usar" para
+          crear un nuevo proyecto.
         </p>
       </div>
 
@@ -129,20 +133,37 @@ export default function Templates() {
               )}
             </div>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1">
-              {template.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-1.5 py-0.5 rounded text-xs text-gray-600"
-                >
-                  #{tag}
-                </span>
-              ))}
+            {/* Tags + Button */}
+            <div className="flex items-center justify-between mt-auto">
+              <div className="flex flex-wrap gap-1">
+                {template.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-1.5 py-0.5 rounded text-xs text-gray-600"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => setSelectedTemplate(template)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-500/10 text-primary-500 hover:bg-primary-500/20 transition-colors"
+              >
+                Usar
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {selectedTemplate && (
+        <UseTemplateModal
+          isOpen={true}
+          onClose={() => setSelectedTemplate(null)}
+          templateId={selectedTemplate.id}
+          templateName={selectedTemplate.name}
+        />
+      )}
     </div>
   );
 }

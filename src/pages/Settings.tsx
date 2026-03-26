@@ -5,12 +5,15 @@ import type { DetectedRuntime } from "@/lib/tauri";
 
 export default function Settings() {
   const { config, setConfig } = useSettingsStore();
+  const loadConfig = useSettingsStore((s) => s.loadConfig);
+  const isLoaded = useSettingsStore((s) => s.isLoaded);
   const [runtimes, setRuntimes] = useState<DetectedRuntime[]>([]);
   const [loadingRuntimes, setLoadingRuntimes] = useState(false);
 
   useEffect(() => {
+    if (!isLoaded) loadConfig();
     loadRuntimes();
-  }, []);
+  }, [isLoaded, loadConfig]);
 
   async function loadRuntimes() {
     setLoadingRuntimes(true);

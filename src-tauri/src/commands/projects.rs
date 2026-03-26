@@ -1,17 +1,18 @@
-use crate::models::project::{CreateProjectInput, Project, RuntimeConfig};
-use crate::storage;
+use crate::core::config;
+use crate::core::models::project::{CreateProjectInput, Project, ProjectStatus, RuntimeConfig};
+use crate::core::storage;
 use tauri::command;
 
 /// Devuelve la lista de todos los proyectos registrados en Delixon
 #[command]
 pub async fn list_projects() -> Result<Vec<Project>, String> {
-    storage::load_projects()
+    storage::load_projects().map_err(|e| e.to_string())
 }
 
 /// Devuelve un proyecto por su ID
 #[command]
 pub async fn get_project(id: String) -> Result<Project, String> {
-    let projects = storage::load_projects()?;
+    let projects = storage::load_projects().map_err(|e| e.to_string())?;
     projects
         .into_iter()
         .find(|p| p.id == id)
@@ -21,7 +22,7 @@ pub async fn get_project(id: String) -> Result<Project, String> {
 /// Crea un nuevo proyecto a partir de los datos del input
 #[command]
 pub async fn create_project(input: CreateProjectInput) -> Result<Project, String> {
-    let mut projects = storage::load_projects()?;
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
 
     // Verificar que no exista un proyecto con el mismo path
     if projects.iter().any(|p| p.path == input.path) {
@@ -31,6 +32,19 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
         ));
     }
 
+    // Validar path: si no existe, crearlo; si existe pero no es directorio, error
+    let path = std::path::Path::new(&input.path);
+    if path.exists() && !path.is_dir() {
+        return Err(format!(
+            "La ruta existe pero no es un directorio: {}",
+            input.path
+        ));
+    }
+    if !path.exists() {
+        std::fs::create_dir_all(path)
+            .map_err(|e| format!("Error creando directorio del proyecto: {}", e))?;
+    }
+
     let now = chrono::Utc::now().to_rfc3339();
     let project = Project {
         id: uuid::Uuid::new_v4().to_string(),
@@ -38,7 +52,7 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
         path: input.path,
         description: input.description,
         runtimes: input.runtimes,
-        status: "active".to_string(),
+        status: ProjectStatus::Active,
         created_at: now.clone(),
         last_opened_at: Some(now),
         template_id: input.template_id,
@@ -46,7 +60,7 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
     };
 
     projects.push(project.clone());
-    storage::save_projects(&projects)?;
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
 
     Ok(project)
 }
@@ -54,7 +68,7 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
 /// Abre un proyecto en el editor configurado (por defecto VSCode)
 #[command]
 pub async fn open_project(id: String) -> Result<(), String> {
-    let mut projects = storage::load_projects()?;
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
 
     let project = projects
         .iter_mut()
@@ -73,12 +87,19 @@ pub async fn open_project(id: String) -> Result<(), String> {
 
     // Actualizar last_opened_at
     project.last_opened_at = Some(chrono::Utc::now().to_rfc3339());
-    project.status = "active".to_string();
-    storage::save_projects(&projects)?;
+    project.status = ProjectStatus::Active;
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
 
-    // Abrir en VSCode
-    let editor = "code";
-    std::process::Command::new(editor)
+    // Abrir en editor configurado (default: code, validado contra whitelist)
+    let editor = config::load_config()
+        .map(|c| c.default_editor)
+        .unwrap_or_else(|_| "code".to_string());
+
+    if !crate::commands::shell::ALLOWED_EDITORS.contains(&editor.as_str()) {
+        return Err(format!("Editor '{}' no esta en la lista de editores permitidos", editor));
+    }
+
+    std::process::Command::new(&editor)
         .arg(&project_path)
         .spawn()
         .map_err(|e| format!("Error abriendo {}: {}", editor, e))?;
@@ -93,10 +114,10 @@ pub async fn update_project(
     name: Option<String>,
     description: Option<String>,
     runtimes: Option<Vec<RuntimeConfig>>,
-    status: Option<String>,
+    status: Option<ProjectStatus>,
     tags: Option<Vec<String>>,
 ) -> Result<Project, String> {
-    let mut projects = storage::load_projects()?;
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
 
     let project = projects
         .iter_mut()
@@ -120,7 +141,7 @@ pub async fn update_project(
     }
 
     let updated = project.clone();
-    storage::save_projects(&projects)?;
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
 
     Ok(updated)
 }
@@ -128,7 +149,7 @@ pub async fn update_project(
 /// Elimina un proyecto del registro de Delixon (no borra los archivos del disco)
 #[command]
 pub async fn delete_project(id: String) -> Result<(), String> {
-    let mut projects = storage::load_projects()?;
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
     let original_len = projects.len();
 
     projects.retain(|p| p.id != id);
@@ -137,7 +158,7 @@ pub async fn delete_project(id: String) -> Result<(), String> {
         return Err(format!("Proyecto no encontrado: {}", id));
     }
 
-    storage::save_projects(&projects)?;
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
 
     // Limpiar env vars del proyecto eliminado
     let _ = storage::delete_env_vars(&id);

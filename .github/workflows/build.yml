@@ -10,11 +10,20 @@ concurrency:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Linux deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,7 +35,7 @@ jobs:
         id: npm-cache
         with:
           path: node_modules
-          key: npm-${{ hashFiles('package-lock.json') }}
+          key: npm-${{ matrix.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Node dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -53,4 +62,7 @@ jobs:
         run: cargo check --manifest-path src-tauri/Cargo.toml
 
       - name: Run Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        run: cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
+
+      - name: Check CLI builds independently
+        run: cargo check --manifest-path src-tauri/Cargo.toml --bin delixon-cli --no-default-features

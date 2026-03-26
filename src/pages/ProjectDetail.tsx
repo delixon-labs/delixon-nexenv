@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
-import type { Project } from "@/types/project";
+import type { Project, Runtime, RuntimeConfig } from "@/types/project";
 import { useProjectsStore } from "@/stores/projects";
+
+const AVAILABLE_RUNTIMES: { value: Runtime; label: string }[] = [
+  { value: "node", label: "Node.js" },
+  { value: "python", label: "Python" },
+  { value: "rust", label: "Rust" },
+  { value: "go", label: "Go" },
+  { value: "dotnet", label: ".NET" },
+  { value: "php", label: "PHP" },
+  { value: "ruby", label: "Ruby" },
+];
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +28,15 @@ export default function ProjectDetail() {
   const [envSaving, setEnvSaving] = useState(false);
   const [envSaved, setEnvSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [workspaceSaved, setWorkspaceSaved] = useState(false);
+
+  // Edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editRuntimes, setEditRuntimes] = useState<Runtime[]>([]);
+  const [editTags, setEditTags] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   const loadProject = useCallback(async () => {
     if (!id) return;
@@ -40,6 +59,49 @@ export default function ProjectDetail() {
     if (!id) return;
     loadProject();
   }, [id, loadProject]);
+
+  function startEditing() {
+    if (!project) return;
+    setEditName(project.name);
+    setEditDescription(project.description || "");
+    setEditRuntimes(project.runtimes.map((r) => r.runtime as Runtime));
+    setEditTags(project.tags.join(", "));
+    setIsEditing(true);
+  }
+
+  async function handleSaveEdit() {
+    if (!id || !project) return;
+    setEditSaving(true);
+    try {
+      const runtimes: RuntimeConfig[] = editRuntimes.map((rt) => ({
+        runtime: rt,
+        version: project.runtimes.find((r) => r.runtime === rt)?.version || "",
+      }));
+      const tags = editTags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const updated = await api.updateProject(id, {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+        runtimes,
+        tags,
+      });
+      setProject(updated);
+      setIsEditing(false);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
+  function toggleEditRuntime(rt: Runtime) {
+    setEditRuntimes((prev) =>
+      prev.includes(rt) ? prev.filter((r) => r !== rt) : [...prev, rt]
+    );
+  }
 
   async function handleSaveEnvVars() {
     if (!id) return;
@@ -87,6 +149,33 @@ export default function ProjectDetail() {
     if (!project) return;
     try {
       await api.openTerminal(project.id);
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
+  async function handleExport() {
+    if (!project) return;
+    try {
+      const json = await api.exportProject(project.id);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.name}.delixon`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
+  async function handleGenerateWorkspace() {
+    if (!project) return;
+    try {
+      await api.generateVscodeWorkspace(project.id);
+      setWorkspaceSaved(true);
+      setTimeout(() => setWorkspaceSaved(false), 2000);
     } catch (err) {
       setError(String(err));
     }
@@ -150,7 +239,7 @@ export default function ProjectDetail() {
           )}
           <p className="text-xs text-gray-600 font-mono mt-2">{project.path}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <button
             onClick={handleOpenInEditor}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
@@ -158,7 +247,7 @@ export default function ProjectDetail() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
-            Abrir en VSCode
+            Editor
           </button>
           <button
             onClick={handleOpenTerminal}
@@ -169,6 +258,29 @@ export default function ProjectDetail() {
             </svg>
             Terminal
           </button>
+          <button
+            onClick={handleGenerateWorkspace}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+            title="Generar .code-workspace"
+          >
+            {workspaceSaved ? "Generado" : "Workspace"}
+          </button>
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+            title="Exportar .delixon"
+          >
+            Exportar
+          </button>
+          <button
+            onClick={startEditing}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+            </svg>
+            Editar
+          </button>
         </div>
       </div>
 
@@ -176,6 +288,80 @@ export default function ProjectDetail() {
         <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
           {error}
         </div>
+      )}
+
+      {/* Edit Form */}
+      {isEditing && (
+        <section className="mb-8 rounded-xl bg-gray-900 border border-primary-500/30 p-6">
+          <h2 className="text-sm font-semibold text-primary-500 uppercase tracking-wider mb-4">
+            Editar proyecto
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Descripcion</label>
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm resize-none focus:outline-none focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Runtimes</label>
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_RUNTIMES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => toggleEditRuntime(value)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors ${
+                      editRuntimes.includes(value)
+                        ? "bg-primary-500/10 text-primary-500 border-primary-500/30"
+                        : "bg-gray-800 text-gray-500 border-gray-700 hover:text-gray-300"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Tags <span className="text-gray-600">(separados por coma)</span>
+              </label>
+              <input
+                type="text"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={editSaving}
+                className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+              >
+                {editSaving ? "Guardando..." : "Guardar cambios"}
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Info Cards */}
@@ -265,7 +451,6 @@ export default function ProjectDetail() {
         </div>
 
         <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
-          {/* Existing vars */}
           {Object.entries(envVars).length > 0 ? (
             <div className="divide-y divide-gray-800">
               {Object.entries(envVars).map(([key, value]) => (
@@ -296,7 +481,6 @@ export default function ProjectDetail() {
             </div>
           )}
 
-          {/* Add new */}
           <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-800 bg-gray-900/50">
             <input
               type="text"

@@ -1,5 +1,7 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
-import type { Project, CreateProjectInput, RuntimeConfig } from "@/types/project";
+import type { Project, CreateProjectInput, RuntimeConfig, ProjectStatus } from "@/types/project";
+import type { DelixonConfig } from "@/types/config";
+import { DEFAULT_CONFIG } from "@/types/config";
 
 // --- Mock data para desarrollo en navegador ---
 
@@ -118,6 +120,38 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
         { name: "Rust", version: "1.94.0", path: "C:/Users/user/.cargo/bin/rustc.exe" },
       ] as T);
 
+    case "create_from_template": {
+      const tplProject: Project = {
+        id: `mock-tpl-${Date.now()}`,
+        name: (args?.name as string) || "new-project",
+        path: (args?.path as string) || "/tmp/new-project",
+        description: `Creado desde plantilla: ${args?.templateId}`,
+        runtimes: [],
+        status: "active",
+        createdAt: new Date().toISOString(),
+        tags: [],
+      };
+      mockProjects.push(tplProject);
+      return Promise.resolve(tplProject as T);
+    }
+
+    case "detect_project_stack":
+      return Promise.resolve({ runtimes: [], tags: [] } as T);
+
+    case "get_config":
+      return Promise.resolve(DEFAULT_CONFIG as T);
+
+    case "set_config":
+      console.info("[mock] Config guardada (simulado)");
+      return Promise.resolve(undefined as T);
+
+    case "export_project":
+      return Promise.resolve('{"version":"1","exportedAt":"2026-01-01","project":{"name":"mock","runtimes":[],"tags":[],"envKeys":[]}}' as T);
+
+    case "import_project":
+      return Promise.resolve({ id: `mock-import-${Date.now()}`, name: "imported", path: "/tmp/imported", runtimes: [], status: "active", createdAt: new Date().toISOString(), tags: [] } as T);
+
+    case "generate_vscode_workspace":
     case "open_terminal":
     case "open_in_editor":
       console.info(`[mock] ${cmd} (simulado en navegador)`);
@@ -152,7 +186,7 @@ export async function updateProject(
     name?: string;
     description?: string;
     runtimes?: RuntimeConfig[];
-    status?: string;
+    status?: ProjectStatus;
     tags?: string[];
   }
 ): Promise<Project> {
@@ -183,6 +217,53 @@ export interface DetectedRuntime {
 
 export async function detectRuntimes(): Promise<DetectedRuntime[]> {
   return safeInvoke<DetectedRuntime[]>("detect_runtimes");
+}
+
+// --- Templates ---
+
+export async function createFromTemplate(
+  templateId: string,
+  path: string,
+  name: string
+): Promise<Project> {
+  return safeInvoke<Project>("create_from_template", { templateId, path, name });
+}
+
+// --- Detection ---
+
+export interface DetectedStack {
+  runtimes: { runtime: string; version: string }[];
+  tags: string[];
+}
+
+export async function detectProjectStack(path: string): Promise<DetectedStack> {
+  return safeInvoke<DetectedStack>("detect_project_stack", { path });
+}
+
+// --- Config ---
+
+export async function getConfig(): Promise<DelixonConfig> {
+  return safeInvoke<DelixonConfig>("get_config");
+}
+
+export async function setConfig(config: DelixonConfig): Promise<void> {
+  return safeInvoke<void>("set_config", { config });
+}
+
+// --- Portable (export/import) ---
+
+export async function exportProject(projectId: string): Promise<string> {
+  return safeInvoke<string>("export_project", { projectId });
+}
+
+export async function importProject(json: string, targetPath: string): Promise<Project> {
+  return safeInvoke<Project>("import_project", { json, targetPath });
+}
+
+// --- VSCode Workspace ---
+
+export async function generateVscodeWorkspace(projectId: string): Promise<void> {
+  return safeInvoke<void>("generate_vscode_workspace", { projectId });
 }
 
 // --- Shell / Editor ---

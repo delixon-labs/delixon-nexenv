@@ -1,4 +1,9 @@
+pub mod config;
+pub mod detection;
 pub mod environments;
+pub mod portable;
 pub mod projects;
 pub mod runtimes;
 pub mod shell;
+pub mod templates;
+pub mod vscode;

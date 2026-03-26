@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { CreateProjectInput, Runtime, RuntimeConfig } from "@/types/project";
 import { useProjectsStore } from "@/stores/projects";
+import * as api from "@/lib/tauri";
 
 const AVAILABLE_RUNTIMES: { value: Runtime; label: string }[] = [
   { value: "node", label: "Node.js" },
@@ -30,6 +31,28 @@ export default function CreateProjectModal({
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  const handlePathBlur = useCallback(async () => {
+    const trimmed = path.trim();
+    if (!trimmed) return;
+    setIsDetecting(true);
+    try {
+      const stack = await api.detectProjectStack(trimmed);
+      if (stack.runtimes.length > 0) {
+        setSelectedRuntimes(
+          stack.runtimes.map((r) => r.runtime as Runtime)
+        );
+      }
+      if (stack.tags.length > 0) {
+        setTags(stack.tags.join(", "));
+      }
+    } catch {
+      // No-op: path might not exist yet
+    } finally {
+      setIsDetecting(false);
+    }
+  }, [path]);
 
   if (!isOpen) return null;
 
@@ -153,9 +176,13 @@ export default function CreateProjectModal({
                 type="text"
                 value={path}
                 onChange={(e) => setPath(e.target.value)}
+                onBlur={handlePathBlur}
                 placeholder="/home/user/projects/mi-proyecto"
                 className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm font-mono"
               />
+              {isDetecting && (
+                <p className="text-xs text-primary-500 mt-1">Detectando stack...</p>
+              )}
             </div>
 
             {/* Descripcion */}
