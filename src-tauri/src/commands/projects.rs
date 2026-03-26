@@ -100,7 +100,7 @@ pub async fn open_project(id: String) -> Result<(), String> {
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
 
-    if !crate::commands::shell::ALLOWED_EDITORS.contains(&editor.as_str()) {
+    if !crate::core::utils::platform::ALLOWED_EDITORS.contains(&editor.as_str()) {
         return Err(format!("Editor '{}' no esta en la lista de editores permitidos", editor));
     }
 

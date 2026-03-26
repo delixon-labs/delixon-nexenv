@@ -67,7 +67,10 @@ pub fn generate_workspace(project: &Project) -> Result<String, DelixonError> {
 /// Genera y escribe el archivo .code-workspace en el directorio del proyecto
 pub fn write_workspace(project: &Project) -> Result<(), DelixonError> {
     let content = generate_workspace(project)?;
-    let workspace_name = project.name.replace(' ', "-").to_lowercase();
+    let workspace_name = project.name
+        .replace(' ', "-")
+        .replace(['/', '\\', '.', '~'], "_")
+        .to_lowercase();
     let file_path = Path::new(&project.path).join(format!("{}.code-workspace", workspace_name));
     std::fs::write(&file_path, content)?;
     Ok(())

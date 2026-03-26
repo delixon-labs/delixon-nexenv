@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
 import type { Technology } from "@/types/catalog";
 import type { ValidationResult, ScaffoldPreview } from "@/types/scaffold";
+import { CATEGORY_LABELS } from "@/lib/catalog";
 
 type Step = "info" | "stack" | "preview" | "result";
 
@@ -49,8 +50,8 @@ export default function Scaffold() {
         ]);
         setAllTechs(t);
         setCategories(c);
-      } catch {
-        // silently fail
+      } catch (err) {
+        setError(String(err));
       }
     }
     load();
@@ -107,16 +108,7 @@ export default function Scaffold() {
     }
   }
 
-  const categoryLabels: Record<string, string> = {
-    runtime: "Runtimes",
-    frontend: "Frontend",
-    backend: "Backend",
-    database: "Bases de datos",
-    orm: "ORMs",
-    auth: "Autenticacion",
-    styling: "Estilos",
-    devops: "DevOps",
-  };
+  const categoryLabels = CATEGORY_LABELS;
 
   const canAdvanceToStack = name.trim() && path.trim();
   const canAdvanceToPreview = selectedTechs.length > 0 && (validation?.valid !== false);

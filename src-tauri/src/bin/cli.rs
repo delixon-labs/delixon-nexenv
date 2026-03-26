@@ -319,24 +319,11 @@ fn cmd_list() -> Result<(), String> {
 }
 
 fn cmd_open(name: &str) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
-    let lower = name.to_lowercase();
-    let project = projects
-        .iter()
-        .find(|p| p.name.to_lowercase().contains(&lower))
-        .ok_or_else(|| format!("No se encontro un proyecto que coincida con '{}'", name))?;
-
+    let project = find_project(name)?;
     let cfg = config::load_config().map_err(|e| e.to_string())?;
     let editor = &cfg.default_editor;
 
-    // Whitelist de editores permitidos (misma que commands/shell.rs)
-    const ALLOWED_EDITORS: &[&str] = &[
-        "code", "code-insiders", "cursor", "zed", "subl", "atom", "nvim",
-        "vim", "nano", "emacs", "gedit", "kate", "mousepad", "pluma",
-        "webstorm", "phpstorm", "idea", "clion", "goland", "rustrover",
-        "fleet", "lapce", "helix",
-    ];
-
+    use delixon_lib::core::utils::platform::ALLOWED_EDITORS;
     if !ALLOWED_EDITORS.contains(&editor.as_str()) {
         return Err(format!(
             "Editor '{}' no permitido. Editores disponibles: {}",
@@ -787,23 +774,8 @@ fn cmd_new(name: &str, path: &str, project_type: &str, profile: &str, techs: &[S
         }
     }
 
-    // Register the project
-    let now = chrono::Utc::now().to_rfc3339();
-    let project = delixon_lib::core::models::project::Project {
-        id: uuid::Uuid::new_v4().to_string(),
-        name: name.to_string(),
-        path: path.to_string(),
-        description: None,
-        runtimes: vec![],
-        status: delixon_lib::core::models::project::ProjectStatus::Active,
-        created_at: now.clone(),
-        last_opened_at: Some(now),
-        template_id: None,
-        tags: techs.to_vec(),
-    };
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
-    projects.push(project);
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    // Register the project (shared with Tauri command)
+    scaffold::register_scaffolded_project(&config, &result).map_err(|e| e.to_string())?;
 
     println!("\n{} Proyecto generado y registrado en {}", "ok".green().bold(), path);
     Ok(())

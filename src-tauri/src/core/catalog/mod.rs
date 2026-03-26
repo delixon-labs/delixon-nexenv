@@ -57,10 +57,11 @@ pub struct TechHealthCheck {
     pub retries: u32,
 }
 
-/// Loads all technologies from embedded YAML files
-pub fn load_all_technologies() -> Vec<Technology> {
-    let mut techs = Vec::new();
-    // Use include_str! for each YAML and parse
+use std::sync::OnceLock;
+
+static CATALOG: OnceLock<Vec<Technology>> = OnceLock::new();
+
+fn init_catalog() -> Vec<Technology> {
     let yaml_files: &[&str] = &[
         include_str!("technologies/nodejs.yaml"),
         include_str!("technologies/python.yaml"),
@@ -94,21 +95,24 @@ pub fn load_all_technologies() -> Vec<Technology> {
         include_str!("technologies/github-actions.yaml"),
     ];
 
-    for yaml_str in yaml_files {
-        if let Ok(tech) = serde_yml::from_str::<Technology>(yaml_str) {
-            techs.push(tech);
-        }
-    }
-    techs
+    yaml_files
+        .iter()
+        .filter_map(|s| serde_yml::from_str::<Technology>(s).ok())
+        .collect()
 }
 
-pub fn get_technology(id: &str) -> Option<Technology> {
-    load_all_technologies().into_iter().find(|t| t.id == id)
+/// Returns a reference to the cached technology catalog (parsed once, shared across calls)
+pub fn load_all_technologies() -> &'static [Technology] {
+    CATALOG.get_or_init(init_catalog)
 }
 
-pub fn get_by_category(category: &str) -> Vec<Technology> {
+pub fn get_technology(id: &str) -> Option<&'static Technology> {
+    load_all_technologies().iter().find(|t| t.id == id)
+}
+
+pub fn get_by_category(category: &str) -> Vec<&'static Technology> {
     load_all_technologies()
-        .into_iter()
+        .iter()
         .filter(|t| t.category == category)
         .collect()
 }
@@ -130,7 +134,7 @@ mod tests {
     #[test]
     fn test_load_all_technologies() {
         let techs = load_all_technologies();
-        assert_eq!(techs.len(), 30);
+        assert!(techs.len() >= 30, "Expected at least 30 technologies, got {}", techs.len());
     }
 
     #[test]

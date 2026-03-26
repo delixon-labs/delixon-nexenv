@@ -224,13 +224,7 @@ fn try_linux_terminals(project_path: &str, env_vars: &std::collections::HashMap<
     false
 }
 
-/// Editores permitidos (whitelist de seguridad)
-pub const ALLOWED_EDITORS: &[&str] = &[
-    "code", "code-insiders", "cursor", "zed", "subl", "atom", "nvim",
-    "vim", "nano", "emacs", "gedit", "kate", "mousepad", "pluma",
-    "webstorm", "phpstorm", "idea", "clion", "goland", "rustrover",
-    "fleet", "lapce", "helix",
-];
+use crate::core::utils::platform::ALLOWED_EDITORS;
 
 /// Abre el proyecto en un editor de codigo (solo editores de la whitelist)
 #[command]
@@ -242,7 +236,6 @@ pub async fn open_in_editor(project_path: String, editor: Option<String>) -> Res
 
     let editor_cmd = editor.unwrap_or_else(|| "code".to_string());
 
-    // Validar que el editor esta en la whitelist
     if !ALLOWED_EDITORS.contains(&editor_cmd.as_str()) {
         return Err(format!(
             "Editor '{}' no permitido. Editores disponibles: {}",

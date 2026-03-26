@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as api from "@/lib/tauri";
 import type { Technology } from "@/types/catalog";
+import { CATEGORY_LABELS } from "@/lib/catalog";
 
 export default function Catalog() {
   const [techs, setTechs] = useState<Technology[]>([]);
@@ -9,6 +10,7 @@ export default function Catalog() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState<Technology | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -19,8 +21,8 @@ export default function Catalog() {
         ]);
         setTechs(t);
         setCategories(c);
-      } catch {
-        // silently fail
+      } catch (err) {
+        setLoadError(String(err));
       } finally {
         setLoading(false);
       }
@@ -40,16 +42,7 @@ export default function Catalog() {
     );
   });
 
-  const categoryLabels: Record<string, string> = {
-    runtime: "Runtimes",
-    frontend: "Frontend",
-    backend: "Backend",
-    database: "Bases de datos",
-    orm: "ORMs",
-    auth: "Autenticacion",
-    styling: "Estilos",
-    devops: "DevOps",
-  };
+  const categoryLabels = CATEGORY_LABELS;
 
   if (loading) {
     return (
@@ -65,6 +58,12 @@ export default function Catalog() {
         <h1 className="text-2xl font-bold text-white">Catalogo de tecnologias</h1>
         <p className="text-sm text-gray-500 mt-1">{techs.length} tecnologias disponibles</p>
       </div>
+
+      {loadError && (
+        <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-4">
+          Error cargando catalogo: {loadError}
+        </div>
+      )}
 
       {/* Search + Category filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">

@@ -5,7 +5,9 @@ use std::path::Path;
 use crate::core::catalog;
 use crate::core::error::DelixonError;
 use crate::core::manifest::{ManifestEnvVars, ManifestService, ProjectManifest};
+use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::rules;
+use crate::core::storage;
 use crate::core::utils::fs::ensure_dir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -97,13 +99,13 @@ fn generate_file_list(config: &ScaffoldConfig) -> Vec<(String, String)> {
     files.push((".gitignore".to_string(), generate_gitignore(config)));
 
     // .env.example
-    files.push((".env.example".to_string(), generate_env_example(config, &all_techs)));
+    files.push((".env.example".to_string(), generate_env_example(config, all_techs)));
 
     // README.md
     files.push(("README.md".to_string(), generate_readme(config)));
 
     // docker-compose.yml (if DB or Docker selected)
-    let compose = generate_docker_compose(config, &all_techs);
+    let compose = generate_docker_compose(config, all_techs);
     if !compose.is_empty() {
         files.push(("docker-compose.yml".to_string(), compose));
     }
@@ -489,6 +491,49 @@ fn build_manifest(config: &ScaffoldConfig, validation: &rules::ValidationResult)
         recipes_applied: Vec::new(),
         health_checks: Vec::new(),
     }
+}
+
+/// Registra un proyecto scaffolded en el storage — fuente unica de verdad para CLI y Tauri
+pub fn register_scaffolded_project(
+    config: &ScaffoldConfig,
+    result: &ScaffoldResult,
+) -> Result<Project, DelixonError> {
+    let all_techs = catalog::load_all_technologies();
+    let now = chrono::Utc::now().to_rfc3339();
+
+    let runtimes: Vec<RuntimeConfig> = result
+        .manifest
+        .technologies
+        .iter()
+        .filter_map(|tech_id| {
+            all_techs
+                .iter()
+                .find(|t| t.id == *tech_id && t.category == "runtime")
+                .map(|t| RuntimeConfig {
+                    runtime: t.id.clone(),
+                    version: t.default_version.clone(),
+                })
+        })
+        .collect();
+
+    let project = Project {
+        id: uuid::Uuid::new_v4().to_string(),
+        name: config.name.clone(),
+        path: config.path.clone(),
+        description: None,
+        runtimes,
+        status: ProjectStatus::Active,
+        created_at: now.clone(),
+        last_opened_at: Some(now),
+        template_id: None,
+        tags: config.technologies.clone(),
+    };
+
+    let mut projects = storage::load_projects()?;
+    projects.push(project.clone());
+    storage::save_projects(&projects)?;
+
+    Ok(project)
 }
 
 #[cfg(test)]
