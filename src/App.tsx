@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import ProjectDetail from "./pages/ProjectDetail";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
+import Catalog from "./pages/Catalog";
+import Scaffold from "./pages/Scaffold";
 import { useSettingsStore } from "./stores/settings";
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/templates" element={<Templates />} />
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/scaffold" element={<Scaffold />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </AppLayout>
