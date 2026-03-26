@@ -15,6 +15,7 @@ pub struct DoctorReport {
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DoctorCheck {
+    pub group: String,
     pub name: String,
     pub ok: bool,
     pub message: String,
@@ -23,11 +24,12 @@ pub struct DoctorCheck {
 pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
     let mut checks = Vec::new();
 
-    // 1. Data dir
+    // --- Grupo: Sistema ---
     match get_data_dir() {
         Some(dir) => {
             let exists = dir.exists();
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Directorio de datos".to_string(),
                 ok: exists,
                 message: if exists {
@@ -39,6 +41,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
         None => {
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Directorio de datos".to_string(),
                 ok: false,
                 message: "No se pudo determinar".to_string(),
@@ -46,10 +49,10 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
     }
 
-    // 2. Config
     match config::load_config() {
         Ok(cfg) => {
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Configuracion".to_string(),
                 ok: true,
                 message: format!(
@@ -60,6 +63,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
         Err(e) => {
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Configuracion".to_string(),
                 ok: false,
                 message: format!("Error: {}", e),
@@ -67,10 +71,10 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
     }
 
-    // 3. Projects count
     match storage::load_projects() {
         Ok(projects) => {
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Proyectos".to_string(),
                 ok: true,
                 message: format!("{} registrados", projects.len()),
@@ -78,6 +82,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
         Err(e) => {
             checks.push(DoctorCheck {
+                group: "Sistema".to_string(),
                 name: "Proyectos".to_string(),
                 ok: false,
                 message: format!("Error: {}", e),
@@ -85,7 +90,13 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
     }
 
-    // 4. Runtimes
+    // --- Grupo: Runtimes ---
+    let projects = storage::load_projects().unwrap_or_default();
+    let used_runtimes: Vec<String> = projects
+        .iter()
+        .flat_map(|p| p.runtimes.iter().map(|r| r.runtime.to_lowercase()))
+        .collect();
+
     let runtime_checks = [
         ("node", "--version"),
         ("python", "--version"),
@@ -95,28 +106,35 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
 
     for (cmd, arg) in &runtime_checks {
         let found = which::which(cmd).is_ok();
+        let needed = used_runtimes.iter().any(|r| r == cmd || (r == "rust" && *cmd == "rustc"));
+        let tag = if needed { "requerido" } else { "no requerido" };
         let version = if found {
-            std::process::Command::new(cmd)
+            let ver = std::process::Command::new(cmd)
                 .arg(arg)
                 .output()
                 .ok()
                 .and_then(|o| String::from_utf8(o.stdout).ok())
                 .map(|s| s.trim().to_string())
-                .unwrap_or_else(|| "?".to_string())
+                .unwrap_or_else(|| "?".to_string());
+            format!("{} ({})", ver, tag)
+        } else if needed {
+            "no encontrado (requerido)".to_string()
         } else {
-            "no encontrado".to_string()
+            "no instalado (no requerido)".to_string()
         };
 
         checks.push(DoctorCheck {
-            name: format!("Runtime: {}", cmd),
-            ok: found,
+            group: "Runtimes".to_string(),
+            name: cmd.to_string(),
+            ok: found || !needed,
             message: version,
         });
     }
 
-    // 5. Docker
+    // --- Grupo: Herramientas ---
     let docker_found = which::which("docker").is_ok();
     checks.push(DoctorCheck {
+        group: "Herramientas".to_string(),
         name: "Docker".to_string(),
         ok: docker_found,
         message: if docker_found {
@@ -126,9 +144,9 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         },
     });
 
-    // 6. Git
     let git_found = which::which("git").is_ok();
     checks.push(DoctorCheck {
+        group: "Herramientas".to_string(),
         name: "Git".to_string(),
         ok: git_found,
         message: if git_found {
@@ -144,12 +162,12 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         },
     });
 
-    // 7. Editor
     let editor = config::load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
     let editor_found = which::which(&editor).is_ok();
     checks.push(DoctorCheck {
+        group: "Herramientas".to_string(),
         name: format!("Editor ({})", editor),
         ok: editor_found,
         message: if editor_found {

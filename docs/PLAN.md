@@ -54,9 +54,26 @@ Estos problemas **tienden a multiplicarse** con cada proyecto nuevo. No son mole
 
 ## 2. La solución: Delixon
 
-Delixon es una **aplicación de escritorio local** que actúa como capa de organización e inteligencia entre el desarrollador y sus proyectos.
+Delixon es una **aplicacion de escritorio local + CLI** que actua como capa de organizacion e inteligencia entre el desarrollador y sus proyectos.
 
 **No reemplaza ninguna herramienta.** El desarrollador sigue usando VSCode, su terminal preferida, Git, Docker, npm, pip — todo lo que ya conoce y domina. Delixon se encarga de que cada proyecto viva en su propio mundo perfectamente configurado, listo para trabajar desde el primer segundo.
+
+### Estrategia dual: GUI + CLI
+
+Delixon no es "GUI o CLI". Es **ambos, para todos los usuarios**:
+
+| Interfaz | Para quien | Uso principal |
+|---|---|---|
+| **GUI** (Tauri + React) | Producto principal para el cliente. Usuarios visuales, onboarding, exploracion | Dashboard, configuracion, wizards, health visual, browse catalogo |
+| **CLI** (Rust + clap) | Power users, devs tecnicos, automatizacion, y herramienta interna de desarrollo | Acciones rapidas desde terminal, scripting, CI/CD, testing del core |
+
+**Tres perfiles de usuario:**
+
+1. **Usuario visual** — Usa solo GUI. Quiere clics, dashboards, colores. La GUI es su producto.
+2. **Usuario tecnico** — Usa solo CLI. Vive en la terminal. `delixon open`, `delixon scan`, `delixon run`.
+3. **Usuario mixto** — Usa GUI para explorar/configurar y CLI para operar rapido. El caso mas comun.
+
+> **Ambas interfaces comparten el mismo core (`delixon_lib`).** Misma logica, mismos datos, misma persistencia JSON/YAML. No son productos separados. La CLI no es "la version pobre" — es la version rapida. La GUI no es "la version lenta" — es la version visual.
 
 ### Principio central
 
@@ -701,29 +718,29 @@ StackPilot (repo `Xplus-Technologies-open-source/StackPilot`) se desarrolló en 
 | Abrir en VSCode | ✅ Funcional | ❌ No tiene | **Delixon** |
 | Terminal aislada | ✅ Con env vars cargadas | ❌ No tiene | **Delixon** |
 | Dashboard UI | ✅ React + Tailwind, 4 páginas | ✅ React + Tailwind, 7 páginas | **Delixon** — Una sola UI unificada |
-| Templates | ❌ 7 carpetas vacías | ✅ 20 templates completos | **StackPilot** — Migrar 8-10 sólidos, no los 20 |
-| Catálogo tecnológico | ❌ No existe | ✅ 83 tecnologías en YAML | **StackPilot** — Migrar 25-30 prioritarias, calidad > cantidad |
-| Scaffolding real | ❌ No implementado | ✅ Genera proyectos completos | **StackPilot** — ScaffoldOrchestrator como motor interno |
-| Validación de stacks | ❌ No existe | ✅ RulesEngine | **StackPilot** — Con niveles: válido / advertencia / no recomendado / incompatible |
-| Docker management | ❌ No tiene | ✅ up/down/status/logs | **StackPilot** — Solo para servicios, nunca para runtimes |
-| CLI | ❌ No tiene | ✅ 23 comandos | **Híbrido** — 5-8 comandos básicos en mediano plazo (open, create, scan, add, doctor, ps) |
-| Versionado de stacks | ❌ No tiene | ✅ save/diff/rollback | **StackPilot** — Incluir en mediano plazo, reduce miedo a tocar el proyecto |
-| Health checks | ❌ No tiene | ✅ Por tecnología | **StackPilot** — Subir a corto plazo, sin esto el dashboard es decorativo |
-| Doctor command | ❌ No tiene | ✅ Verifica requisitos | **StackPilot** — Subir a corto plazo, es lo primero que un usuario nuevo necesita |
-| Perfiles de madurez | ❌ No tiene | ✅ rapid/standard/production/enterprise | **StackPilot** — Que cambien archivos reales, no solo etiquetas |
-| Full-stack detection | ❌ No tiene | ✅ frontend/ + backend/ automático | **StackPilot** — Incluir en scan de proyectos existentes |
+| Templates | ✅ 7 templates funcionales (UI + backend) | ✅ 20 templates completos | **Completado** — Templates integrados en GUI y scaffold |
+| Catálogo tecnológico | ✅ 30+ techs en YAML con UI | ✅ 83 tecnologías en YAML | **Completado** — Catálogo migrado con browse, search, filtros |
+| Scaffolding real | ✅ Genera proyectos completos | ✅ Genera proyectos completos | **Completado** — Wizard multi-step en GUI + `new` en CLI |
+| Validación de stacks | ✅ RulesEngine integrado | ✅ RulesEngine | **Completado** — Dependencias auto, incompatibilidades, puertos, sugerencias |
+| Docker management | ✅ up/down/status/logs | ✅ up/down/status/logs | **Completado** — GUI (DockerTab) + CLI (docker subcommands) |
+| CLI | ✅ 28 comandos (clap) | ✅ 23 comandos (origen) | **Completado** — CLI y GUI comparten `delixon_lib`, ambas interfaces al mismo motor |
+| Versionado de stacks | ✅ save/diff/rollback + UI | ✅ save/diff/rollback | **Completado** — VersioningTab en GUI + snapshot en CLI |
+| Health checks | ✅ Por proyecto con UI | ✅ Por tecnología | **Completado** — HealthTab con sugerencias de fix + CLI health |
+| Doctor command | ✅ Sistema completo | ✅ Verifica requisitos | **Completado** — Runtimes, Docker, Git, config, datos |
+| Perfiles de madurez | ✅ rapid/standard/production | ✅ rapid/standard/production/enterprise | **Completado** — Integrados en scaffold |
+| Full-stack detection | ✅ Deteccion completa (964 lineas) | ✅ frontend/ + backend/ automático | **Completado** — Readiness score, frameworks, ORMs, CI, linters |
 | Settings persistentes | ✅ Editor, tema, idioma, runtimes | ✅ Editor, package manager | **Delixon** — Unificar preferencias |
-| TechInstaller | ❌ No tiene | ✅ Lógica por tecnología | **StackPilot** — Es el motor interno de las recipes |
+| TechInstaller / Recipes | ✅ 6 recipes funcionales | ✅ Lógica por tecnología | **Completado** — vitest, pytest, docker, ci-github, biome, prisma |
 | Config DB | ✅ JSON local | ✅ SQLite | **JSON corto plazo** — Evaluar SQLite si escala a equipos |
 
 ### Ideas de StackPilot que NO se integran (o se postergan)
 
 | Concepto | Razón |
 |---|---|
-| 23 comandos CLI completos | Solo 5-8 básicos en mediano plazo. GUI primero |
+| ~~23 comandos CLI completos~~ | ✅ **Completado** — 28 comandos implementados (ver `docs/commander_cli/CLI_REFERENCE.md`) |
 | DevContainers generation (.devcontainer/) | Va contra la filosofía "sin Docker para dev". Solo como export opcional futuro |
 | Monorepo con Turborepo | Delixon es monolito Tauri. No aplica |
-| User tech notes (rating personal) | Nice-to-have tardío, no resuelve problema core |
+| ~~User tech notes (rating personal)~~ | ✅ **Completado** — Sistema de notas por proyecto (CRUD con UUID y timestamps) |
 | SQLite como DB local | JSON funciona para <100 proyectos. Evaluar a futuro |
 
 ### El núcleo declarativo común (CRÍTICO)
@@ -804,7 +821,7 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 
 - **No es meter StackPilot como módulo externo** — es absorber sus capacidades como motor interno
 - **No es tener dos UIs** — es una sola app (Delixon) con más capacidades
-- **No es copiar todo** — es migrar lo valioso (catálogo, reglas, scaffold, recipes, health) y descartar lo que no aplica (monorepo, devcontainers, 23 CLI commands)
+- **No es copiar todo** — es migrar lo valioso (catalogo, reglas, scaffold, recipes, health) y descartar lo que no aplica (monorepo, devcontainers). El CLI ya supera al original con 28 comandos
 - **No es priorizar cantidad** — 25 tecnologías sólidas > 83 a medias; 8 templates probados > 20 sin mantener
 
 ---
@@ -833,7 +850,7 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 - [x] ScaffoldOrchestrator: genera docker-compose, .env, README, CI/CD, scripts
 - [x] TechInstaller: lógica específica por tecnología
 - [x] 20 templates funcionales
-- [x] 23 comandos CLI
+- [x] 28 comandos CLI (ver tabla completa en sección P0 CLI)
 - [x] Full-stack detection (frontend/ + backend/)
 - [x] Versionado de stacks (save/diff/rollback)
 - [x] Docker management (up/down/status/logs)
@@ -860,57 +877,88 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 > Sin la base declarativa, todo lo demás será frágil. Sin operación local útil, nadie lo usa dos veces.
 > Sin CLI, pierdes a la mayoría de devs. Sin Linux, pierdes a la mitad del público.
 
-**P0 — Núcleo declarativo (la columna vertebral):**
-- [ ] Definir formato de `project manifest` (.delixon/manifest.yaml) — el formato que unifica toda la info del proyecto
-- [ ] Migrar catálogo YAML de StackPilot → seleccionar las 25-30 tecnologías prioritarias, validar que cada una compila
-- [ ] Integrar RulesEngine con niveles de compatibilidad: `válido` / `advertencia` / `no recomendado` / `incompatible`
-- [ ] Generar manifest automáticamente al crear o importar un proyecto
+**P0 — Nucleo declarativo (la columna vertebral):**
+- [x] Definir formato de `project manifest` (.delixon/manifest.yaml) — techs, servicios, env vars, comandos, puertos, recipes, health checks
+- [x] Migrar catalogo YAML de StackPilot → 30+ tecnologias con metadatos completos, UI de browse/search
+- [x] Integrar RulesEngine con dependencias auto, incompatibilidades, puertos, sugerencias
+- [x] Generar manifest automaticamente al crear o importar un proyecto
 
 **P0 — Completar workspace (Capa 1):**
 - [ ] Historial de terminal aislado por proyecto
-- [ ] Activación automática de runtimes al abrir proyecto (ya detecta, falta activar)
-- [ ] Exportar/importar configuración de proyecto (archivo `.delixon`)
-- [ ] Detección de conflictos de puertos entre proyectos
+- [ ] Activacion automatica de runtimes al abrir proyecto (ya detecta, falta activar)
+- [x] Exportar/importar configuracion de proyecto (archivo `.delixon`) — portable.rs + UI
+- [x] Deteccion de conflictos de puertos entre proyectos — ports.rs con TCP check
 
 **P0 — CLI desde el día 1 (los devs viven en la terminal):**
-- [ ] Arquitectura CLI con subcomandos (clap en Rust o binario separado que invoque el mismo core)
-- [ ] `delixon list` — listar proyectos registrados con estado
-- [ ] `delixon open <nombre>` — abrir proyecto en editor con entorno cargado
-- [ ] `delixon doctor` — verificar runtimes, Docker, Git, VSCode, permisos, PATH
-- [ ] `delixon scan <ruta>` — detectar stack de un proyecto existente y registrarlo
-- [ ] La CLI y la GUI comparten el mismo core (misma lógica, mismos datos, misma persistencia)
+- [x] Arquitectura CLI con subcomandos (clap en Rust, binario separado que invoca el mismo core)
+- [x] La CLI y la GUI comparten el mismo core (misma lógica, mismos datos, misma persistencia)
 - [ ] Instalable globalmente: el dev escribe `delixon` desde cualquier terminal
+
+**28 comandos implementados (delixon-cli):**
+
+| Comando | Descripción | Uso |
+|---|---|---|
+| `list` | Lista todos los proyectos registrados | `delixon-cli list` |
+| `open <name>` | Abre proyecto en el editor configurado | `delixon-cli open mi-proyecto` |
+| `create <name> --path <ruta>` | Crea un nuevo proyecto | `delixon-cli create mi-app --path ./apps --template id` |
+| `scan <path>` | Detecta el stack de un proyecto existente | `delixon-cli scan ./mi-proyecto` |
+| `doctor` | Verifica el estado del sistema | `delixon-cli doctor` |
+| `env <project> get` | Muestra variables de entorno | `delixon-cli env mi-app get` |
+| `env <project> set <key> <val>` | Establece variable de entorno | `delixon-cli env mi-app set PORT 3000` |
+| `export <project>` | Exporta proyecto como `.delixon` | `delixon-cli export mi-app -o archivo.delixon` |
+| `import <file> --path <ruta>` | Importa desde archivo `.delixon` | `delixon-cli import app.delixon --path ./apps` |
+| `manifest <project>` | Muestra el manifest del proyecto | `delixon-cli manifest mi-app` |
+| `catalog [id]` | Navega catálogo de tecnologías | `delixon-cli catalog` o `delixon-cli catalog rust` |
+| `validate <techs...>` | Valida combinación de tecnologías | `delixon-cli validate rust react docker` |
+| `health <project>` | Ejecuta health checks del proyecto | `delixon-cli health mi-app` |
+| `ports` | Muestra puertos en uso por proyectos | `delixon-cli ports` |
+| `new <name> --path <ruta>` | Genera proyecto desde scaffold | `delixon-cli new api --path ./apps --type api --profile standard --techs rust,docker` |
+| `add <recipe>` | Aplica una recipe al proyecto | `delixon-cli add testing-vitest --project mi-app --preview` |
+| `recipes` | Lista recipes disponibles | `delixon-cli recipes` |
+| `status <project>` | Muestra estado Git del proyecto | `delixon-cli status mi-app` |
+| `docker up <project>` | Inicia servicios Docker Compose | `delixon-cli docker up mi-app` |
+| `docker down <project>` | Detiene servicios Docker | `delixon-cli docker down mi-app` |
+| `docker status <project>` | Estado de servicios Docker | `delixon-cli docker status mi-app` |
+| `docker logs <project>` | Muestra logs Docker | `delixon-cli docker logs mi-app --lines 100` |
+| `run <script>` | Ejecuta script del manifest | `delixon-cli run dev --project mi-app` |
+| `snapshot save <project>` | Guarda snapshot del manifest | `delixon-cli snapshot save mi-app` |
+| `snapshot list <project>` | Lista snapshots guardados | `delixon-cli snapshot list mi-app` |
+| `snapshot diff <project> <v1> <v2>` | Compara dos versiones | `delixon-cli snapshot diff mi-app 1 2` |
+| `snapshot rollback <project> <ver>` | Restaura versión anterior | `delixon-cli snapshot rollback mi-app 1` |
+| `diff <project>` | Cambios desde último snapshot | `delixon-cli diff mi-app` |
+| `note <project> [text]` | Gestiona notas (sin texto = lista) | `delixon-cli note mi-app "nota aquí"` |
+| `ps [project]` | Lista procesos en puertos del proyecto | `delixon-cli ps mi-app` |
 
 > **Decisión de diseño:** CLI y GUI son dos interfaces al mismo motor. No son productos separados, no compiten. La CLI es para acciones rápidas, la GUI es para explorar y configurar. Ambas leen/escriben sobre el mismo manifest y la misma persistencia JSON.
 
-**P0 — Cross-platform desde el día 1 (Windows + Linux + macOS):**
-- [ ] Tauri ya compila cross-platform — aprovecharlo desde el inicio
-- [ ] Adaptación de rutas y permisos por SO (el código Rust ya tiene lógica para Windows y Linux)
+**P0 — Cross-platform desde el dia 1 (Windows + Linux + macOS):**
+- [x] Tauri compila cross-platform
+- [x] Adaptacion de rutas y permisos por SO — logica platform-aware en Rust (cfg(target_os), lsof vs tasklist, etc.)
 - [ ] CI/CD con GitHub Actions: build y test en Windows, Ubuntu y macOS en cada PR
 - [ ] Documentar diferencias por SO: rutas de datos, terminales disponibles, binarios detectados
-- [ ] Probar la CLI en los tres SO (es más crítico que la GUI al inicio)
+- [ ] Probar la CLI en los tres SO
 
 > **Por qué no esperar:** El 50%+ de los developers objetivo usan Linux o macOS. Retrasar cross-platform es retrasar la adopción. Además, Tauri + Rust hacen que el coste de mantener 3 plataformas sea bajo desde el inicio. El verdadero coste de "agregar Linux después" es acumular decisiones Windows-only que luego cuestan mucho revertir.
 
 **P1 — Crear proyectos reales (integrar motor de StackPilot):**
-- [ ] Conectar flujo "crear proyecto" del dashboard y CLI con ScaffoldOrchestrator
-- [ ] 3-5 templates sólidos, probados y que compilen: Node+Express, React+Vite, Python+FastAPI, Next.js fullstack, Desktop Tauri
-- [ ] Cada template genera: estructura, deps, scripts, docker-compose (si necesita servicios), .env.example, README, Makefile/scripts básicos
-- [ ] Tests automatizados de generación: cada template se genera y arranca sin errores
-- [ ] `delixon create` desde CLI con selección interactiva de stack
+- [x] Conectar flujo "crear proyecto" del dashboard y CLI con ScaffoldOrchestrator
+- [x] 7 templates funcionales: Node+Express, React+Vite, Python+FastAPI, Python+Django, Fullstack, Rust CLI, Docker Compose
+- [x] Cada template genera: estructura, deps, scripts, docker-compose, .env.example, README, Makefile, CI workflows, VS Code config
+- [ ] Tests automatizados de generacion: cada template se genera y arranca sin errores
+- [x] `delixon create` y `delixon new` desde CLI con parametros de stack
 
-**P1 — Diagnosticar (lo que hace que Delixon sea útil el día 1):**
-- [ ] `doctor` del sistema: verificar runtimes, Docker, Git, VSCode, permisos, PATH, versiones mínimas
-- [ ] Health checks por proyecto: deps instaladas, DB accesible, puertos libres, env vars presentes, servicios Docker en marcha
-- [ ] Dashboard que muestre estado REAL (verde OK / amarillo warning / rojo error) — no solo lista de proyectos
-- [ ] `delixon health <proyecto>` desde CLI
+**P1 — Diagnosticar (lo que hace que Delixon sea util el dia 1):**
+- [x] `doctor` del sistema: verificar runtimes (Node, Python, Rust, Go, PHP, Ruby), Docker, Git, config, datos
+- [x] Health checks por proyecto: directorio, README, Git, .gitignore, deps, runtimes, puertos
+- [x] HealthTab en GUI con sugerencias de fix por cada check
+- [x] `delixon doctor` y `delixon health <proyecto>` desde CLI
 
-**P1 — Scan de proyectos existentes (duplica el público objetivo):**
-- [ ] `delixon scan ./mi-proyecto` → detectar: lenguaje, framework, package manager, ORM, DB, scripts, env vars, servicios, puertos, Docker, estructura frontend/backend
-- [ ] Generar manifest desde scan → registrar proyecto → gestionar con Delixon
-- [ ] Score de production-readiness con recomendaciones actionables
+**P1 — Scan de proyectos existentes (duplica el publico objetivo):**
+- [x] `delixon scan ./mi-proyecto` → detecta: lenguaje, framework, package manager, ORM, DB, scripts, Docker, CI, testing, linters, TypeScript, fullstack
+- [x] Generar manifest desde scan → registrar proyecto → gestionar con Delixon
+- [x] Readiness score con breakdown detallado por categoria
 
-**Entregable:** MVP donde puedas CREAR proyectos completos desde GUI o CLI, IMPORTAR proyectos existentes con scan, ver el ESTADO REAL de cada uno, y todo funciona en Windows, Linux y macOS. El manifiesto existe y todo lee/escribe sobre él.
+**Entregable:** ✅ MVP completado — se pueden CREAR proyectos completos desde GUI (wizard) o CLI (`new`/`create`), IMPORTAR proyectos existentes con `scan`, ver el ESTADO REAL con health/doctor, gestionar Docker/Git/scripts/env. Manifest unifica todo. **Pendiente:** CI/CD multi-SO, tests automatizados de templates, terminal integrada.
 
 ### MEDIANO PLAZO (3-6 meses) — "Que sea útil de verdad"
 
@@ -918,32 +966,32 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 >
 > Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Delixon me dice qué falla".
 
-**P1 — Recipes (lo que hace que Delixon sirva después del día 1):**
-- [ ] Sistema de recipes con TechInstaller como motor: `delixon add auth`, `delixon add database`, `delixon add docker`, `delixon add testing`
-- [ ] Preview de cambios antes de aplicar (qué archivos se crean/modifican)
-- [ ] 2-4 recipes impecables primero: Auth, Base de datos, Testing, Docker services
-- [ ] Más recipes después: Pagos, Email, CI/CD, Admin panel, Observabilidad
+**P1 — Recipes (lo que hace que Delixon sirva despues del dia 1):**
+- [x] Sistema de recipes: `delixon add <recipe>` con preview y aplicacion
+- [x] Preview de cambios antes de aplicar (`--preview` flag)
+- [x] 6 recipes funcionales: testing-vitest, testing-pytest, docker, ci-github, linting-biome, prisma
+- [ ] Mas recipes: Auth, Pagos, Email, Admin panel, Observabilidad
 
 **P2 — Versionado de stacks (reduce el miedo):**
-- [ ] Save del estado del stack antes de cambios
-- [ ] Diff visual entre versiones (qué se añadió, qué cambió)
-- [ ] Rollback de recipe si no convence
-- [ ] Historial de evolución del proyecto
+- [x] Save del estado del stack antes de cambios (snapshot save)
+- [x] Diff visual entre versiones — techs añadidas/removidas, recipes aplicadas (GUI VersioningTab + CLI)
+- [x] Rollback de manifest a version anterior (snapshot rollback)
+- [x] Historial de evolucion del proyecto (snapshot list)
 
-**P2 — Operación diaria avanzada:**
-- [ ] Docker Compose management integrado (up/down/status/logs desde Delixon)
+**P2 — Operacion diaria avanzada:**
+- [x] Docker Compose management integrado — up/down/status/logs desde GUI (DockerTab) y CLI
 - [ ] Terminal integrada dentro de Delixon (panel embebido)
-- [ ] Contexto de Git integrado (rama, cambios pendientes, PRs)
-- [ ] Scripts con alias unificados (`delixon run start` sin importar el stack)
-- [ ] Gestión de procesos en background (`delixon ps`, `delixon logs`)
-- [ ] Snapshots de entorno (debugging de "ayer funcionaba, hoy no")
-- [ ] Gestión de runtimes: instalar/cambiar versiones desde la app
+- [x] Contexto de Git integrado — rama, cambios, remoto, commits (GitTab + CLI status)
+- [x] Scripts con alias unificados — `delixon run <script>` ejecuta desde manifest (ScriptsTab + CLI)
+- [x] Gestion de procesos — `delixon ps`, kill desde GUI (ProcessesTab + CLI)
+- [x] Snapshots de entorno — comparar runtimes y deps entre momentos (snapshots.rs)
+- [ ] Gestion de runtimes: instalar/cambiar versiones desde la app
 - [ ] Notificaciones de dependencias desactualizadas o vulnerables
 
 **P2 — CLI avanzado:**
-- [ ] Completar a 8-10 comandos: `delixon add`, `delixon ps`, `delixon run`, `delixon logs`, `delixon env`
-- [ ] Autocompletado para bash/zsh/fish
-- [ ] Output formateado (colores, tablas, spinners)
+- [x] Completar comandos: `add`, `ps`, `run`, `docker logs`, `env`, `snapshot`, `diff`, `note`, `recipes`, `validate`, `new`, `catalog`, `health`, `ports`, `manifest`, `export`, `import`, `status` (28 comandos totales)
+- [ ] Autocompletado para bash/zsh/fish/PowerShell
+- [x] Output formateado (colores, tablas con colored crate)
 
 ### LARGO PLAZO (6-12 meses) — "Que sea indispensable"
 
@@ -985,14 +1033,14 @@ recipes_applied: [auth-nextauth, database-prisma, docker-services]
 
 ### Tabla resumen de prioridades
 
-| Prioridad | Qué | Por qué | Cuándo |
+| Prioridad | Que | Estado | Pendiente |
 |---|---|---|---|
-| **P0** | Manifest + workspace + CLI + cross-platform | La base: sin esto no hay producto serio | Corto (1-3m) |
-| **P1** | Templates (3-5) + scaffold + scan + health + doctor | Lo que atrae Y retiene usuarios | Corto (1-3m) |
-| **P1** | Recipes (2-4 impecables) | Lo que hace útil después del día 1 | Corto→Mediano |
-| **P2** | Versionado + Docker mgmt + terminal + CLI avanzado + Git | Lo que genera confianza y poder | Mediano (3-6m) |
-| **P3** | Equipos + perfiles madurez + multi-editor + más templates | Lo que monetiza | Largo (6-12m) |
-| **P4** | IA + agentes + marketplace + plugins + catálogos corp | Lo que diferencia a largo plazo | Futuro (12+m) |
+| **P0** | Manifest + workspace + CLI + cross-platform | ✅ Mayormente completado | Terminal aislada, activacion runtimes, CI/CD multi-SO |
+| **P1** | Templates + scaffold + scan + health + doctor | ✅ Completado | Tests automatizados de templates |
+| **P1** | Recipes (6 funcionales) | ✅ Completado | Mas recipes: Auth, Pagos, Email, Observabilidad |
+| **P2** | Versionado + Docker mgmt + CLI avanzado + Git | ✅ Completado | Terminal integrada, gestion runtimes, notificaciones deps |
+| **P3** | Equipos + perfiles madurez + multi-editor + mas templates | Pendiente | Lo que monetiza |
+| **P4** | IA + agentes + marketplace + plugins + catalogos corp | Pendiente | Lo que diferencia a largo plazo |
 
 ---
 
@@ -1363,7 +1411,7 @@ DIFERENCIAL:
 ROADMAP:
   P0 Corto (1-3m) → Manifest + catálogo + reglas + workspace completo + doctor + health
   P1 Corto→Medio → Templates reales + scaffold + recipes + scan de existentes
-  P2 Medio (3-6m) → Versionado stacks + Docker mgmt + terminal + CLI básico + Git
+  P2 Medio (3-6m) → ✅ Versionado + Docker mgmt + CLI 28 cmds + Git. Pendiente: terminal integrada, gestion runtimes
   P3 Largo (6-12m) → Equipos + cross-platform + perfiles madurez + multi-editor
   P4 Futuro (12+m) → IA + agentes + marketplace + plugins (el sueño)
 
@@ -1406,42 +1454,43 @@ MODELO:
 
 | Concepto de StackPilot | Por qué no entró | Opinión final |
 |---|---|---|
-| 23 comandos CLI completos | Delixon prioriza GUI, CLI era Fase 5 | **Mover a mediano plazo.** No 23, pero 5-8 comandos básicos (`open`, `create`, `scan`, `add`, `doctor`, `ps`) sí. Muchos devs prefieren CLI para acciones rápidas |
+| 23 comandos CLI completos | ✅ **28 comandos implementados** | **Completado y superado.** CLI y GUI son interfaces duales al mismo core. Ver `docs/commander_cli/CLI_REFERENCE.md` |
 | Versionado de stacks (save/diff/rollback) | No aparecía en el plan | **Incluir en mediano plazo.** Es lo que reduce el miedo a tocar el proyecto. "Puedo revertir" = confianza = uso real |
 | TechInstaller (lógica específica) | Mencionado en recipes superficialmente | **Incluir como motor interno de recipes.** Cada recipe necesita un installer que sepa qué hacer por tecnología |
 | SQLite como DB local | Delixon usa JSON | **Mantener JSON corto plazo, evaluar SQLite a futuro.** JSON funciona para <100 proyectos. Si escala a equipos, SQLite o similar será necesario |
 | DevContainers generation | No mencionado | **No prioritario.** Va contra la filosofía "sin Docker para dev". Solo como export opcional para equipos que lo requieran |
 | Makefile + scripts auxiliares | No mencionado | **Incluir como parte del scaffold.** Un `scripts/dev.sh` o `Makefile` básico es best practice. El scaffold debería generarlo |
 | Health checks por tecnología | Solo mencionado superficialmente | **Subir a corto plazo.** Sin health checks, el dashboard es decorativo. Con ellos, es útil cada día |
-| Doctor command | No incluido | **Incluir en corto plazo.** Es la primera cosa que un usuario nuevo necesita: "¿estoy listo para usar esto?" |
+| Doctor command | ✅ **Implementado** | Verifica runtimes, Docker, Git, config, datos. GUI + CLI |
 | Full-stack detection (frontend/+backend/) | No mencionado explícitamente | **Incluir en scan.** El scan debe detectar automáticamente la estructura frontend/backend y actuar en consecuencia |
-| User tech notes (rating personal) | No incluido | **No prioritario.** Nice-to-have tardío, no resuelve problema core |
+| User tech notes (rating personal) | ✅ **Implementado** como sistema de notas por proyecto (CRUD con timestamps) |
 
 ### 19.3 Visión final — Qué debe ser Delixon
 
 | Aspecto | Estado actual | Opinión final — Cómo debería funcionar |
 |---|---|---|
-| **Identidad** | Gestor de workspaces + scaffolding | **"Sistema operativo local del developer"** — gestiona TODO el ciclo de vida local: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar, reparar |
-| **Núcleo declarativo** | No existe | **PRIORIDAD MÁXIMA.** Un `project manifest` que unifique: techs, versiones, deps, servicios, env vars, health checks, comandos, nivel de madurez. Sin esto, la integración será frágil |
-| **Flujo de creación** | CRUD básico en Delixon | **Flujo completo:** elegir tipo → proponer stack → validar → generar → registrar → aislar → configurar → listo para trabajar. Un solo flujo, no dos apps |
-| **Scan/import** | No implementado | **Igual de importante que crear.** La mayoría de devs ya tienen proyectos. Scan → detectar → registrar → gestionar. Sin esto pierdes al 70% del público |
-| **Health + Doctor** | No implementado | **Doctor del sistema** (prerequisitos, runtimes, permisos) + **Health del proyecto** (deps, DB, puertos, env vars, servicios). Esto es lo que hace que Delixon sea útil TODOS los días |
-| **Versionado de stack** | No implementado | **Incluir en mediano.** Preview de cambios + aplicar + rollback. Reduce miedo, aumenta confianza. Delixon como "editor de arquitectura local" |
-| **CLI** | No existe | **5-8 comandos básicos en mediano plazo.** GUI primero, pero CLI para power users que quieren `delixon open mi-proyecto` desde terminal |
-| **Templates** | 7 vacíos en Delixon, 20 en StackPilot | **8-10 sólidos + recipes modulares.** No más. La fuerza está en composición, no en cantidad |
-| **Docker** | No integrado en Delixon | **Solo servicios.** up/down/status/logs + health checks + detección de puertos + plantillas docker por stack |
-| **Perfiles madurez** | Solo en el plan | **rapid/standard/production/enterprise** que cambien archivos reales, deps, estructura, validaciones. No etiquetas |
+| **Identidad** | ✅ GUI + CLI dual | **"Sistema operativo local del developer"** — gestiona TODO el ciclo de vida local: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar, reparar |
+| **Nucleo declarativo** | ✅ Implementado | Manifest `.delixon/manifest.yaml` unifica: techs, servicios, env vars, comandos, puertos, recipes, health checks |
+| **Flujo de creacion** | ✅ Wizard completo | Scaffold multi-step en GUI + `new`/`create` en CLI. Elegir tipo → stack → validar → generar → registrar |
+| **Scan/import** | ✅ Implementado | `scan` detecta 15+ aspectos del stack. Export/import con formato `.delixon` portable |
+| **Health + Doctor** | ✅ Implementado | Doctor del sistema + health por proyecto. GUI (HealthTab) + CLI. Sugerencias de fix |
+| **Versionado de stack** | ✅ Implementado | save/list/diff/rollback de manifest. GUI (VersioningTab) + CLI snapshot commands |
+| **CLI** | ✅ 28 comandos | Estrategia dual GUI+CLI. Ambas interfaces al mismo `delixon_lib`. Falta: autocompletado shell, instalacion global |
+| **Templates** | ✅ 7 funcionales | Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose. Ampliar con mas recipes |
+| **Docker** | ✅ Integrado | up/down/status/logs desde GUI (DockerTab) y CLI. Deteccion de puertos |
+| **Perfiles madurez** | ✅ Integrados | rapid/standard/production en scaffold. Cambian archivos reales |
 
 ### 19.4 Priorización final recomendada
 
-| Prioridad | Qué | Por qué |
+| Prioridad | Que | Estado |
 |---|---|---|
-| **P0 — Base** | Manifiesto de proyecto + catálogo tecnológico + reglas de compatibilidad | Sin esto todo lo demás es frágil. Es la columna vertebral |
-| **P1 — Crear** | Templates reales (8-10) + scaffold + recipes + scan de existentes | Lo que atrae usuarios: "creé un proyecto en 2 min" y "importé mi proyecto viejo" |
-| **P1 — Operar** | Health checks + doctor + Docker services + env vars aisladas | Lo que retiene usuarios: "Delixon me dice qué falla y cómo arreglarlo" |
-| **P2 — Evolucionar** | Versionado de stacks + diff/rollback + perfiles de madurez | Lo que genera confianza: "puedo tocar mi proyecto sin miedo" |
-| **P2 — Expandir** | CLI básico (5-8 cmds) + terminal integrada + scripts unificados | Lo que los power users piden desde el día 1 |
-| **P3 — Equipos** | `.delixon-team` + onboarding + secrets vault + multi-editor | Lo que monetiza: equipos pagan, individuos no |
+| **P0 — Base** | Manifest + catalogo + reglas + workspace + CLI + GUI | ✅ Completado |
+| **P1 — Crear** | 7 templates + scaffold wizard + recipes (6) + scan | ✅ Completado |
+| **P1 — Operar** | Health + doctor + Docker + env vars + Git + scripts + procesos | ✅ Completado |
+| **P2 — Evolucionar** | Versionado + diff/rollback + perfiles + notas + export/import | ✅ Completado |
+| **P2 — Expandir** | CLI 28 cmds + output formateado | ✅ Completado. Pendiente: terminal integrada, autocompletado shell |
+| **P3 — Equipos** | `.delixon-team` + onboarding + secrets vault + multi-editor | Pendiente — lo que monetiza |
+| **P4 — Futuro** | IA + agentes + marketplace + plugins | Pendiente — lo que diferencia |
 | **P4 — Sueño** | IA + agentes + marketplace + plugins + catálogos corporativos | Lo que diferencia a largo plazo, pero solo si lo anterior está sólido |
 
 ### 19.5 Conclusión
@@ -1452,7 +1501,7 @@ La fuerza real de la fusión está en que Delixon deja de ser solo un gestor de 
 
 **Lo crítico:** sin el núcleo declarativo (project manifest), la integración será vistosa pero frágil — "una colección de botones" en vez de un sistema coherente. El manifiesto es la columna vertebral sobre la que todo lo demás se construye.
 
-**La trampa a evitar:** no competir en cantidad (83 techs, 20 templates, 23 CLI commands). Competir en **calidad de la experiencia completa** — 25 tecnologías sólidas, 8 templates probados, y un flujo que funcione de extremo a extremo.
+**La trampa a evitar:** no competir en cantidad por la cantidad. Competir en **calidad de la experiencia completa** — 30+ tecnologias solidas, 7 templates probados, 28 comandos CLI, 6 recipes, y un flujo GUI+CLI que funcione de extremo a extremo.
 
 ---
 
