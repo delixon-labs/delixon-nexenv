@@ -1,0 +1,108 @@
+/* ============================================================
+   Paleta de colores de Delixon
+   Sincronizada con delixon-web (landing).
+
+   Cada variable se define DOS veces a proposito:
+   1. :root        → usable en CSS via var(--accent)
+   2. @theme       → genera Tailwind utilities (bg-accent, text-success...)
+   ============================================================ */
+
+:root {
+  /* Fondos — oscuro a claro */
+  --bg-dark-3: #050509;
+  --bg-dark-2: #080810;
+  --bg-dark-1: #0a0a14;
+  --bg-light-1: #12121e;
+  --bg-light-2: #1a1a2e;
+  --bg-light-3: #22223a;
+
+  /* Texto — oscuro a claro */
+  --text-dark-3: #3a3a5a;
+  --text-dark-2: #5a5a7a;
+  --text-dark-1: #7a7a9a;
+  --text-light-1: #a0a0c0;
+  --text-light-2: #c0c0d8;
+  --text-light-3: #e0e0f0;
+
+  /* Acento — purpura (identidad Delixon) */
+  --accent-dark-3: #3b1578;
+  --accent-dark-2: #5521a6;
+  --accent-dark-1: #6d28d9;
+  --accent: #7c3aed;
+  --accent-light-1: #8b5cf6;
+  --accent-light-2: #a78bfa;
+  --accent-light-3: #c4b5fd;
+
+  /* Success */
+  --success: #22c55e;
+  --success-light: #4ade80;
+  --success-dark: #15943a;
+
+  /* Warning */
+  --warning: #eab308;
+  --warning-light: #facc15;
+  --warning-dark: #ca8a04;
+
+  /* Error */
+  --error: #ef4444;
+  --error-light: #f87171;
+  --error-dark: #dc2626;
+
+  /* Info */
+  --info: #3b82f6;
+  --info-light: #60a5fa;
+  --info-dark: #2563eb;
+}
+
+/* Puente → Tailwind utilities
+   bg-dlx-dark-3, text-accent, border-success, etc.
+*/
+@theme {
+  /* Fondos */
+  --color-dlx-dark-3: var(--bg-dark-3);
+  --color-dlx-dark-2: var(--bg-dark-2);
+  --color-dlx-dark-1: var(--bg-dark-1);
+  --color-dlx-light-1: var(--bg-light-1);
+  --color-dlx-light-2: var(--bg-light-2);
+  --color-dlx-light-3: var(--bg-light-3);
+
+  /* Texto */
+  --color-dlx-text-dark-3: var(--text-dark-3);
+  --color-dlx-text-dark-2: var(--text-dark-2);
+  --color-dlx-text-dark-1: var(--text-dark-1);
+  --color-dlx-text-light-1: var(--text-light-1);
+  --color-dlx-text-light-2: var(--text-light-2);
+  --color-dlx-text-light-3: var(--text-light-3);
+
+  /* Acento */
+  --color-accent-dark-3: var(--accent-dark-3);
+  --color-accent-dark-2: var(--accent-dark-2);
+  --color-accent-dark-1: var(--accent-dark-1);
+  --color-accent: var(--accent);
+  --color-accent-light-1: var(--accent-light-1);
+  --color-accent-light-2: var(--accent-light-2);
+  --color-accent-light-3: var(--accent-light-3);
+
+  /* Semanticos */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-success-dark: var(--success-dark);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-warning-dark: var(--warning-dark);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
+  --color-error-dark: var(--error-dark);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+  --color-info-dark: var(--info-dark);
+
+  /* Primary — colores originales de la app (azul).
+     Cuando quieras migrar a purpura, cambia estos a var(--accent-*). */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #e0eaff;
+  --color-primary-500: #4f6ef7;
+  --color-primary-600: #3b5bdb;
+  --color-primary-700: #2f4ac0;
+  --color-primary-900: #1a2d7a;
+}

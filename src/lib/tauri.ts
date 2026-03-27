@@ -610,3 +610,15 @@ export async function takeEnvSnapshot(projectId: string): Promise<EnvSnapshot> {
 export async function diffEnvSnapshot(projectId: string): Promise<EnvDiff | null> {
   return safeInvoke<EnvDiff | null>("diff_env_snapshot", { projectId });
 }
+
+// --- Dialog (folder picker) ---
+
+export async function pickFolder(): Promise<string | null> {
+  if (isTauri()) {
+    const { open } = await import("@tauri-apps/plugin-dialog");
+    const selected = await open({ directory: true, multiple: false });
+    return selected as string | null;
+  }
+  // Mock: prompt en navegador
+  return prompt("Ruta del directorio:");
+}

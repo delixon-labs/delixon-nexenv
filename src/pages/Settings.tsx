@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/stores/settings";
 import * as api from "@/lib/tauri";
 import type { DetectedRuntime } from "@/lib/tauri";
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { config, setConfig } = useSettingsStore();
   const loadConfig = useSettingsStore((s) => s.loadConfig);
   const isLoaded = useSettingsStore((s) => s.isLoaded);
@@ -28,24 +30,24 @@ export default function Settings() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-3xl">
+    <div className="p-6 lg:p-8 max-w-3xl h-full overflow-y-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Configuracion</h1>
+        <h1 className="text-2xl font-bold text-white">{t("settings.title")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Ajustes globales de Delixon
+          {t("settings.subtitle")}
         </p>
       </div>
 
       {/* General */}
       <section className="mb-8">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-          General
+          {t("settings.general")}
         </h2>
         <div className="space-y-4">
           {/* Editor */}
           <SettingRow
-            label="Editor de codigo"
-            description="Comando para abrir el editor al hacer clic en 'Abrir proyecto'"
+            label={t("settings.editor")}
+            description={t("settings.editorDesc")}
           >
             <select
               value={config.defaultEditor}
@@ -64,8 +66,8 @@ export default function Settings() {
 
           {/* Tema */}
           <SettingRow
-            label="Tema"
-            description="Apariencia visual de la aplicacion"
+            label={t("settings.theme")}
+            description={t("settings.themeDesc")}
           >
             <div className="flex gap-2">
               {(["dark", "light", "system"] as const).map((theme) => (
@@ -79,17 +81,17 @@ export default function Settings() {
                   }`}
                 >
                   {theme === "dark"
-                    ? "Oscuro"
+                    ? t("settings.themeDark")
                     : theme === "light"
-                      ? "Claro"
-                      : "Sistema"}
+                      ? t("settings.themeLight")
+                      : t("settings.themeSystem")}
                 </button>
               ))}
             </div>
           </SettingRow>
 
           {/* Idioma */}
-          <SettingRow label="Idioma" description="Idioma de la interfaz">
+          <SettingRow label={t("settings.language")} description={t("settings.languageDesc")}>
             <div className="flex gap-2">
               {(["es", "en"] as const).map((lang) => (
                 <button
@@ -101,7 +103,28 @@ export default function Settings() {
                       : "bg-gray-800 text-gray-500 border-gray-700 hover:text-gray-300"
                   }`}
                 >
-                  {lang === "es" ? "Espanol" : "English"}
+                  {lang === "es" ? "Español" : "English"}
+                </button>
+              ))}
+            </div>
+          </SettingRow>
+
+          {/* Font Pack */}
+          <SettingRow label={t("settings.fontPack")} description={t("settings.fontPackDesc")}>
+            <div className="flex gap-2">
+              {(["system", "classic"] as const).map((pack) => (
+                <button
+                  key={pack}
+                  onClick={() => setConfig({ fontPack: pack })}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                    config.fontPack === pack
+                      ? "bg-primary-500/10 text-primary-500 border-primary-500/30"
+                      : "bg-gray-800 text-gray-500 border-gray-700 hover:text-gray-300"
+                  }`}
+                >
+                  <span className={pack === "classic" ? "font-serif" : ""}>
+                    {pack === "system" ? "System (Inter)" : "Classic (Georgia)"}
+                  </span>
                 </button>
               ))}
             </div>
@@ -109,8 +132,8 @@ export default function Settings() {
 
           {/* Data dir */}
           <SettingRow
-            label="Directorio de datos"
-            description="Donde Delixon almacena la configuracion de proyectos"
+            label={t("settings.dataDir")}
+            description={t("settings.dataDirDesc")}
           >
             <input
               type="text"
@@ -126,14 +149,14 @@ export default function Settings() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
-            Runtimes detectados
+            {t("settings.runtimes")}
           </h2>
           <button
             onClick={loadRuntimes}
             disabled={loadingRuntimes}
             className="px-3 py-1 rounded-md text-xs text-primary-500 hover:bg-primary-500/10 transition-colors disabled:opacity-50"
           >
-            {loadingRuntimes ? "Detectando..." : "Redetectar"}
+            {loadingRuntimes ? t("settings.detecting") : t("settings.redetect")}
           </button>
         </div>
 
@@ -164,8 +187,7 @@ export default function Settings() {
           </div>
         ) : (
           <div className="px-4 py-8 rounded-xl bg-gray-900 border border-gray-800 text-center text-sm text-gray-600">
-            No se detectaron runtimes. Ejecuta la app dentro de Tauri para
-            detectar los runtimes del sistema.
+            {t("settings.noRuntimes")}
           </div>
         )}
       </section>
@@ -173,15 +195,15 @@ export default function Settings() {
       {/* About */}
       <section>
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-          Acerca de
+          {t("settings.about")}
         </h2>
         <div className="rounded-xl bg-gray-900 border border-gray-800 px-4 py-4">
-          <p className="text-sm text-white font-medium">Delixon v1.0.0</p>
+          <p className="text-sm text-white font-medium">{t("settings.version")}</p>
           <p className="text-xs text-gray-500 mt-1">
-            Gestor de workspaces para desarrolladores
+            {t("settings.tagline")}
           </p>
           <p className="text-xs text-gray-600 mt-2">
-            Deja de configurar. Empieza a construir.
+            {t("settings.motto")}
           </p>
         </div>
       </section>

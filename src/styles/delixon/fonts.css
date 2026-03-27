@@ -1,0 +1,29 @@
+/* ============================================================
+   Font packs de Delixon — cada pack define sans + mono.
+   El pack activo se selecciona via [data-font-pack] en <html>.
+   ============================================================ */
+
+:root {
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-mono: "JetBrains Mono", "Fira Code", "monospace";
+}
+
+/* Pack: system */
+[data-font-pack="system"] {
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-mono: "JetBrains Mono", "Fira Code", "monospace";
+}
+
+/* Pack: classic */
+[data-font-pack="classic"] {
+  --font-sans: "Consolas", "Menlo", "Monaco", "monospace";
+  --font-mono: "Courier New", "Courier", "monospace";
+}
+
+/* Puente → Tailwind utilities
+   font-sans, font-mono
+*/
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}

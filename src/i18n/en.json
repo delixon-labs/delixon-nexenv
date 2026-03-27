@@ -1,0 +1,222 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "search": "Search...",
+    "noResults": "No results",
+    "optional": "optional"
+  },
+  "sidebar": {
+    "projects": "Projects",
+    "createProject": "Create project",
+    "templates": "Templates",
+    "catalog": "Catalog",
+    "settings": "Settings",
+    "recent": "Recent"
+  },
+  "dashboard": {
+    "title": "Projects",
+    "subtitle": "Manage your development workspaces",
+    "createProject": "New project",
+    "registerExisting": "Register existing",
+    "importProject": "Import",
+    "searchPlaceholder": "Search projects...",
+    "noProjects": "No projects yet",
+    "noProjectsHint": "Create a new project or register an existing one to get started.",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterArchived": "Archived"
+  },
+  "project": {
+    "openEditor": "Editor",
+    "openTerminal": "Terminal",
+    "openWorkspace": "Workspace",
+    "export": "Export",
+    "back": "Back",
+    "createdFrom": "Created from template: {{template}}",
+    "panel": "Panel",
+    "general": "General",
+    "unlink": "Unlink project",
+    "unlinkDesc": "Remove this project from the Delixon registry. Your files on disk will not be modified and you can re-register it at any time.",
+    "unlinkButton": "Unlink",
+    "unlinkConfirm": "Are you sure?",
+    "unlinkYes": "Yes, unlink",
+    "tabs": {
+      "health": "Health",
+      "git": "Git",
+      "scripts": "Scripts",
+      "docker": "Docker",
+      "manifest": "Manifest",
+      "recipes": "Recipes",
+      "versioning": "Versions",
+      "processes": "Processes",
+      "notes": "Notes"
+    }
+  },
+  "health": {
+    "title": "Health Checks",
+    "refresh": "Refresh",
+    "running": "Running checks...",
+    "noChecks": "No health checks available",
+    "suggestion": "Suggestion"
+  },
+  "git": {
+    "branch": "Branch",
+    "remote": "Remote",
+    "status": "Status",
+    "clean": "Clean",
+    "changes": "{{count}} changes",
+    "recentCommits": "Recent commits",
+    "noCommits": "No commits found",
+    "refresh": "Refresh"
+  },
+  "scripts": {
+    "title": "Scripts",
+    "run": "Run",
+    "running": "Running...",
+    "noScripts": "No scripts in manifest",
+    "output": "Output",
+    "error": "Error"
+  },
+  "docker": {
+    "title": "Docker Services",
+    "start": "Start",
+    "stop": "Stop",
+    "logs": "Logs",
+    "status": "Status",
+    "noServices": "No Docker services configured",
+    "starting": "Starting...",
+    "stopping": "Stopping..."
+  },
+  "manifest": {
+    "title": "Manifest",
+    "technologies": "Technologies",
+    "commands": "Commands",
+    "services": "Services",
+    "envVars": "Environment variables",
+    "required": "Required",
+    "ports": "Ports",
+    "recipes": "Recipes applied",
+    "noManifest": "No manifest found"
+  },
+  "recipes": {
+    "title": "Recipes",
+    "available": "Available",
+    "applied": "Applied",
+    "apply": "Apply",
+    "preview": "Preview",
+    "applying": "Applying...",
+    "noRecipes": "No recipes available"
+  },
+  "versioning": {
+    "title": "Versions",
+    "save": "Save snapshot",
+    "saving": "Saving...",
+    "noSnapshots": "No snapshots yet",
+    "compare": "Compare",
+    "rollback": "Rollback",
+    "confirmRollback": "Restore this version?",
+    "diff": "Differences"
+  },
+  "processes": {
+    "title": "Processes",
+    "pid": "PID",
+    "port": "Port",
+    "kill": "Kill",
+    "confirmKill": "Kill this process?",
+    "noProcesses": "No processes found on project ports"
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Write a note...",
+    "add": "Add",
+    "noNotes": "No notes. Add one for context.",
+    "delete": "Delete"
+  },
+  "register": {
+    "title": "Register existing project",
+    "pathLabel": "Project path",
+    "pathPlaceholder": "C:\\Users\\you\\projects\\my-app",
+    "browse": "Browse",
+    "nameLabel": "Name",
+    "nameAutoDetect": "optional, auto-detected",
+    "scan": "Scan",
+    "scanning": "Scanning...",
+    "register": "Register",
+    "registering": "Registering...",
+    "readiness": "Readiness Score",
+    "suggestedRecipes": "Suggested recipes"
+  },
+  "createModal": {
+    "title": "New project",
+    "name": "Project name",
+    "path": "Path",
+    "browse": "Browse",
+    "template": "Template",
+    "noTemplate": "No template",
+    "create": "Create",
+    "creating": "Creating..."
+  },
+  "importModal": {
+    "title": "Import project",
+    "file": "File (.delixon)",
+    "browse": "Browse",
+    "path": "Target path",
+    "import": "Import",
+    "importing": "Importing..."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Global Delixon settings",
+    "general": "General",
+    "editor": "Code editor",
+    "editorDesc": "Command to open the editor when clicking 'Open project'",
+    "theme": "Theme",
+    "themeDesc": "Visual appearance of the application",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "themeSystem": "System",
+    "language": "Language",
+    "languageDesc": "Interface language",
+    "fontPack": "Typography",
+    "fontPackDesc": "Font pack for the interface",
+    "dataDir": "Data directory",
+    "dataDirDesc": "Where Delixon stores project configuration",
+    "runtimes": "Detected runtimes",
+    "redetect": "Re-detect",
+    "detecting": "Detecting...",
+    "noRuntimes": "No runtimes detected. Run the app inside Tauri to detect system runtimes.",
+    "about": "About",
+    "version": "Delixon v1.0.0",
+    "tagline": "Workspace manager for developers",
+    "motto": "Stop configuring. Start building."
+  },
+  "scaffold": {
+    "title": "Create project",
+    "stepInfo": "Info",
+    "stepStack": "Stack",
+    "stepPreview": "Preview",
+    "stepResult": "Result"
+  },
+  "catalog": {
+    "title": "Technology Catalog",
+    "search": "Search technologies...",
+    "all": "All",
+    "details": "Details",
+    "requires": "Requires",
+    "recommends": "Recommends",
+    "conflicts": "Conflicts with"
+  },
+  "templates": {
+    "title": "Templates",
+    "use": "Use template",
+    "technologies": "Technologies"
+  }
+}

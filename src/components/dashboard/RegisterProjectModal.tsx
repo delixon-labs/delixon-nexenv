@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import * as api from "@/lib/tauri";
 import type { DetectedStack } from "@/lib/tauri";
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Props) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<"path" | "scan" | "confirm">("path");
   const [path, setPath] = useState("");
   const [name, setName] = useState("");
@@ -18,6 +20,15 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  async function handleBrowse() {
+    try {
+      const selected = await api.pickFolder();
+      if (selected) setPath(selected);
+    } catch {
+      // No-op si el usuario cancela
+    }
+  }
 
   async function handleScan() {
     if (!path.trim()) return;
@@ -75,7 +86,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
       <div className="w-full max-w-lg rounded-2xl bg-gray-900 border border-gray-800 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h2 className="text-lg font-semibold text-white">Registrar proyecto existente</h2>
+          <h2 className="text-lg font-semibold text-white">{t("register.title")}</h2>
           <button onClick={handleClose} className="p-1 text-gray-500 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -95,21 +106,32 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Ruta del proyecto
+                  {t("register.pathLabel")}
                 </label>
-                <input
-                  type="text"
-                  value={path}
-                  onChange={(e) => setPath(e.target.value)}
-                  placeholder="/home/user/my-project"
-                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm font-mono placeholder-gray-600 focus:outline-none focus:border-primary-500"
-                  onKeyDown={(e) => e.key === "Enter" && handleScan()}
-                  autoFocus
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={path}
+                    onChange={(e) => setPath(e.target.value)}
+                    placeholder={t("register.pathPlaceholder")}
+                    className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm font-mono placeholder-gray-600 focus:outline-none focus:border-primary-500"
+                    onKeyDown={(e) => e.key === "Enter" && handleScan()}
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleBrowse}
+                    className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 hover:text-white transition-colors"
+                    title={t("register.browse")}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Nombre <span className="text-gray-600">(opcional, se auto-detecta)</span>
+                  {t("register.nameLabel")} <span className="text-gray-600">({t("register.nameAutoDetect")})</span>
                 </label>
                 <input
                   type="text"
@@ -126,7 +148,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
           {step === "confirm" && stack && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t("register.nameLabel")}</label>
                 <input
                   type="text"
                   value={name}
@@ -171,7 +193,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
               {score && (
                 <div className="rounded-lg bg-gray-800/50 border border-gray-700 p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-300">Readiness Score</span>
+                    <span className="text-sm font-medium text-gray-300">{t("register.readiness")}</span>
                     <span className={`text-lg font-bold ${scoreColor}`}>
                       {score.total}/{score.max}
                     </span>
@@ -186,7 +208,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
                   </div>
                   {score.suggestions.length > 0 && (
                     <p className="text-xs text-gray-500 mt-2">
-                      Recipes sugeridas: {score.suggestions.join(", ")}
+                      {t("register.suggestedRecipes")}: {score.suggestions.join(", ")}
                     </p>
                   )}
                 </div>
@@ -201,7 +223,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
             onClick={handleClose}
             className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Cancelar
+            {t("common.cancel")}
           </button>
           {step === "path" && (
             <button
@@ -209,7 +231,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
               disabled={scanning || !path.trim()}
               className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
             >
-              {scanning ? "Escaneando..." : "Escanear"}
+              {scanning ? t("register.scanning") : t("register.scan")}
             </button>
           )}
           {step === "confirm" && (
@@ -218,14 +240,14 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
                 onClick={() => setStep("path")}
                 className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
               >
-                Atras
+                {t("common.back")}
               </button>
               <button
                 onClick={handleRegister}
                 disabled={registering || !name.trim()}
                 className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
               >
-                {registering ? "Registrando..." : "Registrar"}
+                {registering ? t("register.registering") : t("register.register")}
               </button>
             </>
           )}

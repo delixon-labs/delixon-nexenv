@@ -1,33 +1,4 @@
 @import "tailwindcss";
-
-@theme {
-  --color-primary-50: #f0f4ff;
-  --color-primary-100: #e0eaff;
-  --color-primary-500: #4f6ef7;
-  --color-primary-600: #3b5bdb;
-  --color-primary-700: #2f4ac0;
-  --color-primary-900: #1a2d7a;
-
-  --font-sans: "Inter", "system-ui", "sans-serif";
-  --font-mono: "JetBrains Mono", "Fira Code", "monospace";
-}
-
-@layer base {
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* Deshabilitar selección de texto en la UI de la app */
-    user-select: none;
-  }
-
-  /* Permitir selección en contenido de texto */
-  p, span, input, textarea {
-    user-select: text;
-  }
-}
+@import "./styles/delixon/colors.css";
+@import "./styles/delixon/fonts.css";
+@import "./styles/delixon/base.css";

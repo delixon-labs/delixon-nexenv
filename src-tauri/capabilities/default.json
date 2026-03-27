@@ -11,6 +11,7 @@
     "fs:allow-write-text-file",
     "fs:allow-exists",
     "fs:allow-mkdir",
-    "process:default"
+    "process:default",
+    "dialog:default"
   ]
 }

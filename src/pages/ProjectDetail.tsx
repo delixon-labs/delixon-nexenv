@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import * as api from "@/lib/tauri";
 import type { Project, Runtime, RuntimeConfig } from "@/types/project";
 import { useProjectsStore } from "@/stores/projects";
@@ -40,6 +41,7 @@ const PROJECT_TABS: TabDefinition[] = [
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { removeProject } = useProjectsStore();
 
   const [project, setProject] = useState<Project | null>(null);
@@ -214,7 +216,7 @@ export default function ProjectDetail() {
   if (!project) return null;
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
+    <div className="p-6 lg:p-8 max-w-5xl h-full overflow-y-auto">
       {/* Back */}
       <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors mb-6">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -393,19 +395,19 @@ export default function ProjectDetail() {
             </div>
           </section>
 
-          {/* Danger Zone */}
-          <section className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
-            <h2 className="text-sm font-semibold text-red-400 uppercase tracking-wider mb-2">Zona de peligro</h2>
-            <p className="text-sm text-gray-500 mb-4">Eliminar el proyecto del registro. Los archivos no se borran.</p>
+          {/* Unlink */}
+          <section className="rounded-xl border border-gray-700/50 bg-gray-900 p-6">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">{t("project.unlink")}</h2>
+            <p className="text-sm text-gray-500 mb-4">{t("project.unlinkDesc")}</p>
             {!confirmDelete ? (
-              <button onClick={() => setConfirmDelete(true)} className="px-4 py-2 rounded-lg border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors">
-                Eliminar proyecto
+              <button onClick={() => setConfirmDelete(true)} className="px-4 py-2 rounded-lg border border-gray-600 text-gray-400 text-sm font-medium hover:bg-gray-800 transition-colors">
+                {t("project.unlinkButton")}
               </button>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-red-400">Confirmar?</span>
-                <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors">Si, eliminar</button>
-                <button onClick={() => setConfirmDelete(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-white transition-colors">Cancelar</button>
+                <span className="text-sm text-amber-400">{t("project.unlinkConfirm")}</span>
+                <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors">{t("project.unlinkYes")}</button>
+                <button onClick={() => setConfirmDelete(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-white transition-colors">{t("common.cancel")}</button>
               </div>
             )}
           </section>

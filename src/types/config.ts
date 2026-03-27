@@ -4,6 +4,7 @@ export interface DelixonConfig {
   defaultEditor: string;
   theme: "dark" | "light" | "system";
   language: "es" | "en";
+  fontPack: "system" | "classic";
   autoCheckUpdates: boolean;
 }
 
@@ -13,5 +14,6 @@ export const DEFAULT_CONFIG: DelixonConfig = {
   defaultEditor: "code",
   theme: "dark",
   language: "es",
+  fontPack: "system",
   autoCheckUpdates: true,
 };

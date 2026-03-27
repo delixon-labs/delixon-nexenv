@@ -1,17 +1,19 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useProjectsStore } from "@/stores/projects";
 import { useSettingsStore } from "@/stores/settings";
 import { clsx } from "clsx";
 
 const navItems = [
-  { to: "/", label: "Proyectos", icon: IconGrid },
-  { to: "/scaffold", label: "Crear proyecto", icon: IconPlus },
-  { to: "/templates", label: "Plantillas", icon: IconTemplate },
-  { to: "/catalog", label: "Catalogo", icon: IconCatalog },
-  { to: "/settings", label: "Configuracion", icon: IconSettings },
+  { to: "/", labelKey: "sidebar.projects", icon: IconGrid },
+  { to: "/scaffold", labelKey: "sidebar.createProject", icon: IconPlus },
+  { to: "/templates", labelKey: "sidebar.templates", icon: IconTemplate },
+  { to: "/catalog", labelKey: "sidebar.catalog", icon: IconCatalog },
+  { to: "/settings", labelKey: "sidebar.settings", icon: IconSettings },
 ];
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const { projects } = useProjectsStore();
   const { sidebarCollapsed, toggleSidebar } = useSettingsStore();
 
@@ -56,7 +58,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, labelKey, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -71,7 +73,7 @@ export default function Sidebar() {
             }
           >
             <Icon className="w-5 h-5 flex-shrink-0" />
-            {!sidebarCollapsed && <span>{label}</span>}
+            {!sidebarCollapsed && <span>{t(labelKey)}</span>}
           </NavLink>
         ))}
 
@@ -79,7 +81,7 @@ export default function Sidebar() {
         {!sidebarCollapsed && recentProjects.length > 0 && (
           <div className="pt-6">
             <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Recientes
+              {t("sidebar.recent")}
             </p>
             {recentProjects.map((project) => (
               <NavLink

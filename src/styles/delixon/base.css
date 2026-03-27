@@ -1,0 +1,13 @@
+/* ============================================================
+   Delixon Base — overrides puntuales sobre Tailwind.
+   Sin @layer — gana sobre Tailwind cuando necesites forzar algo.
+   Solo agregar reglas aqui cuando Tailwind NO haga lo que quieres.
+   ============================================================ */
+
+/* --- Scrollbar invisible ---
+   Oculta el scrollbar en toda la app. El scroll sigue funcionando.
+*/
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
