@@ -488,9 +488,14 @@ fn cmd_doctor() -> Result<(), String> {
 
     let report = doctor::run_doctor().map_err(|e| e.to_string())?;
 
+    let mut current_group = String::new();
     for check in &report.checks {
+        if check.group != current_group {
+            current_group = check.group.clone();
+            println!("\n  {}", current_group.bold().underline());
+        }
         let icon = if check.ok { "ok".green() } else { "!!".yellow() };
-        println!("  {} {}: {}", icon, check.name.bold(), check.message);
+        println!("    {} {}: {}", icon, check.name, check.message);
     }
 
     if report.overall_ok {

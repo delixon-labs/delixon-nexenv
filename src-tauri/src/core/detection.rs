@@ -118,15 +118,15 @@ pub fn detect_stack(project_path: &str) -> Result<DetectedStack, DelixonError> {
     }
 
     // --- Rust ---
-    let cargo_toml = path.join("Cargo.toml");
-    if cargo_toml.exists() {
+    let cargo_toml = find_file_in_root_or_subdirs(path, "Cargo.toml");
+    if let Some(cargo_path) = cargo_toml {
         runtimes.push(RuntimeConfig {
             runtime: "rust".to_string(),
             version: String::new(),
         });
         tags.push("rust".to_string());
 
-        if let Ok(data) = std::fs::read_to_string(&cargo_toml) {
+        if let Ok(data) = std::fs::read_to_string(&cargo_path) {
             if data.contains("[[bin]]") || data.contains("[bin]") {
                 tags.push("cli".to_string());
             }
@@ -211,11 +211,14 @@ pub fn detect_stack(project_path: &str) -> Result<DetectedStack, DelixonError> {
     }
 
     // --- Docker ---
-    let has_dockerfile = path.join("Dockerfile").exists();
+    let has_dockerfile = path.join("Dockerfile").exists()
+        || find_file_in_root_or_subdirs(path, "Dockerfile").is_some();
     let has_compose = path.join("docker-compose.yml").exists()
         || path.join("docker-compose.yaml").exists()
         || path.join("compose.yml").exists()
-        || path.join("compose.yaml").exists();
+        || path.join("compose.yaml").exists()
+        || find_file_in_root_or_subdirs(path, "docker-compose.yml").is_some()
+        || find_file_in_root_or_subdirs(path, "compose.yml").is_some();
     let docker = if has_dockerfile || has_compose {
         tags.push("docker".to_string());
         Some(DockerInfo {
@@ -516,7 +519,9 @@ fn detect_testing(path: &Path, pkg_data: Option<&serde_json::Value>) -> Option<S
     }
 
     // Cargo.toml tests dir
-    if path.join("Cargo.toml").exists() && path.join("tests").is_dir() {
+    if find_file_in_root_or_subdirs(path, "Cargo.toml").is_some()
+        && (path.join("tests").is_dir() || find_dir_in_subdirs(path, "tests").is_some())
+    {
         return Some("cargo-test".to_string());
     }
 
@@ -606,7 +611,7 @@ fn detect_linter(path: &Path, pkg_data: Option<&serde_json::Value>) -> Option<St
     }
 
     // Rust clippy (always available with rustc)
-    if path.join("Cargo.toml").exists() {
+    if find_file_in_root_or_subdirs(path, "Cargo.toml").is_some() {
         return Some("clippy".to_string());
     }
 
@@ -682,18 +687,30 @@ fn calculate_readiness_score(input: &ReadinessInput) -> ReadinessScore {
         suggestions.push("ci".to_string());
     }
 
-    // 3. Docker (+1)
+    // 3. Docker (+1) — no aplica a apps de escritorio (tauri, electron)
+    let is_desktop_app = input.tags.iter().any(|t| t == "tauri" || t == "electron");
     let docker_present = input.docker.is_some();
-    breakdown.push(ScoreItem {
-        name: "Docker".to_string(),
-        points: if docker_present { 1 } else { 0 },
-        max_points: 1,
-        present: docker_present,
-    });
-    if docker_present {
+    if is_desktop_app {
+        // Apps de escritorio no necesitan Docker, no penalizar
+        breakdown.push(ScoreItem {
+            name: "Docker (n/a desktop)".to_string(),
+            points: 1,
+            max_points: 1,
+            present: true,
+        });
         total += 1;
     } else {
-        suggestions.push("docker".to_string());
+        breakdown.push(ScoreItem {
+            name: "Docker".to_string(),
+            points: if docker_present { 1 } else { 0 },
+            max_points: 1,
+            present: docker_present,
+        });
+        if docker_present {
+            total += 1;
+        } else {
+            suggestions.push("docker".to_string());
+        }
     }
 
     // 4. Linter (+1)
@@ -773,6 +790,55 @@ fn calculate_readiness_score(input: &ReadinessInput) -> ReadinessScore {
         breakdown,
         suggestions,
     }
+}
+
+/// Busca un archivo en la raiz o en subdirectorios comunes (1 nivel de profundidad).
+/// Util para proyectos como Tauri donde Cargo.toml esta en src-tauri/.
+fn find_file_in_root_or_subdirs(root: &Path, filename: &str) -> Option<std::path::PathBuf> {
+    let direct = root.join(filename);
+    if direct.exists() {
+        return Some(direct);
+    }
+    // Buscar en subdirectorios de primer nivel
+    if let Ok(entries) = std::fs::read_dir(root) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_dir() {
+                // Ignorar node_modules, .git, target y otros dirs pesados
+                if let Some(name) = entry_path.file_name().and_then(|n| n.to_str()) {
+                    if matches!(name, "node_modules" | ".git" | "target" | "dist" | "build" | ".next" | "__pycache__") {
+                        continue;
+                    }
+                }
+                let candidate = entry_path.join(filename);
+                if candidate.exists() {
+                    return Some(candidate);
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Busca un directorio por nombre en subdirectorios de primer nivel.
+fn find_dir_in_subdirs(root: &Path, dirname: &str) -> Option<std::path::PathBuf> {
+    if let Ok(entries) = std::fs::read_dir(root) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_dir() {
+                if let Some(name) = entry_path.file_name().and_then(|n| n.to_str()) {
+                    if matches!(name, "node_modules" | ".git" | "target" | "dist" | "build") {
+                        continue;
+                    }
+                }
+                let candidate = entry_path.join(dirname);
+                if candidate.is_dir() {
+                    return Some(candidate);
+                }
+            }
+        }
+    }
+    None
 }
 
 fn has_file_with_extension(dir: &Path, ext: &str) -> bool {
