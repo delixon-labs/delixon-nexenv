@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::core::error::DelixonError;
+use crate::core::manifest::{self, ProjectManifest};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::storage;
 
@@ -10,6 +11,9 @@ pub struct DelixonExport {
     pub version: String,
     pub exported_at: String,
     pub project: ExportedProject,
+    /// Manifest completo del proyecto (si existe)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub manifest: Option<ProjectManifest>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,6 +38,9 @@ pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
     let env_vars = storage::load_env_vars(project_id)?;
     let env_keys: Vec<String> = env_vars.keys().cloned().collect();
 
+    // Cargar manifest si existe
+    let project_manifest = manifest::load_manifest(&project.path).unwrap_or(None);
+
     let export = DelixonExport {
         version: "1".to_string(),
         exported_at: chrono::Utc::now().to_rfc3339(),
@@ -45,6 +52,7 @@ pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
             template_id: project.template_id.clone(),
             env_keys,
         },
+        manifest: project_manifest,
     };
 
     let json = serde_json::to_string_pretty(&export)?;
@@ -90,6 +98,11 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
             .map(|k| (k, String::new()))
             .collect();
         storage::save_env_vars(&project.id, &vars)?;
+    }
+
+    // Restaurar manifest si viene en el export
+    if let Some(m) = export.manifest {
+        let _ = manifest::save_manifest(target_path, &m);
     }
 
     Ok(project)

@@ -14,6 +14,9 @@ pub enum DelixonError {
     #[error("Configuracion invalida: {0}")]
     InvalidConfig(String),
 
+    #[error("Manifest invalido: {0}")]
+    InvalidManifest(String),
+
     #[error("Error de IO: {0}")]
     Io(#[from] std::io::Error),
 

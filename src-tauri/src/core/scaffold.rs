@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::core::catalog;
 use crate::core::error::DelixonError;
-use crate::core::manifest::{ManifestEnvVars, ManifestService, ProjectManifest};
+use crate::core::manifest::{ManifestEnvVars, ManifestMetadata, ManifestService, ProjectManifest, CURRENT_SCHEMA_VERSION};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::rules;
 use crate::core::storage;
@@ -475,7 +475,10 @@ fn build_manifest(config: &ScaffoldConfig, validation: &rules::ValidationResult)
     }
     required_env.sort();
 
+    let now = chrono::Utc::now().to_rfc3339();
+
     ProjectManifest {
+        schema_version: CURRENT_SCHEMA_VERSION,
         name: config.name.clone(),
         project_type: config.project_type.clone(),
         profile: config.profile.clone(),
@@ -490,6 +493,12 @@ fn build_manifest(config: &ScaffoldConfig, validation: &rules::ValidationResult)
         ports,
         recipes_applied: Vec::new(),
         health_checks: Vec::new(),
+        metadata: ManifestMetadata {
+            description: String::new(),
+            created_at: now,
+            author: String::new(),
+        },
+        editor: None,
     }
 }
 

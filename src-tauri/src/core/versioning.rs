@@ -22,6 +22,8 @@ pub struct SnapshotDiff {
     pub added_techs: Vec<String>,
     pub removed_techs: Vec<String>,
     pub added_recipes: Vec<String>,
+    pub profile_changed: Option<(String, String)>,
+    pub editor_changed: Option<(Option<String>, Option<String>)>,
 }
 
 fn snapshots_dir(project_id: &str) -> Result<PathBuf, DelixonError> {
@@ -108,12 +110,26 @@ pub fn diff_snapshots(project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff
         .cloned()
         .collect();
 
+    let profile_changed = if s1.manifest.profile != s2.manifest.profile {
+        Some((s1.manifest.profile.clone(), s2.manifest.profile.clone()))
+    } else {
+        None
+    };
+
+    let editor_changed = if s1.manifest.editor != s2.manifest.editor {
+        Some((s1.manifest.editor.clone(), s2.manifest.editor.clone()))
+    } else {
+        None
+    };
+
     Ok(SnapshotDiff {
         from_version: v1,
         to_version: v2,
         added_techs,
         removed_techs,
         added_recipes,
+        profile_changed,
+        editor_changed,
     })
 }
 

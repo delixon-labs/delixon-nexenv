@@ -579,6 +579,7 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
         Some(m) => {
             println!("{} {}", "Manifest:".bold(), project.name);
             println!("{}", "=".repeat(40));
+            println!("Schema:    v{}", m.schema_version);
             println!("Tipo:      {}", m.project_type.cyan());
             println!("Perfil:    {}", m.profile);
             println!("Runtime:   {}", m.runtime.green());
@@ -588,6 +589,18 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
             if !m.ports.is_empty() {
                 let ports: Vec<String> = m.ports.iter().map(|p| p.to_string()).collect();
                 println!("Puertos:   {}", ports.join(", "));
+            }
+            if let Some(ref editor) = m.editor {
+                println!("Editor:    {}", editor);
+            }
+            if !m.metadata.description.is_empty() {
+                println!("Desc:      {}", m.metadata.description);
+            }
+            if !m.metadata.author.is_empty() {
+                println!("Autor:     {}", m.metadata.author);
+            }
+            if !m.metadata.created_at.is_empty() {
+                println!("Creado:    {}", m.metadata.created_at);
             }
             if !m.commands.is_empty() {
                 println!("\n{}", "Comandos:".bold());
@@ -599,6 +612,18 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
                 println!("\n{}", "Servicios:".bold());
                 for svc in &m.services {
                     println!("  {} (puerto {})", svc.name, svc.port);
+                }
+            }
+            if !m.env_vars.required.is_empty() {
+                println!("\n{}", "Env vars requeridas:".bold());
+                for key in &m.env_vars.required {
+                    println!("  {}", key);
+                }
+            }
+            if !m.recipes_applied.is_empty() {
+                println!("\n{}", "Recipes aplicadas:".bold());
+                for recipe in &m.recipes_applied {
+                    println!("  {}", recipe.green());
                 }
             }
         }
