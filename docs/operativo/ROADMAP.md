@@ -168,8 +168,8 @@
 | **CLI** | 23 comandos funcionales (0 stubs) | [x] cli.rs revisado |
 | **Core modules** | 17 modulos Rust con implementacion real | [x] Todos >90 lineas |
 | **Manifest** | schema_version, metadata, editor, validate, normalize | [x] manifest.rs:500 lineas |
-| **GUI** | 6 paginas + 9 tabs funcionales | [x] Componentes revisados |
-| **Templates** | 7 templates con generacion real (include_str) | [x] templates/mod.rs |
+| **GUI** | 6 paginas + 9 tabs funcionales. Paleta semantica (info/success/warning/error/dlx-grays). Colores de marca por tecnologia via CSS (@theme). PathInput reutilizable. i18n parcial (es/en) | [x] Componentes revisados |
+| **Templates** | 7 templates con generacion real (include_str), modularizados (1 archivo .rs por template + registry.rs) | [x] templates/*.rs |
 | **Recipes** | 6 recipes con preview y apply | [x] recipes/mod.rs |
 | **Catalogo** | 30 YAML con metadatos completos | [x] 30 archivos .yaml |
 | **RulesEngine** | Validacion, dependencias, conflictos, puertos | [x] rules.rs:247 lineas |

@@ -585,7 +585,6 @@ delixon/
 │   │   │   └── shell.rs          # Integración con terminales
 │   │   ├── models/               # Estructuras de datos
 │   │   │   ├── project.rs
-│   │   │   ├── template.rs
 │   │   │   └── config.rs
 │   │   └── utils/                # Utilidades del sistema
 │   │       ├── fs.rs             # Operaciones de archivo
@@ -595,24 +594,18 @@ delixon/
 │
 ├── src/                          # Frontend React
 │   ├── components/
-│   │   ├── ui/                   # Componentes base (shadcn)
-│   │   ├── project-card/
-│   │   ├── project-editor/
-│   │   ├── template-gallery/
-│   │   ├── dependency-viewer/
-│   │   └── terminal-panel/
-│   ├── stores/
-│   ├── hooks/
-│   └── lib/
-│
-├── templates/                    # Plantillas de proyectos
-│   ├── node-express/
-│   ├── react-vite/
-│   ├── python-fastapi/
-│   ├── python-django/
-│   ├── fullstack-react-python/
-│   ├── rust-cli/
-│   └── docker-compose/
+│   │   ├── ui/                   # Componentes reutilizables (PathInput, ScrollRow...)
+│   │   ├── dashboard/            # ProjectCard, modales (Create, Register, Import)
+│   │   ├── project/              # Tabs del detalle de proyecto (9 tabs)
+│   │   ├── templates/            # UseTemplateModal
+│   │   └── layout/               # Sidebar
+│   ├── pages/                    # Dashboard, ProjectDetail, Catalog, Templates, Scaffold, Settings
+│   ├── stores/                   # Zustand stores
+│   ├── styles/
+│   │   ├── delixon/              # Paleta de colores, fonts, base CSS
+│   │   └── tech/                 # Colores de marca por tecnologia (brand + catalog)
+│   ├── lib/                      # Tauri bridge, tech-meta, catalog helpers
+│   └── i18n/                     # Traducciones (es.json, en.json)
 │
 └── docs/
 ```
@@ -894,7 +887,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Catalogo de 30+ tecnologias en YAML con metadatos completos y UI de browse/search
 - [x] RulesEngine: validacion, dependencias automaticas, conflictos, puertos, sugerencias
 - [x] ScaffoldOrchestrator: genera estructura, docker-compose, .env, README, CI/CD, scripts, Makefile, VS Code config
-- [x] 7 templates funcionales (Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose)
+- [x] 7 templates funcionales modularizados (1 archivo .rs por template + registry.rs): Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose
 - [x] 6 recipes aplicables (vitest, pytest, docker, ci-github, biome, prisma)
 - [x] Full-stack detection (frontend/ + backend/) con readiness score
 - [x] Perfiles de madurez (rapid/standard/production)
@@ -911,6 +904,16 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Snapshots de entorno
 - [x] Notas por proyecto (CRUD con UUID y timestamps)
 - [x] Gestion de puertos y procesos — GUI + CLI
+
+**Sistema de diseno (GUI):**
+- [x] Paleta semantica Delixon: info (azul), success (verde), warning (ambar), error (rojo), dlx-grays (6 niveles fondo + 6 texto)
+- [x] Colores de marca por tecnologia en CSS (`src/styles/tech/`): brand.css (texto en project cards) y catalog.css (fondos en catalog cards)
+- [x] Safelist de clases Tailwind para colores dinamicos (`src/lib/tech-safelist.ts`)
+- [x] Sistema de aliases de tech IDs (node→nodejs, postgres→postgresql, etc.) en `tech-meta.ts`
+- [x] Font packs configurables (modern, classic, developer)
+- [x] Componentes reutilizables: PathInput (browse nativo), ScrollRow (carousel horizontal), TechCard
+- [x] Botones con patron uniforme: accion→success, navegacion→info, peligro→error, neutral→dlx-grays (hover solo fondo, texto fijo)
+- [x] i18n parcial (es/en) con react-i18next
 
 **Landing page (delixon-web):**
 - [x] Landing completa con paneles expandibles, efectos 3D, i18n ES/EN
