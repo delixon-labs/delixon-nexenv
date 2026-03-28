@@ -154,7 +154,7 @@ export default function Settings() {
           <button
             onClick={loadRuntimes}
             disabled={loadingRuntimes}
-            className="px-3 py-1 rounded-md text-xs text-primary-500 hover:bg-primary-500/10 transition-colors disabled:opacity-50"
+            className="px-3 py-1 rounded-md text-xs text-dlx-text-light-1 bg-dlx-light-2/50 hover:bg-dlx-light-3/50 transition-colors disabled:opacity-50"
           >
             {loadingRuntimes ? t("settings.detecting") : t("settings.redetect")}
           </button>

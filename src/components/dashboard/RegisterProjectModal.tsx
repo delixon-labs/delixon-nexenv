@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "@/lib/tauri";
 import type { DetectedStack } from "@/lib/tauri";
+import PathInput from "@/components/ui/PathInput";
 
 interface Props {
   isOpen: boolean;
@@ -20,15 +21,6 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
-
-  async function handleBrowse() {
-    try {
-      const selected = await api.pickFolder();
-      if (selected) setPath(selected);
-    } catch {
-      // No-op si el usuario cancela
-    }
-  }
 
   async function handleScan() {
     if (!path.trim()) return;
@@ -108,26 +100,13 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   {t("register.pathLabel")}
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={path}
-                    onChange={(e) => setPath(e.target.value)}
-                    placeholder={t("register.pathPlaceholder")}
-                    className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm font-mono placeholder-gray-600 focus:outline-none focus:border-primary-500"
-                    onKeyDown={(e) => e.key === "Enter" && handleScan()}
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleBrowse}
-                    className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 hover:text-white transition-colors"
-                    title={t("register.browse")}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                  </button>
-                </div>
+                <PathInput
+                  value={path}
+                  onChange={setPath}
+                  placeholder={t("register.pathPlaceholder")}
+                  onKeyDown={(e) => e.key === "Enter" && handleScan()}
+                  autoFocus
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -221,7 +200,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-800">
           <button
             onClick={handleClose}
-            className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 hover:bg-dlx-text-dark-3 transition-colors"
           >
             {t("common.cancel")}
           </button>
@@ -229,7 +208,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
             <button
               onClick={handleScan}
               disabled={scanning || !path.trim()}
-              className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
             >
               {scanning ? t("register.scanning") : t("register.scan")}
             </button>
@@ -238,14 +217,14 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
             <>
               <button
                 onClick={() => setStep("path")}
-                className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 rounded-lg bg-dlx-light-2/10 text-dlx-text-light-2 border border-dlx-light-2/20 text-sm font-medium hover:bg-dlx-light-2/20 hover:text-dlx-text-light-1 transition-colors"
               >
                 {t("common.back")}
               </button>
               <button
                 onClick={handleRegister}
                 disabled={registering || !name.trim()}
-                className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
               >
                 {registering ? t("register.registering") : t("register.register")}
               </button>

@@ -68,7 +68,7 @@ export default function VersioningTab({ projectId }: { projectId: string; projec
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-1.5 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+          className="px-4 py-1.5 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
         >
           {saving ? "Guardando..." : "Tomar snapshot"}
         </button>
@@ -91,21 +91,21 @@ export default function VersioningTab({ projectId }: { projectId: string; projec
                   {prevSnap && (
                     <button
                       onClick={() => handleDiff(prevSnap.version, snap.version)}
-                      className="px-2 py-1 rounded bg-gray-800 text-gray-400 text-xs hover:bg-gray-700 transition-colors"
+                      className="px-2 py-1 rounded bg-info/10 text-info-light text-xs hover:bg-info/20 transition-colors"
                     >
                       Diff vs v{prevSnap.version}
                     </button>
                   )}
                   {confirmRollback === snap.version ? (
                     <div className="flex items-center gap-1">
-                      <span className="text-xs text-yellow-400">Restaurar?</span>
-                      <button onClick={() => handleRollback(snap.version)} className="px-2 py-0.5 rounded bg-yellow-500 text-black text-xs">Si</button>
+                      <span className="text-xs text-warning-light">Restaurar?</span>
+                      <button onClick={() => handleRollback(snap.version)} className="px-2 py-0.5 rounded bg-warning text-black text-xs">Si</button>
                       <button onClick={() => setConfirmRollback(null)} className="px-2 py-0.5 rounded bg-gray-700 text-gray-300 text-xs">No</button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setConfirmRollback(snap.version)}
-                      className="px-2 py-1 rounded bg-yellow-500/10 text-yellow-400 text-xs hover:bg-yellow-500/20 transition-colors"
+                      className="px-2 py-1 rounded bg-warning/10 text-warning-light text-xs hover:bg-warning/20 transition-colors"
                     >
                       Restaurar
                     </button>

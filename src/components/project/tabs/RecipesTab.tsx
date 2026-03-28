@@ -87,14 +87,14 @@ export default function RecipesTab({ projectId }: { projectId: string; projectPa
                 <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => handlePreview(recipe.id)}
-                    className="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 text-xs hover:bg-gray-700 transition-colors"
+                    className="px-3 py-1 rounded-lg bg-info/10 text-info-light text-xs hover:bg-info/20 transition-colors"
                   >
                     Preview
                   </button>
                   <button
                     onClick={() => handleApply(recipe.id)}
                     disabled={applying}
-                    className="px-3 py-1 rounded-lg bg-primary-500/10 text-primary-500 text-xs font-medium hover:bg-primary-500/20 disabled:opacity-50 transition-colors"
+                    className="px-3 py-1 rounded-lg bg-success/10 text-success-light text-xs font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
                   >
                     {applying ? "..." : "Aplicar"}
                   </button>
@@ -160,11 +160,11 @@ export default function RecipesTab({ projectId }: { projectId: string; projectPa
               )}
             </div>
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-800">
-              <button onClick={() => setPreview(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cerrar</button>
+              <button onClick={() => setPreview(null)} className="px-4 py-2 rounded-lg text-sm font-medium bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 hover:bg-dlx-text-dark-3 transition-colors">Cerrar</button>
               <button
                 onClick={() => handleApply(preview.recipe.id)}
                 disabled={applying}
-                className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
               >
                 {applying ? "Aplicando..." : "Aplicar recipe"}
               </button>

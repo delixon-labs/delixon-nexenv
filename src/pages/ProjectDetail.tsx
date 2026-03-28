@@ -233,16 +233,16 @@ export default function ProjectDetail() {
           <p className="text-xs text-gray-600 font-mono mt-2">{project.path}</p>
         </div>
         <div className="flex gap-2 flex-wrap justify-end">
-          <button onClick={handleOpenInEditor} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors">
+          <button onClick={handleOpenInEditor} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             Editor
           </button>
-          <button onClick={handleOpenTerminal} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors">
+          <button onClick={handleOpenTerminal} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             Terminal
           </button>
-          <button onClick={handleGenerateWorkspace} className="px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors">
+          <button onClick={handleGenerateWorkspace} className="px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             {workspaceSaved ? "Generado" : "Workspace"}
           </button>
-          <button onClick={handleExport} className="px-3 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors">
+          <button onClick={handleExport} className="px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             Exportar
           </button>
         </div>
@@ -312,7 +312,7 @@ export default function ProjectDetail() {
 
           {/* Edit button */}
           <section className="mb-8">
-            <button onClick={startEditing} className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors">
+            <button onClick={startEditing} className="px-4 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
               Editar proyecto
             </button>
           </section>
@@ -346,10 +346,10 @@ export default function ProjectDetail() {
                   <input type="text" value={editTags} onChange={(e) => setEditTags(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500" />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button onClick={handleSaveEdit} disabled={editSaving} className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors">
+                  <button onClick={handleSaveEdit} disabled={editSaving} className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
                     {editSaving ? "Guardando..." : "Guardar"}
                   </button>
-                  <button onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">Cancelar</button>
+                  <button onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-lg text-sm font-medium bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 hover:bg-dlx-text-dark-3 transition-colors">Cancelar</button>
                 </div>
               </div>
             </section>
@@ -361,7 +361,7 @@ export default function ProjectDetail() {
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Variables de entorno</h2>
               <div className="flex items-center gap-2">
                 {envSaved && <span className="text-xs text-green-400">Guardado</span>}
-                <button onClick={handleSaveEnvVars} disabled={envSaving} className="px-3 py-1 rounded-md bg-primary-500/10 text-primary-500 text-xs font-medium hover:bg-primary-500/20 disabled:opacity-50 transition-colors">
+                <button onClick={handleSaveEnvVars} disabled={envSaving} className="px-3 py-1 rounded-md bg-success/10 text-success-light text-xs font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
                   {envSaving ? "Guardando..." : "Guardar"}
                 </button>
               </div>
@@ -374,7 +374,7 @@ export default function ProjectDetail() {
                       <span className="text-sm font-mono text-primary-500 w-40 flex-shrink-0 truncate">{key}</span>
                       <input type="text" value={value} onChange={(e) => handleEnvValueChange(key, e.target.value)}
                         className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-none focus:border-primary-500/50" />
-                      <button onClick={() => handleRemoveEnvVar(key)} className="p-1 rounded text-gray-600 hover:text-red-400 transition-colors">
+                      <button onClick={() => handleRemoveEnvVar(key)} className="p-1 rounded text-gray-600 hover:text-error-light transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
@@ -390,24 +390,24 @@ export default function ProjectDetail() {
                 <input type="text" value={newValue} onChange={(e) => setNewValue(e.target.value)} placeholder="valor"
                   className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 placeholder-gray-600 focus:outline-none focus:border-primary-500/50"
                   onKeyDown={(e) => e.key === "Enter" && handleAddEnvVar()} />
-                <button onClick={handleAddEnvVar} className="px-3 py-1 rounded-md bg-gray-800 text-gray-400 text-sm hover:text-white hover:bg-gray-700 transition-colors">Agregar</button>
+                <button onClick={handleAddEnvVar} className="px-3 py-1 rounded-md bg-success/10 text-success-light text-sm hover:bg-success/20 transition-colors">Agregar</button>
               </div>
             </div>
           </section>
 
           {/* Unlink */}
-          <section className="rounded-xl border border-gray-700/50 bg-gray-900 p-6">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">{t("project.unlink")}</h2>
+          <section className="rounded-xl border border-info/20 bg-info/5 p-6">
+            <h2 className="text-sm font-semibold text-info-light uppercase tracking-wider mb-2">{t("project.unlink")}</h2>
             <p className="text-sm text-gray-500 mb-4">{t("project.unlinkDesc")}</p>
             {!confirmDelete ? (
-              <button onClick={() => setConfirmDelete(true)} className="px-4 py-2 rounded-lg border border-gray-600 text-gray-400 text-sm font-medium hover:bg-gray-800 transition-colors">
+              <button onClick={() => setConfirmDelete(true)} className="px-4 py-2 rounded-lg border border-error/30 text-error-light text-sm font-medium hover:bg-error/10 transition-colors">
                 {t("project.unlinkButton")}
               </button>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-amber-400">{t("project.unlinkConfirm")}</span>
-                <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors">{t("project.unlinkYes")}</button>
-                <button onClick={() => setConfirmDelete(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-white transition-colors">{t("common.cancel")}</button>
+                <span className="text-sm text-error-light">{t("project.unlinkConfirm")}</span>
+                <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-error text-white text-sm font-medium hover:bg-error-dark transition-colors">{t("project.unlinkYes")}</button>
+                <button onClick={() => setConfirmDelete(false)} className="px-4 py-2 rounded-lg text-sm font-medium bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 hover:bg-dlx-text-dark-3 transition-colors">{t("common.cancel")}</button>
               </div>
             )}
           </section>

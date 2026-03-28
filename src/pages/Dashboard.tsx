@@ -52,7 +52,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl">
+    <div className="p-6 lg:p-8 h-full overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -66,7 +66,7 @@ export default function Dashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowRegisterModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -75,7 +75,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -91,7 +91,7 @@ export default function Dashboard() {
           />
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -102,7 +102,7 @@ export default function Dashboard() {
       </div>
 
       {importError && (
-        <div className="mb-4 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="mb-4 px-3 py-2 rounded-lg bg-error/10 border border-error/20 text-error-light text-sm">
           Error importando: {importError}
         </div>
       )}
@@ -129,7 +129,7 @@ export default function Dashboard() {
 
       {/* Error */}
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
+        <div className="px-4 py-3 rounded-lg bg-error/10 border border-error/20 text-error-light text-sm mb-6">
           {error}
         </div>
       )}
@@ -151,7 +151,7 @@ export default function Dashboard() {
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -172,7 +172,7 @@ export default function Dashboard() {
 
       {/* Project grid */}
       {sortedProjects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {sortedProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}

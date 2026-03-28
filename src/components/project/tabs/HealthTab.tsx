@@ -45,7 +45,7 @@ export default function HealthTab({ projectId }: { projectId: string; projectPat
         </div>
         <button
           onClick={load}
-          className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-dlx-light-2/50 text-dlx-text-light-1 text-sm hover:bg-dlx-light-3/50 transition-colors"
         >
           Refrescar
         </button>

@@ -1,4 +1,6 @@
 @import "tailwindcss";
 @import "./styles/delixon/colors.css";
 @import "./styles/delixon/fonts.css";
+@import "./styles/tech/brand.css";
+@import "./styles/tech/catalog.css";
 @import "./styles/delixon/base.css";

@@ -86,7 +86,7 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl">
+    <div className="p-6 lg:p-8 h-full overflow-y-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Plantillas</h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -95,7 +95,7 @@ export default function Templates() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
         {BUILT_IN_TEMPLATES.map((template) => (
           <div
             key={template.id}
@@ -147,7 +147,7 @@ export default function Templates() {
               </div>
               <button
                 onClick={() => setSelectedTemplate(template)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-500/10 text-primary-500 hover:bg-primary-500/20 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-success/10 text-success-light hover:bg-success/20 transition-colors"
               >
                 Usar
               </button>

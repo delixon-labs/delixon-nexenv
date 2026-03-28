@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
+import PathInput from "@/components/ui/PathInput";
 
 interface UseTemplateModalProps {
   isOpen: boolean;
@@ -106,12 +107,10 @@ export default function UseTemplateModal({
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Ruta donde crear el proyecto
               </label>
-              <input
-                type="text"
+              <PathInput
                 value={path}
-                onChange={(e) => setPath(e.target.value)}
-                placeholder="/home/user/projects/mi-proyecto"
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm font-mono"
+                onChange={setPath}
+                placeholder="C:\\Users\\you\\projects\\mi-proyecto"
               />
             </div>
           </div>
@@ -120,14 +119,14 @@ export default function UseTemplateModal({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 hover:bg-dlx-text-dark-3 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-success/10 text-success-light hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? "Creando..." : "Crear desde plantilla"}
             </button>

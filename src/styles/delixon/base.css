@@ -4,6 +4,13 @@
    Solo agregar reglas aqui cuando Tailwind NO haga lo que quieres.
    ============================================================ */
 
+/* --- Cadena de altura completa ---
+   Necesario para que h-screen/h-full funcione en fullscreen.
+*/
+html, body, #root {
+  height: 100%;
+}
+
 /* --- Scrollbar invisible ---
    Oculta el scrollbar en toda la app. El scroll sigue funcionando.
 */

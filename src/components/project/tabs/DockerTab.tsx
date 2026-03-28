@@ -83,19 +83,19 @@ export default function DockerTab({ projectId }: { projectId: string; projectPat
         </div>
         <div className="flex gap-2">
           <button onClick={handleUp} disabled={actionLoading}
-            className="px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 text-sm font-medium hover:bg-green-500/20 disabled:opacity-50 transition-colors">
+            className="px-3 py-1.5 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
             {actionLoading ? "..." : "Iniciar"}
           </button>
           <button onClick={handleDown} disabled={actionLoading}
-            className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-sm font-medium hover:bg-red-500/20 disabled:opacity-50 transition-colors">
+            className="px-3 py-1.5 rounded-lg bg-error/10 text-error-light text-sm font-medium hover:bg-error/20 disabled:opacity-50 transition-colors">
             Detener
           </button>
           <button onClick={handleLogs}
-            className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors">
+            className="px-3 py-1.5 rounded-lg bg-info/10 text-info-light text-sm hover:bg-info/20 transition-colors">
             Logs
           </button>
           <button onClick={load}
-            className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors">
+            className="px-3 py-1.5 rounded-lg bg-dlx-light-2/50 text-dlx-text-light-1 text-sm hover:bg-dlx-light-3/50 transition-colors">
             Refrescar
           </button>
         </div>

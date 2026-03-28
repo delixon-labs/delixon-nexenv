@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import * as api from "@/lib/tauri";
 import type { Technology } from "@/types/catalog";
 import { CATEGORY_LABELS } from "@/lib/catalog";
+import { getTechIcon, techCatalogClass } from "@/lib/tech-meta";
 
 export default function Catalog() {
   const [techs, setTechs] = useState<Technology[]>([]);
@@ -53,7 +54,7 @@ export default function Catalog() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl">
+    <div className="p-6 lg:p-8 h-full overflow-y-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Catalogo de tecnologias</h1>
         <p className="text-sm text-gray-500 mt-1">{techs.length} tecnologias disponibles</p>
@@ -65,60 +66,61 @@ export default function Catalog() {
         </div>
       )}
 
-      {/* Search + Category filter */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      {/* Search */}
+      <div className="mb-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar tecnologia..."
-          className="flex-1 max-w-md px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-primary-500/50"
+          className="w-full max-w-md px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-primary-500/50"
         />
-        <div className="flex gap-1 flex-wrap">
+      </div>
+
+      {/* Category filter */}
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        <button
+          onClick={() => setActiveCategory(null)}
+          className={`min-w-26 px-3 py-1.5 rounded-lg text-xs font-medium text-center whitespace-nowrap transition-colors ${!activeCategory ? "bg-primary-500/10 text-primary-500 border border-primary-500/30" : "bg-gray-800 text-gray-400 hover:text-white"}`}
+        >
+          Todas
+        </button>
+        {categories.map((cat) => (
           <button
-            onClick={() => setActiveCategory(null)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${!activeCategory ? "bg-primary-500/10 text-primary-500 border border-primary-500/30" : "bg-gray-800 text-gray-400 hover:text-white"}`}
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`min-w-26 px-3 py-1.5 rounded-lg text-xs font-medium text-center whitespace-nowrap transition-colors ${activeCategory === cat ? "bg-primary-500/10 text-primary-500 border border-primary-500/30" : "bg-gray-800 text-gray-400 hover:text-white"}`}
           >
-            Todas
+            {categoryLabels[cat] || cat}
           </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeCategory === cat ? "bg-primary-500/10 text-primary-500 border border-primary-500/30" : "bg-gray-800 text-gray-400 hover:text-white"}`}
-            >
-              {categoryLabels[cat] || cat}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Grid */}
       {filtered.length === 0 ? (
         <p className="text-gray-500 text-center py-12">No se encontraron tecnologias</p>
+      ) : !activeCategory ? (
+        /* Vista agrupada por categoría */
+        <div className="space-y-8">
+          {categories.map((cat) => {
+            const catTechs = filtered.filter((t) => t.category === cat);
+            if (catTechs.length === 0) return null;
+            return (
+              <div key={cat}>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                  {categoryLabels[cat] || cat}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                  {catTechs.map((tech) => <TechCard key={tech.id} tech={tech} onClick={() => setSelectedTech(tech)} />)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((tech) => (
-            <button
-              key={tech.id}
-              onClick={() => setSelectedTech(tech)}
-              className="text-left px-4 py-4 rounded-xl bg-gray-900 border border-gray-800 hover:border-primary-500/30 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-white">{tech.name}</span>
-                {tech.defaultPort > 0 && (
-                  <span className="text-xs text-gray-600 font-mono">:{tech.defaultPort}</span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 line-clamp-2 mb-3">{tech.description}</p>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-400">{categoryLabels[tech.category] || tech.category}</span>
-                {tech.defaultVersion && (
-                  <span className="text-xs text-gray-600">v{tech.defaultVersion}</span>
-                )}
-              </div>
-            </button>
-          ))}
+        /* Vista plana con filtro activo */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {filtered.map((tech) => <TechCard key={tech.id} tech={tech} onClick={() => setSelectedTech(tech)} />)}
         </div>
       )}
 
@@ -152,7 +154,7 @@ export default function Catalog() {
                   <span className="text-xs font-semibold text-gray-500 uppercase">Requiere</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedTech.requires.map((r) => (
-                      <span key={r} className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-xs">{r}</span>
+                      <span key={r} className="px-2 py-0.5 rounded bg-info/10 text-info-light text-xs">{r}</span>
                     ))}
                   </div>
                 </div>
@@ -163,7 +165,7 @@ export default function Catalog() {
                   <span className="text-xs font-semibold text-gray-500 uppercase">Incompatible con</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedTech.incompatibleWith.map((r) => (
-                      <span key={r} className="px-2 py-0.5 rounded bg-red-500/10 text-red-400 text-xs">{r}</span>
+                      <span key={r} className="px-2 py-0.5 rounded bg-error/10 text-error-light text-xs">{r}</span>
                     ))}
                   </div>
                 </div>
@@ -174,7 +176,7 @@ export default function Catalog() {
                   <span className="text-xs font-semibold text-gray-500 uppercase">Recomendado con</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedTech.suggestedWith.map((r) => (
-                      <span key={r} className="px-2 py-0.5 rounded bg-green-500/10 text-green-400 text-xs">{r}</span>
+                      <span key={r} className="px-2 py-0.5 rounded bg-success/10 text-success-light text-xs">{r}</span>
                     ))}
                   </div>
                 </div>
@@ -203,6 +205,49 @@ export default function Catalog() {
         </div>
       )}
     </div>
+  );
+}
+
+function TechCard({ tech, onClick }: { tech: Technology; onClick: () => void }) {
+  const icon = getTechIcon(tech.id, tech.name);
+  const cls = techCatalogClass(tech.id);
+  /* Variable CSS: --color-cat-{id} registrada en catalog.css */
+  const cssVar = `var(--color-cat-${cls.id})`;
+  return (
+    <button
+      onClick={onClick}
+      className="text-left rounded-xl border border-gray-800 hover:border-gray-600 transition-colors overflow-hidden"
+      style={{ backgroundColor: `color-mix(in srgb, ${cssVar} 6%, transparent)` }}
+    >
+      <div className="px-4 py-4">
+        <div className="flex items-center gap-3 mb-3">
+          <span
+            className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${cls.text}`}
+            style={{ backgroundColor: `color-mix(in srgb, ${cssVar} 15%, transparent)` }}
+          >
+            {icon}
+          </span>
+          <div className="min-w-0 flex-1">
+            <span className="text-sm font-semibold text-white block truncate">{tech.name}</span>
+            {tech.defaultPort > 0 && (
+              <span className={`text-xs font-mono ${cls.text}`}>:{tech.defaultPort}</span>
+            )}
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 line-clamp-2 mb-3">{tech.description}</p>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-xs px-2 py-0.5 rounded text-gray-400"
+            style={{ backgroundColor: `color-mix(in srgb, ${cssVar} 10%, transparent)` }}
+          >
+            {CATEGORY_LABELS[tech.category] || tech.category}
+          </span>
+          {tech.defaultVersion && (
+            <span className="text-xs text-gray-600">v{tech.defaultVersion}</span>
+          )}
+        </div>
+      </div>
+    </button>
   );
 }
 

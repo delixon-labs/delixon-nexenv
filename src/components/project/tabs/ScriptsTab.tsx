@@ -64,7 +64,7 @@ export default function ScriptsTab({ projectId }: { projectId: string; projectPa
             <button
               onClick={() => handleRun(name)}
               disabled={running !== null}
-              className="px-3 py-1 rounded-lg bg-primary-500/10 text-primary-500 text-sm font-medium hover:bg-primary-500/20 disabled:opacity-50 transition-colors"
+              className="px-3 py-1 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
             >
               {running === name ? "Ejecutando..." : "Ejecutar"}
             </button>

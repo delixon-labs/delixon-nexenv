@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
+import PathInput from "@/components/ui/PathInput";
 import type { Technology } from "@/types/catalog";
 import type { ValidationResult, ScaffoldPreview } from "@/types/scaffold";
 import { CATEGORY_LABELS } from "@/lib/catalog";
@@ -114,7 +115,7 @@ export default function Scaffold() {
   const canAdvanceToPreview = selectedTechs.length > 0 && (validation?.valid !== false);
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl">
+    <div className="p-6 lg:p-8 max-w-4xl h-full overflow-y-auto">
       <h1 className="text-2xl font-bold text-white mb-2">Crear proyecto</h1>
       <p className="text-sm text-gray-500 mb-6">Genera un proyecto con scaffold personalizado</p>
 
@@ -149,8 +150,11 @@ export default function Scaffold() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Ruta</label>
-            <input type="text" value={path} onChange={(e) => setPath(e.target.value)} placeholder="/home/user/projects/mi-proyecto"
-              className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white text-sm font-mono placeholder-gray-600 focus:outline-none focus:border-primary-500" />
+            <PathInput
+              value={path}
+              onChange={setPath}
+              placeholder="C:\\Users\\you\\projects\\mi-proyecto"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Tipo de proyecto</label>
@@ -177,7 +181,7 @@ export default function Scaffold() {
           </div>
           <div className="flex justify-end pt-4">
             <button onClick={() => setStep("stack")} disabled={!canAdvanceToStack}
-              className="px-6 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors">
+              className="px-6 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
               Siguiente
             </button>
           </div>
@@ -246,9 +250,9 @@ export default function Scaffold() {
           })}
 
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep("info")} className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors">Atras</button>
+            <button onClick={() => setStep("info")} className="px-4 py-2 rounded-lg bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 text-sm font-medium hover:bg-dlx-text-dark-3 transition-colors">Atras</button>
             <button onClick={handlePreview} disabled={!canAdvanceToPreview}
-              className="px-6 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors">
+              className="px-6 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
               Preview
             </button>
           </div>
@@ -315,9 +319,9 @@ export default function Scaffold() {
           )}
 
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep("stack")} className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors">Atras</button>
+            <button onClick={() => setStep("stack")} className="px-4 py-2 rounded-lg bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 text-sm font-medium hover:bg-dlx-text-dark-3 transition-colors">Atras</button>
             <button onClick={handleGenerate} disabled={generating}
-              className="px-6 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors">
+              className="px-6 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
               {generating ? "Generando..." : "Generar proyecto"}
             </button>
           </div>
@@ -338,12 +342,12 @@ export default function Scaffold() {
           <div className="flex gap-3 justify-center">
             {resultProjectId && (
               <button onClick={() => navigate(`/project/${resultProjectId}`)}
-                className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors">
+                className="px-4 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
                 Ver proyecto
               </button>
             )}
             <button onClick={() => navigate("/")}
-              className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 transition-colors">
+              className="px-4 py-2 rounded-lg bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 text-sm font-medium hover:bg-dlx-text-dark-3 transition-colors">
               Ir al dashboard
             </button>
           </div>

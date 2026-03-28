@@ -47,7 +47,7 @@ export default function ProcessesTab({ projectId }: { projectId: string; project
             ? "No hay procesos en los puertos del proyecto"
             : `${processes.length} proceso(s) detectado(s)`}
         </span>
-        <button onClick={load} className="px-3 py-1 rounded-lg bg-gray-800 text-gray-400 text-xs hover:bg-gray-700 transition-colors">
+        <button onClick={load} className="px-3 py-1 rounded-lg bg-dlx-light-2/50 text-dlx-text-light-1 text-xs hover:bg-dlx-light-3/50 transition-colors">
           Refrescar
         </button>
       </div>
@@ -73,13 +73,13 @@ export default function ProcessesTab({ projectId }: { projectId: string; project
                     {confirmKill === proc.pid ? (
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-xs text-red-400">Confirmar?</span>
-                        <button onClick={() => handleKill(proc.pid)} className="px-2 py-1 rounded bg-red-500 text-white text-xs">Si</button>
+                        <button onClick={() => handleKill(proc.pid)} className="px-2 py-1 rounded bg-error text-white text-xs">Si</button>
                         <button onClick={() => setConfirmKill(null)} className="px-2 py-1 rounded bg-gray-700 text-gray-300 text-xs">No</button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setConfirmKill(proc.pid)}
-                        className="px-2 py-1 rounded bg-red-500/10 text-red-400 text-xs hover:bg-red-500/20 transition-colors"
+                        className="px-2 py-1 rounded bg-error/10 text-error-light text-xs hover:bg-error/20 transition-colors"
                       >
                         Kill
                       </button>

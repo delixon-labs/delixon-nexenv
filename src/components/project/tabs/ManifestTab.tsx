@@ -44,7 +44,7 @@ export default function ManifestTab({ projectId }: { projectId: string; projectP
         <button
           onClick={handleRegenerate}
           disabled={regenerating}
-          className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 disabled:opacity-50 transition-colors"
+          className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
         >
           {regenerating ? "Generando..." : "Generar manifest"}
         </button>
@@ -63,7 +63,7 @@ export default function ManifestTab({ projectId }: { projectId: string; projectP
         <button
           onClick={handleRegenerate}
           disabled={regenerating}
-          className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-sm hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-dlx-light-2/50 text-dlx-text-light-1 text-sm hover:bg-dlx-light-3/50 disabled:opacity-50 transition-colors"
         >
           {regenerating ? "Regenerando..." : "Regenerar"}
         </button>
