@@ -34,7 +34,7 @@ export default function PathInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm font-mono placeholder-gray-600 focus:outline-none focus:border-primary-500"
+        className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm font-mono placeholder-gray-600 focus:outline-hidden focus:border-primary-500"
         autoFocus={autoFocus}
         onKeyDown={onKeyDown}
         onBlur={onBlur}

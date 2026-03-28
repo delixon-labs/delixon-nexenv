@@ -84,7 +84,7 @@ export default function RecipesTab({ projectId }: { projectId: string; projectPa
                   <span className="text-sm font-medium text-white">{recipe.name}</span>
                   <p className="text-xs text-gray-500 mt-0.5">{recipe.description}</p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 shrink-0">
                   <button
                     onClick={() => handlePreview(recipe.id)}
                     className="px-3 py-1 rounded-lg bg-info/10 text-info-light text-xs hover:bg-info/20 transition-colors"

@@ -69,12 +69,12 @@ export default function GitTab({ projectId }: { projectId: string; projectPath: 
           <div className="space-y-1">
             {commits.map((commit) => (
               <div key={commit.hash} className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gray-900 border border-gray-800">
-                <span className="text-xs font-mono text-primary-500 flex-shrink-0">
+                <span className="text-xs font-mono text-primary-500 shrink-0">
                   {commit.hash.slice(0, 7)}
                 </span>
                 <span className="text-sm text-white truncate flex-1">{commit.message}</span>
-                <span className="text-xs text-gray-500 flex-shrink-0">{commit.author}</span>
-                <span className="text-xs text-gray-600 flex-shrink-0">{commit.date.slice(0, 10)}</span>
+                <span className="text-xs text-gray-500 shrink-0">{commit.author}</span>
+                <span className="text-xs text-gray-600 shrink-0">{commit.date.slice(0, 10)}</span>
               </div>
             ))}
           </div>

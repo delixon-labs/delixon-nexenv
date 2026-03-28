@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // Mock the tauri core module
 vi.mock("@tauri-apps/api/core", () => ({
@@ -7,8 +7,6 @@ vi.mock("@tauri-apps/api/core", () => ({
 }));
 
 import * as api from "@/lib/tauri";
-import type { DetectedRuntime } from "@/lib/tauri";
-import type { Project } from "@/types/project";
 
 describe("Tauri API (mock mode)", () => {
   describe("Projects", () => {

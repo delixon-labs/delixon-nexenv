@@ -57,7 +57,7 @@ export default function HealthTab({ projectId }: { projectId: string; projectPat
             key={check.name}
             className="flex items-start gap-3 px-4 py-3 rounded-lg bg-gray-900 border border-gray-800"
           >
-            <span className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
+            <span className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
               check.status === "ok" ? "bg-green-400" : check.status === "warning" ? "bg-yellow-400" : "bg-red-400"
             }`} />
             <div className="flex-1 min-w-0">

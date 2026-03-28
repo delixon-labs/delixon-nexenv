@@ -324,11 +324,11 @@ export default function ProjectDetail() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
-                  <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500" />
+                  <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Descripcion</label>
-                  <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm resize-none focus:outline-none focus:border-primary-500" />
+                  <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm resize-none focus:outline-hidden focus:border-primary-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Runtimes</label>
@@ -343,7 +343,7 @@ export default function ProjectDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">Tags <span className="text-gray-600">(separados por coma)</span></label>
-                  <input type="text" value={editTags} onChange={(e) => setEditTags(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500" />
+                  <input type="text" value={editTags} onChange={(e) => setEditTags(e.target.value)} className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500" />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={handleSaveEdit} disabled={editSaving} className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
@@ -371,9 +371,9 @@ export default function ProjectDetail() {
                 <div className="divide-y divide-gray-800">
                   {Object.entries(envVars).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-2 px-4 py-2">
-                      <span className="text-sm font-mono text-primary-500 w-40 flex-shrink-0 truncate">{key}</span>
+                      <span className="text-sm font-mono text-primary-500 w-40 shrink-0 truncate">{key}</span>
                       <input type="text" value={value} onChange={(e) => handleEnvValueChange(key, e.target.value)}
-                        className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-none focus:border-primary-500/50" />
+                        className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-hidden focus:border-primary-500/50" />
                       <button onClick={() => handleRemoveEnvVar(key)} className="p-1 rounded text-gray-600 hover:text-error-light transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
@@ -385,10 +385,10 @@ export default function ProjectDetail() {
               )}
               <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-800 bg-gray-900/50">
                 <input type="text" value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="CLAVE"
-                  className="w-40 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 placeholder-gray-600 focus:outline-none focus:border-primary-500/50"
+                  className="w-40 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 placeholder-gray-600 focus:outline-hidden focus:border-primary-500/50"
                   onKeyDown={(e) => e.key === "Enter" && handleAddEnvVar()} />
                 <input type="text" value={newValue} onChange={(e) => setNewValue(e.target.value)} placeholder="valor"
-                  className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 placeholder-gray-600 focus:outline-none focus:border-primary-500/50"
+                  className="flex-1 px-2 py-1 rounded bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 placeholder-gray-600 focus:outline-hidden focus:border-primary-500/50"
                   onKeyDown={(e) => e.key === "Enter" && handleAddEnvVar()} />
                 <button onClick={handleAddEnvVar} className="px-3 py-1 rounded-md bg-success/10 text-success-light text-sm hover:bg-success/20 transition-colors">Agregar</button>
               </div>

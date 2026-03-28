@@ -98,7 +98,7 @@ export default function UseTemplateModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="mi-proyecto"
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
                 autoFocus
               />
             </div>

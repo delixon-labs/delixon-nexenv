@@ -117,7 +117,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="mi-proyecto"
-                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-primary-500"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm placeholder-gray-600 focus:outline-hidden focus:border-primary-500"
                 />
               </div>
             </>
@@ -132,7 +132,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500"
                 />
               </div>
 
@@ -239,7 +239,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-gray-500 w-28 flex-shrink-0">{label}</span>
+      <span className="text-xs text-gray-500 w-28 shrink-0">{label}</span>
       <span className="text-sm text-white">{value}</span>
     </div>
   );

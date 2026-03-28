@@ -72,7 +72,7 @@ export default function Sidebar() {
               )
             }
           >
-            <Icon className="w-5 h-5 flex-shrink-0" />
+            <Icon className="w-5 h-5 shrink-0" />
             {!sidebarCollapsed && <span>{t(labelKey)}</span>}
           </NavLink>
         ))}
@@ -96,7 +96,7 @@ export default function Sidebar() {
                   )
                 }
               >
-                <span className="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-primary-500 shrink-0" />
                 <span className="truncate">{project.name}</span>
               </NavLink>
             ))}

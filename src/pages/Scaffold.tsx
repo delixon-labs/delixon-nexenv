@@ -146,7 +146,7 @@ export default function Scaffold() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Nombre del proyecto</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="mi-proyecto"
-              className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-primary-500" autoFocus />
+              className="w-full px-3 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white text-sm placeholder-gray-600 focus:outline-hidden focus:border-primary-500" autoFocus />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Ruta</label>

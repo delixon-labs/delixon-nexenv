@@ -52,7 +52,7 @@ export default function Settings() {
             <select
               value={config.defaultEditor}
               onChange={(e) => setConfig({ defaultEditor: e.target.value })}
-              className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-primary-500"
+              className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500"
             >
               <option value="code">VS Code</option>
               <option value="code-insiders">VS Code Insiders</option>
@@ -139,7 +139,7 @@ export default function Settings() {
               type="text"
               value={config.dataDir || "~/.local/share/delixon"}
               onChange={(e) => setConfig({ dataDir: e.target.value })}
-              className="w-full max-w-sm px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-none focus:border-primary-500/50"
+              className="w-full max-w-sm px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-hidden focus:border-primary-500/50"
             />
           </SettingRow>
         </div>

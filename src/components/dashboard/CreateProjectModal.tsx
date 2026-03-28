@@ -163,7 +163,7 @@ export default function CreateProjectModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="mi-proyecto"
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
                 autoFocus
               />
             </div>
@@ -195,7 +195,7 @@ export default function CreateProjectModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Breve descripcion del proyecto..."
                 rows={2}
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm resize-none"
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm resize-none"
               />
             </div>
 
@@ -233,7 +233,7 @@ export default function CreateProjectModal({
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="web, api, personal"
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
+                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 text-sm"
               />
             </div>
           </div>

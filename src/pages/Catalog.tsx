@@ -73,7 +73,7 @@ export default function Catalog() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar tecnologia..."
-          className="w-full max-w-md px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-primary-500/50"
+          className="w-full max-w-md px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 text-white placeholder-gray-600 text-sm focus:outline-hidden focus:border-primary-500/50"
         />
       </div>
 
