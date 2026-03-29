@@ -112,7 +112,7 @@ pub fn validate_manifest(manifest: &ProjectManifest) -> Result<(), DelixonError>
     for &port in &manifest.ports {
         if port == 0 {
             return Err(DelixonError::InvalidManifest(
-                format!("Puerto invalido: 0 (rango valido: 1-65535)"),
+                "Puerto invalido: 0 (rango valido: 1-65535)".to_string(),
             ));
         }
     }

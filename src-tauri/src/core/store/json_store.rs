@@ -12,6 +12,12 @@ use crate::core::store::traits::*;
 /// Backend JSON que delega a las funciones existentes de storage/config/notes/etc.
 pub struct JsonStore;
 
+impl Default for JsonStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl JsonStore {
     pub fn new() -> Self {
         let _ = storage::init_data_dir();

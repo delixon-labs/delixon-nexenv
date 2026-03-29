@@ -296,7 +296,7 @@ fn generate_launch(
 ) -> serde_json::Value {
     let mut configs: Vec<serde_json::Value> = Vec::new();
     let has_env = !manifest.env_vars.required.is_empty()
-        || stack.map_or(false, |s| s.has_env_example);
+        || stack.is_some_and(|s| s.has_env_example);
 
     let env_file = if has_env {
         Some("${workspaceFolder}/.env")
@@ -633,9 +633,8 @@ fn collect_extensions(
 
     // Por stack detectado
     if let Some(st) = stack {
-        match st.orm.as_deref() {
-            Some("prisma") => exts.push("Prisma.prisma".into()),
-            _ => {}
+        if let Some("prisma") = st.orm.as_deref() {
+            exts.push("Prisma.prisma".into());
         }
         match st.testing.as_deref() {
             Some("jest") => exts.push("orta.vscode-jest".into()),
@@ -647,9 +646,8 @@ fn collect_extensions(
             Some("ruff") => exts.push("charliermarsh.ruff".into()),
             _ => {}
         }
-        match st.ci.as_deref() {
-            Some("github-actions") => exts.push("github.vscode-github-actions".into()),
-            _ => {}
+        if let Some("github-actions") = st.ci.as_deref() {
+            exts.push("github.vscode-github-actions".into());
         }
         if st.docker.is_some() {
             exts.push("ms-azuretools.vscode-docker".into());
@@ -658,7 +656,7 @@ fn collect_extensions(
 
     // env vars -> dotenv
     if !manifest.env_vars.required.is_empty()
-        || stack.map_or(false, |s| s.has_env_example)
+        || stack.is_some_and(|s| s.has_env_example)
     {
         exts.push("mikestead.dotenv".into());
     }

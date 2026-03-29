@@ -55,36 +55,32 @@ impl ProjectStore for SqliteStore {
             "SELECT id, name, path, description, status, created_at, last_opened_at, template_id FROM projects ORDER BY name"
         ).map_err(Self::db_err)?;
 
-        let project_rows: Vec<(String, String, String, Option<String>, String, String, Option<String>, Option<String>)> = stmt
-            .query_map([], |row| {
-                Ok((
-                    row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?,
-                    row.get(4)?, row.get(5)?, row.get(6)?, row.get(7)?,
-                ))
-            })
-            .map_err(Self::db_err)?
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(Self::db_err)?;
+        // Colectar IDs y datos base primero, luego enriquecer con runtimes/tags
+        let base: Vec<_> = stmt.query_map([], |row| {
+            Ok((
+                row.get::<_, String>(0)?, row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?, row.get::<_, Option<String>>(3)?,
+                row.get::<_, String>(4)?, row.get::<_, String>(5)?,
+                row.get::<_, Option<String>>(6)?, row.get::<_, Option<String>>(7)?,
+            ))
+        }).map_err(Self::db_err)?.collect::<Result<Vec<_>, _>>().map_err(Self::db_err)?;
+        drop(stmt);
 
-        let mut projects = Vec::with_capacity(project_rows.len());
-        for (id, name, path, description, status, created_at, last_opened_at, template_id) in project_rows {
-            let runtimes = conn
+        let mut projects = Vec::with_capacity(base.len());
+        for (id, name, path, description, status, created_at, last_opened_at, template_id) in base {
+            let runtimes: Vec<RuntimeConfig> = conn
                 .prepare("SELECT runtime, version FROM project_runtimes WHERE project_id = ?1")
                 .map_err(Self::db_err)?
-                .query_map([&id], |row| {
-                    Ok(RuntimeConfig { runtime: row.get(0)?, version: row.get(1)? })
-                })
+                .query_map([&id], |row| Ok(RuntimeConfig { runtime: row.get(0)?, version: row.get(1)? }))
                 .map_err(Self::db_err)?
-                .collect::<Result<Vec<_>, _>>()
-                .map_err(Self::db_err)?;
+                .collect::<Result<Vec<_>, _>>().map_err(Self::db_err)?;
 
-            let tags = conn
+            let tags: Vec<String> = conn
                 .prepare("SELECT tag FROM project_tags WHERE project_id = ?1 ORDER BY tag")
                 .map_err(Self::db_err)?
                 .query_map([&id], |row| row.get(0))
                 .map_err(Self::db_err)?
-                .collect::<Result<Vec<String>, _>>()
-                .map_err(Self::db_err)?;
+                .collect::<Result<Vec<_>, _>>().map_err(Self::db_err)?;
 
             let status_enum = match status.as_str() {
                 "idle" => ProjectStatus::Idle,
