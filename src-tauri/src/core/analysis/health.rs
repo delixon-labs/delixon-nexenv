@@ -185,11 +185,24 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
     // 8. Testing configured
     let has_testing = project_path.join("vitest.config.ts").exists()
         || project_path.join("vitest.config.js").exists()
+        || project_path.join("vitest.config.mts").exists()
         || project_path.join("jest.config.js").exists()
         || project_path.join("jest.config.ts").exists()
+        || project_path.join("jest.config.mjs").exists()
+        || project_path.join(".mocharc.yml").exists()
+        || project_path.join(".mocharc.json").exists()
         || project_path.join("pytest.ini").exists()
         || project_path.join("pyproject.toml").exists()
-        || (project_path.join("Cargo.toml").exists() && project_path.join("tests").exists());
+        || project_path.join("setup.cfg").exists()
+        || project_path.join("tox.ini").exists()
+        || project_path.join("conftest.py").exists()
+        || (project_path.join("Cargo.toml").exists() && project_path.join("tests").exists())
+        // Detectar test config dentro de vite.config.ts (vitest inline)
+        || vite_has_test_config(&project_path)
+        // Detectar scripts de test en package.json
+        || package_json_has_test_script(&project_path)
+        // Detectar [dev-dependencies] con crates de test en Cargo.toml
+        || cargo_has_test_deps(&project_path);
 
     if has_testing {
         checks.push(HealthCheck {
@@ -239,6 +252,47 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
         overall,
         checks,
     })
+}
+
+/// Detecta si vite.config.ts/js contiene configuracion de test (vitest inline)
+fn vite_has_test_config(project_path: &std::path::Path) -> bool {
+    for name in &["vite.config.ts", "vite.config.js", "vite.config.mts"] {
+        let path = project_path.join(name);
+        if let Ok(content) = std::fs::read_to_string(&path) {
+            if content.contains("test:") || content.contains("test :") {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// Detecta si package.json tiene un script "test" definido
+fn package_json_has_test_script(project_path: &std::path::Path) -> bool {
+    let path = project_path.join("package.json");
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&content) {
+            if let Some(scripts) = parsed.get("scripts") {
+                if let Some(test_cmd) = scripts.get("test").and_then(|v| v.as_str()) {
+                    // Ignorar el placeholder default de npm
+                    return !test_cmd.contains("no test specified");
+                }
+            }
+        }
+    }
+    false
+}
+
+/// Detecta si Cargo.toml tiene dev-dependencies de testing
+fn cargo_has_test_deps(project_path: &std::path::Path) -> bool {
+    let path = project_path.join("Cargo.toml");
+    if let Ok(content) = std::fs::read_to_string(&path) {
+        return content.contains("[dev-dependencies]")
+            && (content.contains("tempfile") || content.contains("serial_test")
+                || content.contains("mockall") || content.contains("proptest")
+                || content.contains("criterion") || content.contains("rstest"));
+    }
+    false
 }
 
 #[cfg(test)]

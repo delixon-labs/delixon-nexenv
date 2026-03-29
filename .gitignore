@@ -27,10 +27,11 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
-# Editor — .vscode es personal de cada desarrollador
+# Editor — .vscode y .code-workspace son personales de cada desarrollador
 # Solo se versiona extensions.json (recomendaciones)
 .vscode/*
 !.vscode/extensions.json
+*.code-workspace
 .vscode/terminal-history.txt
 .vscode/bash-history.txt
 .idea/
@@ -68,3 +69,6 @@ coverage/
 # Misc
 .cache/
 .temp/
+
+# Delixon (generado automaticamente)
+.delixon/
