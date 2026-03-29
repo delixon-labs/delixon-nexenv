@@ -165,13 +165,13 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
     let editor = config::load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
-    let editor_found = which::which(&editor).is_ok();
+    let editor_path = crate::core::utils::platform::find_editor_in_path(&editor);
     checks.push(DoctorCheck {
         group: "Herramientas".to_string(),
         name: format!("Editor ({})", editor),
-        ok: editor_found,
-        message: if editor_found {
-            "Disponible en PATH".to_string()
+        ok: editor_path.is_some(),
+        message: if let Some(path) = editor_path {
+            format!("{}", path.display())
         } else {
             "No encontrado en PATH".to_string()
         },

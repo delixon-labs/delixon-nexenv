@@ -208,7 +208,12 @@ export default function ProjectDetail() {
     return (
       <div className="p-8">
         <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
-        <button onClick={() => navigate("/")} className="mt-4 text-sm text-primary-500 hover:underline">Volver al dashboard</button>
+        <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 hover:text-white transition-colors">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Volver al dashboard
+        </button>
       </div>
     );
   }
@@ -218,7 +223,7 @@ export default function ProjectDetail() {
   return (
     <div className="p-6 lg:p-8 max-w-5xl h-full overflow-y-auto">
       {/* Back */}
-      <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors mb-6">
+      <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm hover:bg-gray-700 hover:text-white transition-colors mb-6">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>

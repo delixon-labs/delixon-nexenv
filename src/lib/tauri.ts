@@ -56,7 +56,19 @@ const MOCK_ENV_VARS: Record<string, Record<string, string>> = {
   "mock-3": { DATABASE_URL: "postgresql://localhost:5432/ml", FLASK_ENV: "development" },
 };
 
-let mockProjects = [...MOCK_PROJECTS];
+function loadMockProjects(): Project[] {
+  try {
+    const stored = localStorage.getItem("delixon_mock_projects");
+    if (stored) return JSON.parse(stored);
+  } catch { /* fallback */ }
+  return [...MOCK_PROJECTS];
+}
+
+function saveMockProjects(projects: Project[]) {
+  localStorage.setItem("delixon_mock_projects", JSON.stringify(projects));
+}
+
+let mockProjects = loadMockProjects();
 
 // --- Invoke seguro con fallback mock ---
 
@@ -91,17 +103,20 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
         tags: input.tags ?? [],
       };
       mockProjects.push(newProject);
+      saveMockProjects(mockProjects);
       return Promise.resolve(newProject as T);
     }
 
     case "delete_project":
       mockProjects = mockProjects.filter((p) => p.id !== args?.id);
+      saveMockProjects(mockProjects);
       return Promise.resolve(undefined as T);
 
     case "update_project": {
       const idx = mockProjects.findIndex((p) => p.id === args?.id);
       if (idx >= 0) {
         mockProjects[idx] = { ...mockProjects[idx], ...args };
+        saveMockProjects(mockProjects);
         return Promise.resolve(mockProjects[idx] as T);
       }
       return Promise.reject("Proyecto no encontrado");
@@ -109,7 +124,10 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
 
     case "open_project": {
       const idx = mockProjects.findIndex((p) => p.id === args?.id);
-      if (idx >= 0) mockProjects[idx].lastOpenedAt = new Date().toISOString();
+      if (idx >= 0) {
+        mockProjects[idx].lastOpenedAt = new Date().toISOString();
+        saveMockProjects(mockProjects);
+      }
       console.info("[mock] Abriendo proyecto en VSCode (simulado)");
       return Promise.resolve(undefined as T);
     }
@@ -148,6 +166,7 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
         tags: [],
       };
       mockProjects.push(tplProject);
+      saveMockProjects(mockProjects);
       return Promise.resolve(tplProject as T);
     }
 
@@ -165,6 +184,7 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
         tags: [],
       };
       mockProjects.push(regProject);
+      saveMockProjects(mockProjects);
       return Promise.resolve(regProject as T);
     }
 
@@ -186,6 +206,9 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     case "open_in_editor":
       console.info(`[mock] ${cmd} (simulado en navegador)`);
       return Promise.resolve(undefined as T);
+
+    case "list_installed_editors":
+      return Promise.resolve([["code", "VS Code"], ["cursor", "Cursor"]] as T);
 
     case "check_project_health":
       return Promise.resolve({ projectId: args?.projectId ?? "", projectName: "mock", overall: "ok", checks: [{ name: "Directorio", status: "ok", message: "Existe", fixSuggestion: "" }] } as T);
@@ -457,6 +480,16 @@ export async function openTerminal(projectId: string): Promise<void> {
 
 export async function openInEditor(projectPath: string, editor?: string): Promise<void> {
   return safeInvoke<void>("open_in_editor", { projectPath, editor });
+}
+
+export interface InstalledEditor {
+  cmd: string;
+  label: string;
+}
+
+export async function listInstalledEditors(): Promise<InstalledEditor[]> {
+  const tuples = await safeInvoke<[string, string][]>("list_installed_editors");
+  return tuples.map(([cmd, label]) => ({ cmd, label }));
 }
 
 // --- Health ---

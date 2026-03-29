@@ -323,7 +323,7 @@ fn cmd_open(name: &str) -> Result<(), String> {
     let cfg = config::load_config().map_err(|e| e.to_string())?;
     let editor = &cfg.default_editor;
 
-    use delixon_lib::core::utils::platform::ALLOWED_EDITORS;
+    use delixon_lib::core::utils::platform::{ALLOWED_EDITORS, find_editor_in_path};
     if !ALLOWED_EDITORS.contains(&editor.as_str()) {
         return Err(format!(
             "Editor '{}' no permitido. Editores disponibles: {}",
@@ -332,6 +332,9 @@ fn cmd_open(name: &str) -> Result<(), String> {
         ));
     }
 
+    let editor_bin = find_editor_in_path(editor)
+        .ok_or_else(|| format!("Editor '{}' no encontrado en PATH", editor))?;
+
     println!(
         "{} {} en {}...",
         "Abriendo".green().bold(),
@@ -339,7 +342,7 @@ fn cmd_open(name: &str) -> Result<(), String> {
         editor
     );
 
-    std::process::Command::new(editor)
+    std::process::Command::new(&editor_bin)
         .arg(&project.path)
         .spawn()
         .map_err(|e| format!("Error abriendo {}: {}", editor, e))?;

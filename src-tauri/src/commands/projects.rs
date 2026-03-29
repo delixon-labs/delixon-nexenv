@@ -104,7 +104,10 @@ pub async fn open_project(id: String) -> Result<(), String> {
         return Err(format!("Editor '{}' no esta en la lista de editores permitidos", editor));
     }
 
-    std::process::Command::new(&editor)
+    let editor_bin = crate::core::utils::platform::find_editor_in_path(&editor)
+        .ok_or_else(|| format!("Editor '{}' no encontrado en PATH", editor))?;
+
+    std::process::Command::new(&editor_bin)
         .arg(&project_path)
         .spawn()
         .map_err(|e| format!("Error abriendo {}: {}", editor, e))?;

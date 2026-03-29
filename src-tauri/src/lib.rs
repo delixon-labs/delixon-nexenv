@@ -33,6 +33,7 @@ pub fn run() {
             // Shell
             shell::open_terminal,
             shell::open_in_editor,
+            shell::list_installed_editors,
             // Config
             config::get_config,
             config::set_config,

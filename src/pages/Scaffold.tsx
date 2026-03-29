@@ -250,7 +250,7 @@ export default function Scaffold() {
           })}
 
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep("info")} className="px-4 py-2 rounded-lg bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 text-sm font-medium hover:bg-dlx-text-dark-3 transition-colors">Atras</button>
+            <button onClick={() => setStep("info")} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>Atras</button>
             <button onClick={handlePreview} disabled={!canAdvanceToPreview}
               className="px-6 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
               Preview
@@ -319,7 +319,7 @@ export default function Scaffold() {
           )}
 
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep("stack")} className="px-4 py-2 rounded-lg bg-dlx-light-3 text-dlx-text-light-1 border border-dlx-text-dark-3 text-sm font-medium hover:bg-dlx-text-dark-3 transition-colors">Atras</button>
+            <button onClick={() => setStep("stack")} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm font-medium hover:bg-gray-700 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>Atras</button>
             <button onClick={handleGenerate} disabled={generating}
               className="px-6 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors">
               {generating ? "Generando..." : "Generar proyecto"}

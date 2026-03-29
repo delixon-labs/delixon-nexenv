@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/stores/settings";
 import * as api from "@/lib/tauri";
-import type { DetectedRuntime } from "@/lib/tauri";
+import type { DetectedRuntime, InstalledEditor } from "@/lib/tauri";
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -11,10 +11,12 @@ export default function Settings() {
   const isLoaded = useSettingsStore((s) => s.isLoaded);
   const [runtimes, setRuntimes] = useState<DetectedRuntime[]>([]);
   const [loadingRuntimes, setLoadingRuntimes] = useState(false);
+  const [installedEditors, setInstalledEditors] = useState<InstalledEditor[]>([]);
 
   useEffect(() => {
     if (!isLoaded) loadConfig();
     loadRuntimes();
+    api.listInstalledEditors().then(setInstalledEditors).catch(() => {});
   }, [isLoaded, loadConfig]);
 
   async function loadRuntimes() {
@@ -54,13 +56,13 @@ export default function Settings() {
               onChange={(e) => setConfig({ defaultEditor: e.target.value })}
               className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500"
             >
-              <option value="code">VS Code</option>
-              <option value="code-insiders">VS Code Insiders</option>
-              <option value="cursor">Cursor</option>
-              <option value="zed">Zed</option>
-              <option value="subl">Sublime Text</option>
-              <option value="atom">Atom</option>
-              <option value="nvim">Neovim</option>
+              {installedEditors.length > 0 ? (
+                installedEditors.map((ed) => (
+                  <option key={ed.cmd} value={ed.cmd}>{ed.label}</option>
+                ))
+              ) : (
+                <option value={config.defaultEditor}>{config.defaultEditor}</option>
+              )}
             </select>
           </SettingRow>
 

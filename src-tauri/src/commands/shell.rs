@@ -224,7 +224,7 @@ fn try_linux_terminals(project_path: &str, env_vars: &std::collections::HashMap<
     false
 }
 
-use crate::core::utils::platform::ALLOWED_EDITORS;
+use crate::core::utils::platform::{ALLOWED_EDITORS, find_editor_in_path, detect_installed_editors};
 
 /// Abre el proyecto en un editor de codigo (solo editores de la whitelist)
 #[command]
@@ -244,10 +244,19 @@ pub async fn open_in_editor(project_path: String, editor: Option<String>) -> Res
         ));
     }
 
-    Command::new(&editor_cmd)
+    let editor_bin = find_editor_in_path(&editor_cmd)
+        .ok_or_else(|| format!("Editor '{}' no encontrado en PATH", editor_cmd))?;
+
+    Command::new(&editor_bin)
         .arg(&project_path)
         .spawn()
         .map_err(|e| format!("Error abriendo {}: {}", editor_cmd, e))?;
 
     Ok(())
+}
+
+/// Retorna los editores instalados en el sistema (cmd, label)
+#[command]
+pub async fn list_installed_editors() -> Result<Vec<(String, String)>, String> {
+    Ok(detect_installed_editors())
 }
