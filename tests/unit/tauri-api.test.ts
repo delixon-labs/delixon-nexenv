@@ -127,8 +127,10 @@ describe("Tauri API (mock mode)", () => {
       await expect(api.openInEditor("/tmp")).resolves.toBeUndefined();
     });
 
-    it("generateVscodeWorkspace does not throw", async () => {
-      await expect(api.generateVscodeWorkspace("mock-1")).resolves.toBeUndefined();
+    it("generateVscodeWorkspace returns result", async () => {
+      const result = await api.generateVscodeWorkspace("mock-1");
+      expect(result).toBeDefined();
+      expect(result.filesCreated).toBeInstanceOf(Array);
     });
   });
 });
