@@ -11,7 +11,7 @@ pub fn ensure_gitignore_entries(project_path: &Path, entries: &[&str]) -> std::i
     let gitignore_path = project_path.join(".gitignore");
     let existing = std::fs::read_to_string(&gitignore_path).unwrap_or_default();
 
-    let mut to_add: Vec<&str> = entries
+    let to_add: Vec<&str> = entries
         .iter()
         .filter(|entry| !existing.lines().any(|line| line.trim() == **entry))
         .copied()

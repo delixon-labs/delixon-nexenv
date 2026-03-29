@@ -198,11 +198,11 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
         || project_path.join("conftest.py").exists()
         || (project_path.join("Cargo.toml").exists() && project_path.join("tests").exists())
         // Detectar test config dentro de vite.config.ts (vitest inline)
-        || vite_has_test_config(&project_path)
+        || vite_has_test_config(project_path)
         // Detectar scripts de test en package.json
-        || package_json_has_test_script(&project_path)
+        || package_json_has_test_script(project_path)
         // Detectar [dev-dependencies] con crates de test en Cargo.toml
-        || cargo_has_test_deps(&project_path);
+        || cargo_has_test_deps(project_path);
 
     if has_testing {
         checks.push(HealthCheck {
