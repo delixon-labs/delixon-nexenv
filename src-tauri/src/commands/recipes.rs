@@ -1,5 +1,5 @@
 use crate::core::recipes::{self, Recipe, RecipeApplyResult, RecipePreview};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
@@ -9,7 +9,7 @@ pub async fn list_recipes() -> Vec<Recipe> {
 
 #[command]
 pub async fn preview_recipe(project_id: String, recipe_id: String) -> Result<RecipePreview, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -20,7 +20,7 @@ pub async fn preview_recipe(project_id: String, recipe_id: String) -> Result<Rec
 
 #[command]
 pub async fn apply_recipe(project_id: String, recipe_id: String) -> Result<RecipeApplyResult, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

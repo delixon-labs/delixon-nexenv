@@ -69,9 +69,24 @@ La GUI ahora detecta cambios en `projects.json` hechos por el CLI u otros proces
 
 Ver `docs/tecnico/estructura-backend.md` para la estructura completa documentada.
 
+### 8. Migracion de storage a SQLite
+
+Posterior al refactor de estructura, se implemento la capa de abstraccion de persistencia:
+
+- Modulo `core/store/` con 6 traits sync + super-trait `Store`
+- `JsonStore` como wrapper de funciones existentes (fallback)
+- `SqliteStore` con rusqlite 0.39 bundled (SQLite 3.49.1) como backend principal
+- OnceLock global (`store::get()`) para acceso unificado desde GUI, CLI y core
+- Migracion automatica JSON → SQLite al primer arranque + backup
+- 22 archivos migrados de `storage::X()` a `store::get().X()`
+- Tests: jsdom para frontend (localStorage), serial_test para Rust (disco)
+
+Ver `docs/tecnico/storage/MIGRATION_PLAN.md` para el plan original.
+
 ## Verificacion
 
 - `cargo check` — compila sin errores
-- `cargo test` — 133/133 tests pasan, 0 fallos
+- `cargo test` — 139/139 tests pasan, 0 fallos (133 originales + 6 SqliteStore)
+- `npx vitest --run` — 18/18 tests frontend pasan (jsdom environment)
 - `npx tsc --noEmit` — frontend compila sin errores
 - Ningun import existente se rompio

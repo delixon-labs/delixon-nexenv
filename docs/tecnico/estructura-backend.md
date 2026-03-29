@@ -34,8 +34,17 @@ core/
                         detect_installed_editors, EDITOR_LABELS
     editor.rs           open_in_editor, find_workspace_file (consolidado)
 
+  store/                Capa de abstraccion de persistencia
+    mod.rs              OnceLock global: init(), get() — punto unico de acceso
+    traits.rs           6 traits sync: ProjectStore, ConfigStore, NoteStore,
+                        EnvVarStore, SnapshotStore, EnvSnapshotStore + Store
+    json_store.rs       Backend JSON — wrapper sobre funciones existentes (fallback)
+    sqlite_store.rs     Backend SQLite — rusqlite 0.39 bundled (default)
+    migrations.rs       Runner de migraciones SQL versionadas
+    migration.rs        Migracion automatica JSON → SQLite + backup
+
   project/              Ciclo de vida del proyecto
-    storage.rs          Persistencia JSON (projects.json, env vars, history)
+    storage.rs          Funciones JSON legacy + helpers filesystem (history_dir)
     config.rs           DelixonConfig (editor, tema, idioma)
     manifest.rs         ProjectManifest — schema, carga, generacion, validacion
     portable.rs         Export/import de proyectos (.delixon)
@@ -114,7 +123,7 @@ Capa fina que expone la logica de `core/` como comandos Tauri. Cada archivo mape
 
 ## `bin/cli.rs` — CLI standalone
 
-Binario independiente (`delixon-cli`) que usa `core/` directamente sin Tauri. Subcomandos: `list`, `open`, `create`, `doctor`, `config`, `export`, `import`.
+Binario independiente (`delixon-cli`) que usa `core/` directamente sin Tauri. 29 subcomandos incluyendo `list`, `open`, `create`, `unlink`, `doctor`, `scan`, `export`, `import`, etc.
 
 ---
 
@@ -122,11 +131,12 @@ Binario independiente (`delixon-cli`) que usa `core/` directamente sin Tauri. Su
 
 ```
 bin/cli.rs ──┐
-commands/  ──┤──> core/
+commands/  ──┤──> store::get() ──> core/
+             │      ├── store/      (abstraccion: SQLite default, JSON fallback)
              │      ├── models/     (structs compartidos)
              │      ├── utils/      (helpers transversales)
              │      ├── error.rs    (tipos de error)
-             │      ├── project/    (persistencia, config, manifest)
+             │      ├── project/    (funciones JSON legacy + filesystem)
              │      ├── analysis/   (deteccion, health, doctor)
              │      ├── runtime/    (docker, git, scripts, ports)
              │      ├── workspace/  (vscode, scaffold)

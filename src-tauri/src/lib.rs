@@ -12,6 +12,9 @@ use commands::{
 #[cfg(feature = "tauri-app")]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Inicializar store global: SQLite con fallback a JSON
+    core::store::init(init_store());
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
@@ -97,4 +100,41 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("Error al iniciar Delixon");
+}
+
+#[cfg(feature = "tauri-app")]
+fn init_store() -> std::sync::Arc<dyn core::store::Store> {
+    use core::store::{json_store::JsonStore, migration, sqlite_store::SqliteStore};
+
+    // Intentar SQLite
+    if let Some(path) = migration::db_path() {
+        // Crear data dir si no existe
+        let _ = core::project::storage::init_data_dir();
+
+        match SqliteStore::new(path.to_str().unwrap_or("delixon.db")) {
+            Ok(sqlite) => {
+                // Migrar JSON si existen datos legacy
+                if migration::json_data_exists() {
+                    match migration::migrate_json_to_sqlite(&sqlite) {
+                        Ok(result) => {
+                            eprintln!(
+                                "[delixon] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
+                                result.projects, result.env_vars, result.notes
+                            );
+                        }
+                        Err(e) => {
+                            eprintln!("[delixon] Error migrando JSON a SQLite: {}. Usando JSON.", e);
+                            return std::sync::Arc::new(JsonStore::new());
+                        }
+                    }
+                }
+                return std::sync::Arc::new(sqlite);
+            }
+            Err(e) => {
+                eprintln!("[delixon] Error inicializando SQLite: {}. Usando JSON.", e);
+            }
+        }
+    }
+
+    std::sync::Arc::new(JsonStore::new())
 }

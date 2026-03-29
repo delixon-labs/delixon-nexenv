@@ -1,19 +1,18 @@
-use crate::core::config;
 use crate::core::manifest;
 use crate::core::models::project::{CreateProjectInput, Project, ProjectStatus, RuntimeConfig};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 /// Devuelve la lista de todos los proyectos registrados en Delixon
 #[command]
 pub async fn list_projects() -> Result<Vec<Project>, String> {
-    storage::load_projects().map_err(|e| e.to_string())
+    store::get().list_projects().map_err(|e| e.to_string())
 }
 
 /// Devuelve un proyecto por su ID
 #[command]
 pub async fn get_project(id: String) -> Result<Project, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     projects
         .into_iter()
         .find(|p| p.id == id)
@@ -23,7 +22,7 @@ pub async fn get_project(id: String) -> Result<Project, String> {
 /// Crea un nuevo proyecto a partir de los datos del input
 #[command]
 pub async fn create_project(input: CreateProjectInput) -> Result<Project, String> {
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     // Verificar que no exista un proyecto con el mismo path
     if projects.iter().any(|p| p.path == input.path) {
@@ -61,7 +60,7 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
     };
 
     projects.push(project.clone());
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
     // Generar manifest automaticamente
     let m = manifest::generate_manifest_from_project(&project);
@@ -73,7 +72,7 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
 /// Abre un proyecto en el editor configurado (por defecto VSCode)
 #[command]
 pub async fn open_project(id: String) -> Result<(), String> {
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     let project = projects
         .iter_mut()
@@ -93,10 +92,11 @@ pub async fn open_project(id: String) -> Result<(), String> {
     // Actualizar last_opened_at
     project.last_opened_at = Some(chrono::Utc::now().to_rfc3339());
     project.status = ProjectStatus::Active;
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
     // Abrir en editor configurado
-    let editor = config::load_config()
+    let editor = store::get()
+        .load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
 
@@ -115,7 +115,7 @@ pub async fn update_project(
     status: Option<ProjectStatus>,
     tags: Option<Vec<String>>,
 ) -> Result<Project, String> {
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     let project = projects
         .iter_mut()
@@ -139,7 +139,7 @@ pub async fn update_project(
     }
 
     let updated = project.clone();
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
     Ok(updated)
 }
@@ -147,7 +147,7 @@ pub async fn update_project(
 /// Elimina un proyecto del registro de Delixon (no borra los archivos del disco)
 #[command]
 pub async fn delete_project(id: String) -> Result<(), String> {
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let original_len = projects.len();
 
     projects.retain(|p| p.id != id);
@@ -156,10 +156,10 @@ pub async fn delete_project(id: String) -> Result<(), String> {
         return Err(format!("Proyecto no encontrado: {}", id));
     }
 
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
     // Limpiar env vars del proyecto eliminado
-    let _ = storage::delete_env_vars(&id);
+    let _ = store::get().delete_env_vars(&id);
 
     Ok(())
 }

@@ -1,10 +1,10 @@
 use crate::core::scripts::{self, ScriptResult};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
 pub async fn list_project_scripts(project_id: String) -> Result<Vec<(String, String)>, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -15,7 +15,7 @@ pub async fn list_project_scripts(project_id: String) -> Result<Vec<(String, Str
 
 #[command]
 pub async fn run_project_script(project_id: String, script_name: String) -> Result<ScriptResult, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

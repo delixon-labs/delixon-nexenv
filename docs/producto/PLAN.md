@@ -881,7 +881,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Export/import de configuracion (.delixon portable)
 - [x] Settings: editor, tema, idioma, deteccion de runtimes
 - [x] Sidebar con navegacion y proyectos recientes
-- [x] Persistencia local (JSON en `~/.local/share/delixon/`)
+- [x] Persistencia local (JSON en `~/.local/share/delixon/`) — migracion a SQLite planificada (ver `docs/tecnico/storage/MIGRATION_PLAN.md`)
 
 **Capa 2 — Scaffolding y composicion:**
 - [x] Catalogo de 30+ tecnologias en YAML con metadatos completos y UI de browse/search
@@ -894,7 +894,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Scan de proyectos existentes (964 lineas de logica de deteccion)
 
 **Capa 3 — Operacion diaria:**
-- [x] 28 comandos CLI (ver `docs/cli/CLI_REFERENCE.md`)
+- [x] 29 comandos CLI (ver `docs/cli/CLI_REFERENCE.md`)
 - [x] Docker management (up/down/status/logs) — GUI + CLI
 - [x] Git integration (rama, cambios, remoto, commits) — GUI + CLI
 - [x] Scripts unificados (ejecutar desde manifest) — GUI + CLI
@@ -904,6 +904,20 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Snapshots de entorno
 - [x] Notas por proyecto (CRUD con UUID y timestamps)
 - [x] Gestion de puertos y procesos — GUI + CLI
+- [x] Comando `unlink` en CLI para desvincular proyectos
+- [x] Workspace generation mejorado: genera .code-workspace + tasks.json + launch.json + extensions.json con settings inteligentes por stack
+- [x] Doctor muestra todos los editores instalados (no solo el configurado)
+- [x] Boton Workspace condicional (solo VS Code/Cursor, no otros editores)
+- [x] Apertura automatica de .code-workspace al abrir proyecto en editor
+- [x] Reactividad GUI ante cambios externos (CLI, otro proceso) via mouseenter + visibilitychange
+- [x] Deshabilitacion de extensiones conflictivas por workspace (Biome vs ESLint, Ruff vs Black, etc.)
+
+**Arquitectura backend:**
+- [x] Refactor de `core/` en subdirectorios por dominio: project/, analysis/, runtime/, workspace/, history/
+- [x] Consolidacion de codigo duplicado en `utils/editor.rs` (find_workspace_file, open_in_editor)
+- [x] Fix de race conditions en tests con `serial_test` + `#[serial(disk)]`
+- [x] Cleanup automatico de proyectos temporales en tests
+- [x] Documentacion tecnica: estructura-backend.md, refactor-core-v1.md
 
 **Sistema de diseno (GUI):**
 - [x] Paleta semantica Delixon: info (azul), success (verde), warning (ambar), error (rojo), dlx-grays (6 niveles fondo + 6 texto)
@@ -958,7 +972,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 - [x] La CLI y la GUI comparten el mismo core (misma lógica, mismos datos, misma persistencia)
 - [ ] Instalable globalmente: el dev escribe `delixon` desde cualquier terminal
 
-**28 comandos implementados (delixon-cli):**
+**29 comandos implementados (delixon-cli):**
 
 | Comando | Descripción | Uso |
 |---|---|---|
@@ -992,8 +1006,9 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 | `diff <project>` | Cambios desde último snapshot | `delixon-cli diff mi-app` |
 | `note <project> [text]` | Gestiona notas (sin texto = lista) | `delixon-cli note mi-app "nota aquí"` |
 | `ps [project]` | Lista procesos en puertos del proyecto | `delixon-cli ps mi-app` |
+| `unlink <name>` | Desvincula proyecto de Delixon (no borra archivos) | `delixon-cli unlink mi-app` |
 
-> **Decisión de diseño:** CLI y GUI son dos interfaces al mismo motor. No son productos separados, no compiten. La CLI es para acciones rápidas, la GUI es para explorar y configurar. Ambas leen/escriben sobre el mismo manifest y la misma persistencia JSON.
+> **Decisión de diseño:** CLI y GUI son dos interfaces al mismo motor. No son productos separados, no compiten. La CLI es para acciones rápidas, la GUI es para explorar y configurar. Ambas leen/escriben sobre el mismo manifest y la misma persistencia.
 
 **P0 — Cross-platform desde el dia 1 (Windows + Linux + macOS):**
 - [x] Tauri compila cross-platform
@@ -1054,7 +1069,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 - [ ] Notificaciones de dependencias desactualizadas o vulnerables
 
 **P2 — CLI avanzado:**
-- [x] Completar comandos: `add`, `ps`, `run`, `docker logs`, `env`, `snapshot`, `diff`, `note`, `recipes`, `validate`, `new`, `catalog`, `health`, `ports`, `manifest`, `export`, `import`, `status` (28 comandos totales)
+- [x] Completar comandos: `add`, `ps`, `run`, `docker logs`, `env`, `snapshot`, `diff`, `note`, `recipes`, `validate`, `new`, `catalog`, `health`, `ports`, `manifest`, `export`, `import`, `status` (29 comandos totales)
 - [ ] Autocompletado para bash/zsh/fish/PowerShell
 - [x] Output formateado (colores, tablas con colored crate)
 
@@ -1073,7 +1088,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 **P3 — Madurez:**
 - [x] Perfiles de madurez que cambian archivos reales — rapid/standard/production integrados en scaffold
 - [ ] Generacion orientada por tipo de producto ("¿Que vas a construir?" → stack recomendado) — mediano plazo
-- [ ] Soporte multi-editor completo: Cursor, WebStorm, Neovim, Zed
+- [ ] Soporte multi-editor completo: workspace configs para WebStorm (.idea/), Zed (.zed/) — VS Code/Cursor ya soportados
 - [ ] Control de versiones de plantillas y configuraciones
 - [x] 7 templates funcionales (Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose)
 - [x] Catalogo de 30+ tecnologias con metadatos completos
@@ -1116,7 +1131,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 - [ ] Marketplace de templates y recipes
 - [ ] Exportacion automatica de decisiones tecnicas (ADR)
 - [ ] Editor visual de plantillas y catalogos
-- [ ] Soporte multi-editor completo: Cursor, WebStorm, Neovim, Zed, Sublime
+- [ ] Soporte multi-editor completo: workspace configs para WebStorm (.idea/), Zed (.zed/) — VS Code/Cursor ya soportados, Sublime
 - [ ] DevContainers export (para equipos que lo requieran)
 - [ ] Editor visual de plantillas
 
@@ -1539,7 +1554,7 @@ MODELO:
 | **Scan/import** | ✅ Implementado | `scan` detecta 15+ aspectos del stack. Export/import con formato `.delixon` portable |
 | **Health + Doctor** | ✅ Implementado | Doctor del sistema + health por proyecto. GUI (HealthTab) + CLI. Sugerencias de fix |
 | **Versionado de stack** | ✅ Implementado | save/list/diff/rollback de manifest. GUI (VersioningTab) + CLI snapshot commands |
-| **CLI** | ✅ 28 comandos | Estrategia dual GUI+CLI. Ambas interfaces al mismo `delixon_lib`. Falta: autocompletado shell, instalacion global |
+| **CLI** | ✅ 29 comandos | Estrategia dual GUI+CLI. Ambas interfaces al mismo `delixon_lib`. Falta: autocompletado shell, instalacion global |
 | **Templates** | ✅ 7 funcionales | Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose. Ampliar con mas recipes |
 | **Docker** | ✅ Integrado | up/down/status/logs desde GUI (DockerTab) y CLI. Deteccion de puertos |
 | **Perfiles madurez** | ✅ Integrados | rapid/standard/production en scaffold. Cambian archivos reales |
@@ -1563,7 +1578,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 
 **Lo critico:** el nucleo declarativo (Project Manifest) es la columna vertebral. Todas las capas leen y escriben sobre el. Sin el, el producto seria una coleccion de botones inconexos.
 
-**La trampa a evitar:** competir en cantidad por la cantidad. La fuerza esta en la **calidad de la experiencia completa** — 30+ tecnologias solidas, 7 templates probados, 28 comandos CLI, 6 recipes, y un flujo GUI+CLI que funcione de extremo a extremo.
+**La trampa a evitar:** competir en cantidad por la cantidad. La fuerza esta en la **calidad de la experiencia completa** — 30+ tecnologias solidas, 7 templates probados, 29 comandos CLI, 6 recipes, y un flujo GUI+CLI que funcione de extremo a extremo.
 
 ---
 
@@ -1831,7 +1846,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [ ] Tests automatizados: cada template se genera y arranca sin errores
 
 ### Producto — Capa 3: Operacion diaria ✅
-- [x] 28 comandos CLI (clap) — ver `docs/cli/CLI_REFERENCE.md`
+- [x] 29 comandos CLI (clap) — ver `docs/cli/CLI_REFERENCE.md`
 - [x] Docker Compose management — up/down/status/logs (GUI DockerTab + CLI)
 - [x] Git integration — rama, cambios, remoto, commits (GUI GitTab + CLI)
 - [x] Scripts unificados — ejecutar desde manifest (GUI ScriptsTab + CLI)
@@ -1939,7 +1954,7 @@ El concepto de `on_open` (ejecutar comandos al abrir un proyecto) es util pero p
 
 ### Lo que ya tenemos y esta bien
 
-La arquitectura de las capas 0-3 esta completada: manifest, workspace, scaffolding, operacion diaria, CLI de 28 comandos, GUI con 9 tabs, y todo compartiendo el mismo core Rust. Eso es mas de lo que la mayoria de herramientas similares ofrecen. La base esta construida correctamente, pero la experiencia aun necesita blindarse: falta activacion de runtimes, CI multi-SO, instalacion global del CLI, y tests automatizados de templates.
+La arquitectura de las capas 0-3 esta completada: manifest, workspace, scaffolding, operacion diaria, CLI de 29 comandos, GUI con 9 tabs, y todo compartiendo el mismo core Rust. Eso es mas de lo que la mayoria de herramientas similares ofrecen. La base esta construida correctamente, pero la experiencia aun necesita blindarse: falta activacion de runtimes, CI multi-SO, instalacion global del CLI, y tests automatizados de templates.
 
 ### Lo que NO puede faltar antes de lanzar
 
@@ -2026,7 +2041,7 @@ Estas metricas son locales — un archivo JSON en `~/.local/share/delixon/metric
 
 ### Lo que NO deberiamos hacer (errores a evitar)
 
-1. **No agregar features sin pulir las existentes.** 28 comandos CLI que funcionan al 95% es peor que 15 que funcionan al 100%. Antes de agregar Capa 4 (IA), las capas 0-3 deben estar blindadas.
+1. **No agregar features sin pulir las existentes.** 29 comandos CLI que funcionan al 95% es peor que 15 que funcionan al 100%. Antes de agregar Capa 4 (IA), las capas 0-3 deben estar blindadas.
 
 2. **No priorizar GUI sobre CLI ni viceversa.** Ambas interfaces son ciudadanos de primera clase. Cada feature nueva debe funcionar en ambas desde el dia 1. Si solo funciona en GUI, los power users no la van a usar. Si solo funciona en CLI, los usuarios visuales no la van a encontrar.
 

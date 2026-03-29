@@ -7,7 +7,7 @@ use crate::core::error::DelixonError;
 use crate::core::manifest::{ManifestEnvVars, ManifestMetadata, ManifestService, ProjectManifest, CURRENT_SCHEMA_VERSION};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::rules;
-use crate::core::storage;
+use crate::core::store;
 use crate::core::utils::fs::ensure_dir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -538,9 +538,9 @@ pub fn register_scaffolded_project(
         tags: config.technologies.clone(),
     };
 
-    let mut projects = storage::load_projects()?;
+    let mut projects = store::get().list_projects()?;
     projects.push(project.clone());
-    storage::save_projects(&projects)?;
+    store::get().save_projects(&projects)?;
 
     Ok(project)
 }
@@ -573,6 +573,7 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_generate_project() {
+        crate::core::store::init_test_store();
         let dir = tempfile::tempdir().unwrap();
         let path_str = dir.path().to_str().unwrap().to_string();
         let config = ScaffoldConfig {
@@ -586,9 +587,9 @@ mod tests {
         assert!(dir.path().join(".delixon/manifest.yaml").exists());
 
         // Cleanup: eliminar proyecto de projects.json
-        if let Ok(projects) = crate::core::storage::load_projects() {
+        if let Ok(projects) = crate::core::store::get().list_projects() {
             let filtered: Vec<_> = projects.into_iter().filter(|p| p.path != path_str).collect();
-            let _ = crate::core::storage::save_projects(&filtered);
+            let _ = crate::core::store::get().save_projects(&filtered);
         }
     }
 

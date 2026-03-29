@@ -1,11 +1,12 @@
 use crate::core::storage;
+use crate::core::store;
 use std::process::Command;
 use tauri::command;
 
 /// Abre una terminal en la carpeta del proyecto con el entorno correcto cargado
 #[command]
 pub async fn open_terminal(project_id: String) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -20,7 +21,7 @@ pub async fn open_terminal(project_id: String) -> Result<(), String> {
     }
 
     // Cargar env vars del proyecto
-    let mut env_vars = storage::load_env_vars(&project_id).unwrap_or_default();
+    let mut env_vars = store::get().load_env_vars(&project_id).unwrap_or_default();
 
     // Terminal history isolation (bash, zsh, PowerShell)
     if let Ok(history_path) = storage::get_history_path(&project_id) {

@@ -1,10 +1,10 @@
 use crate::core::versioning::{self, Snapshot, SnapshotDiff};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
 pub async fn save_snapshot(project_id: String) -> Result<Snapshot, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -25,7 +25,7 @@ pub async fn diff_snapshots(project_id: String, v1: u32, v2: u32) -> Result<Snap
 
 #[command]
 pub async fn rollback_snapshot(project_id: String, version: u32) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

@@ -1,10 +1,10 @@
 use crate::core::snapshots::{self, EnvDiff, EnvSnapshot};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
 pub async fn take_env_snapshot(project_id: String) -> Result<EnvSnapshot, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -15,7 +15,7 @@ pub async fn take_env_snapshot(project_id: String) -> Result<EnvSnapshot, String
 
 #[command]
 pub async fn diff_env_snapshot(project_id: String) -> Result<Option<EnvDiff>, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

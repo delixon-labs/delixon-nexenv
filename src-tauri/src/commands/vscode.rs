@@ -1,6 +1,6 @@
 use crate::core::detection;
 use crate::core::manifest;
-use crate::core::storage;
+use crate::core::store;
 use crate::core::vscode::{self, VscodeGenerationResult};
 use tauri::command;
 
@@ -8,7 +8,7 @@ use tauri::command;
 /// (.code-workspace, tasks.json, launch.json, extensions.json)
 #[command]
 pub async fn generate_vscode_workspace(project_id: String) -> Result<VscodeGenerationResult, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

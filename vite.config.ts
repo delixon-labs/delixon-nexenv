@@ -22,4 +22,8 @@ export default defineConfig(async () => ({
   },
   // Variables de entorno expuestas al frontend
   envPrefix: ["VITE_", "TAURI_"],
+  // Tests: jsdom provee localStorage, document, window (entorno navegador)
+  test: {
+    environment: "jsdom",
+  },
 }));
