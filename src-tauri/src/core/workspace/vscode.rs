@@ -83,6 +83,12 @@ pub fn generate_all(
         result.files_created.push(".vscode/extensions.json".into());
     }
 
+    // 6. Asegurar entradas en .gitignore
+    let _ = crate::core::utils::fs::ensure_gitignore_entries(
+        project_path,
+        &["*.code-workspace", ".delixon/"],
+    );
+
     Ok(result)
 }
 

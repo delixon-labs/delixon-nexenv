@@ -193,6 +193,11 @@ pub fn save_manifest(
     let data = serde_yml::to_string(&normalized)
         .map_err(|e| DelixonError::InvalidConfig(format!("Error serializando manifest: {}", e)))?;
     std::fs::write(&path, data)?;
+
+    // Asegurar que .delixon/ este en .gitignore del proyecto
+    let project = std::path::Path::new(project_path);
+    let _ = crate::core::utils::fs::ensure_gitignore_entries(project, &[".delixon/"]);
+
     Ok(())
 }
 
