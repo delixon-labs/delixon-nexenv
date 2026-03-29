@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
 use delixon_lib::core::{
-    catalog, config, detection, docker, doctor, git, health, manifest, notes,
-    portable, ports, recipes, rules, scaffold, scripts, snapshots, storage, templates, versioning,
+    catalog, detection, docker, doctor, git, health, manifest,
+    portable, ports, recipes, rules, scaffold, scripts, snapshots, store, templates, versioning,
 };
 
 #[derive(Parser)]
@@ -251,6 +251,9 @@ enum EnvAction {
 }
 
 fn main() {
+    // Inicializar store global: SQLite con fallback a JSON
+    delixon_lib::core::store::init(init_store());
+
     let cli = Cli::parse();
 
     if let Err(e) = run_command(cli.command) {
@@ -289,7 +292,7 @@ fn run_command(cmd: Commands) -> Result<(), String> {
 }
 
 fn cmd_list() -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     if projects.is_empty() {
         println!("{}", "No hay proyectos registrados.".dimmed());
@@ -327,7 +330,7 @@ fn cmd_list() -> Result<(), String> {
 
 fn cmd_open(name: &str) -> Result<(), String> {
     let project = find_project(name)?;
-    let cfg = config::load_config().map_err(|e| e.to_string())?;
+    let cfg = store::get().load_config().map_err(|e| e.to_string())?;
     let editor = &cfg.default_editor;
 
     println!(
@@ -343,7 +346,7 @@ fn cmd_open(name: &str) -> Result<(), String> {
 fn cmd_unlink(name: &str) -> Result<(), String> {
     let project = find_project(name)?;
 
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let original_len = projects.len();
     projects.retain(|p| p.id != project.id);
 
@@ -351,8 +354,8 @@ fn cmd_unlink(name: &str) -> Result<(), String> {
         return Err(format!("Proyecto no encontrado: {}", name));
     }
 
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
-    let _ = storage::delete_env_vars(&project.id);
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
+    let _ = store::get().delete_env_vars(&project.id);
 
     println!(
         "{} {} desvinculado (los archivos en {} no se han borrado)",
@@ -402,9 +405,9 @@ fn cmd_create(name: &str, path: &str, template: Option<&str>) -> Result<(), Stri
             tags: vec![],
         };
 
-        let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+        let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
         projects.push(project);
-        storage::save_projects(&projects).map_err(|e| e.to_string())?;
+        store::get().save_projects(&projects).map_err(|e| e.to_string())?;
         println!("{} Proyecto registrado en {}", "ok".green().bold(), path);
     }
     Ok(())
@@ -525,7 +528,7 @@ fn cmd_doctor() -> Result<(), String> {
 }
 
 fn cmd_env(project_name: &str, action: EnvAction) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = project_name.to_lowercase();
     let project = projects
         .iter()
@@ -534,7 +537,7 @@ fn cmd_env(project_name: &str, action: EnvAction) -> Result<(), String> {
 
     match action {
         EnvAction::Get => {
-            let vars = storage::load_env_vars(&project.id).map_err(|e| e.to_string())?;
+            let vars = store::get().load_env_vars(&project.id).map_err(|e| e.to_string())?;
             if vars.is_empty() {
                 println!("{}", "No hay variables de entorno configuradas.".dimmed());
             } else {
@@ -544,9 +547,9 @@ fn cmd_env(project_name: &str, action: EnvAction) -> Result<(), String> {
             }
         }
         EnvAction::Set { key, value } => {
-            let mut vars = storage::load_env_vars(&project.id).map_err(|e| e.to_string())?;
+            let mut vars = store::get().load_env_vars(&project.id).map_err(|e| e.to_string())?;
             vars.insert(key.clone(), value.clone());
-            storage::save_env_vars(&project.id, &vars).map_err(|e| e.to_string())?;
+            store::get().save_env_vars(&project.id, &vars).map_err(|e| e.to_string())?;
             println!("{} {} configurada", "ok".green().bold(), key);
         }
     }
@@ -554,7 +557,7 @@ fn cmd_env(project_name: &str, action: EnvAction) -> Result<(), String> {
 }
 
 fn cmd_export(project_name: &str, output: Option<&str>) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = project_name.to_lowercase();
     let project = projects
         .iter()
@@ -585,7 +588,7 @@ fn cmd_import(file: &str, path: &str) -> Result<(), String> {
 }
 
 fn cmd_manifest(project_name: &str) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = project_name.to_lowercase();
     let project = projects
         .iter()
@@ -655,7 +658,7 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
 }
 
 fn cmd_health(project_name: &str) -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = project_name.to_lowercase();
     let project = projects
         .iter()
@@ -688,7 +691,7 @@ fn cmd_health(project_name: &str) -> Result<(), String> {
 }
 
 fn cmd_ports() -> Result<(), String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     let port_list = ports::list_project_ports(&projects).map_err(|e| e.to_string())?;
     let conflicts = ports::detect_port_conflicts(&projects).map_err(|e| e.to_string())?;
@@ -777,7 +780,7 @@ fn cmd_validate(techs: &[String]) -> Result<(), String> {
 }
 
 fn find_project(name: &str) -> Result<delixon_lib::core::models::project::Project, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = name.to_lowercase();
     projects
         .into_iter()
@@ -1093,12 +1096,12 @@ fn cmd_note(project_name: &str, text: Option<&str>) -> Result<(), String> {
 
     match text {
         Some(t) => {
-            let note = notes::add_note(&project.id, t).map_err(|e| e.to_string())?;
+            let note = store::get().add_note(&project.id, t).map_err(|e| e.to_string())?;
             println!("{} Nota agregada ({})", "ok".green().bold(), note.id[..8].to_string().dimmed());
             Ok(())
         }
         None => {
-            let project_notes = notes::get_notes(&project.id).map_err(|e| e.to_string())?;
+            let project_notes = store::get().get_notes(&project.id).map_err(|e| e.to_string())?;
             if project_notes.is_empty() {
                 println!("{}", "No hay notas".dimmed());
             } else {
@@ -1194,4 +1197,38 @@ fn cmd_catalog(id: Option<&str>) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+fn init_store() -> std::sync::Arc<dyn delixon_lib::core::store::Store> {
+    use delixon_lib::core::store::{json_store::JsonStore, migration, sqlite_store::SqliteStore};
+    use delixon_lib::core::project::storage;
+
+    if let Some(path) = migration::db_path() {
+        let _ = storage::init_data_dir();
+
+        match SqliteStore::new(path.to_str().unwrap_or("delixon.db")) {
+            Ok(sqlite) => {
+                if migration::json_data_exists() {
+                    match migration::migrate_json_to_sqlite(&sqlite) {
+                        Ok(result) => {
+                            eprintln!(
+                                "[delixon] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
+                                result.projects, result.env_vars, result.notes
+                            );
+                        }
+                        Err(e) => {
+                            eprintln!("[delixon] Error migrando: {}. Usando JSON.", e);
+                            return std::sync::Arc::new(JsonStore::new());
+                        }
+                    }
+                }
+                return std::sync::Arc::new(sqlite);
+            }
+            Err(e) => {
+                eprintln!("[delixon] Error SQLite: {}. Usando JSON.", e);
+            }
+        }
+    }
+
+    std::sync::Arc::new(JsonStore::new())
 }

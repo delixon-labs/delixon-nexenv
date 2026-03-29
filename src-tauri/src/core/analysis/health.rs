@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::core::error::DelixonError;
 use crate::core::manifest;
 use crate::core::models::project::Project;
-use crate::core::storage;
+use crate::core::store;
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -106,7 +106,7 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
     }
 
     // 5. Env vars configured
-    let env_vars = storage::load_env_vars(&project.id).unwrap_or_default();
+    let env_vars = store::get().load_env_vars(&project.id).unwrap_or_default();
     if let Ok(Some(m)) = manifest::load_manifest(&project.path) {
         let missing_required: Vec<_> = m
             .env_vars
@@ -246,6 +246,10 @@ mod tests {
     use super::*;
     use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 
+    fn ensure_store() {
+        crate::core::store::init_test_store();
+    }
+
     fn make_project(path: &str) -> Project {
         Project {
             id: "test-health".to_string(),
@@ -266,6 +270,7 @@ mod tests {
 
     #[test]
     fn test_health_existing_project() {
+        ensure_store();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().to_str().unwrap();
         // Create README and .gitignore
@@ -281,6 +286,7 @@ mod tests {
 
     #[test]
     fn test_health_missing_directory() {
+        ensure_store();
         let project = make_project("/nonexistent/path/xyz");
         let report = check_project_health(&project).unwrap();
 
@@ -290,6 +296,7 @@ mod tests {
 
     #[test]
     fn test_health_empty_project() {
+        ensure_store();
         let dir = tempfile::tempdir().unwrap();
         let project = make_project(dir.path().to_str().unwrap());
         let report = check_project_health(&project).unwrap();

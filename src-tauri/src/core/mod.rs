@@ -1,6 +1,7 @@
 // Fundacional
 pub mod error;
 pub mod models;
+pub mod store;
 pub mod utils;
 
 // Existentes

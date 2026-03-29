@@ -1,7 +1,7 @@
 use crate::core::detection::{self, DetectedStack};
 use crate::core::manifest;
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
@@ -30,9 +30,9 @@ pub async fn scan_and_register(path: String, name: String) -> Result<Project, St
         tags,
     };
 
-    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
     projects.push(project.clone());
-    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
     let m = manifest::generate_manifest_from_project(&project);
     let _ = manifest::save_manifest(&path, &m);

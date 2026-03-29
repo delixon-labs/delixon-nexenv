@@ -1,8 +1,7 @@
 use serde::Serialize;
 
-use crate::core::config;
 use crate::core::error::DelixonError;
-use crate::core::storage;
+use crate::core::store;
 use crate::core::utils::platform::get_data_dir;
 
 #[derive(Debug, Serialize, Clone)]
@@ -49,7 +48,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
     }
 
-    match config::load_config() {
+    match store::get().load_config() {
         Ok(cfg) => {
             checks.push(DoctorCheck {
                 group: "Sistema".to_string(),
@@ -71,7 +70,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         }
     }
 
-    match storage::load_projects() {
+    match store::get().list_projects() {
         Ok(projects) => {
             checks.push(DoctorCheck {
                 group: "Sistema".to_string(),
@@ -91,7 +90,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
     }
 
     // --- Grupo: Runtimes ---
-    let projects = storage::load_projects().unwrap_or_default();
+    let projects = store::get().list_projects().unwrap_or_default();
     let used_runtimes: Vec<String> = projects
         .iter()
         .flat_map(|p| p.runtimes.iter().map(|r| r.runtime.to_lowercase()))
@@ -162,7 +161,7 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         },
     });
 
-    let default_editor = config::load_config()
+    let default_editor = store::get().load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
 
@@ -211,6 +210,7 @@ mod tests {
 
     #[test]
     fn test_run_doctor() {
+        crate::core::store::init_test_store();
         let report = run_doctor().unwrap();
         assert!(!report.checks.is_empty());
         // At minimum, data dir and config should work

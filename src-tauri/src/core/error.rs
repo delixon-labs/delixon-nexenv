@@ -22,6 +22,9 @@ pub enum DelixonError {
 
     #[error("Error de serializacion: {0}")]
     Serialization(#[from] serde_json::Error),
+
+    #[error("Error de base de datos: {0}")]
+    Database(String),
 }
 
 impl From<DelixonError> for String {

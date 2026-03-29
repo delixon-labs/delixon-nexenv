@@ -1,10 +1,10 @@
 use crate::core::git::{self, GitCommit, GitStatus};
-use crate::core::storage;
+use crate::core::store;
 use tauri::command;
 
 #[command]
 pub async fn git_status(project_id: String) -> Result<GitStatus, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
@@ -15,7 +15,7 @@ pub async fn git_status(project_id: String) -> Result<GitStatus, String> {
 
 #[command]
 pub async fn git_log(project_id: String, count: u32) -> Result<Vec<GitCommit>, String> {
-    let projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)

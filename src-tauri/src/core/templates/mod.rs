@@ -9,7 +9,7 @@ mod rust_cli;
 
 use crate::core::error::DelixonError;
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
-use crate::core::storage;
+use crate::core::store;
 use crate::core::utils::fs::ensure_dir;
 use std::path::Path;
 
@@ -81,9 +81,9 @@ pub fn create_from_template(
         tags,
     };
 
-    let mut projects = storage::load_projects()?;
+    let mut projects = store::get().list_projects()?;
     projects.push(project.clone());
-    storage::save_projects(&projects)?;
+    store::get().save_projects(&projects)?;
 
     let manifest = crate::core::manifest::generate_manifest_from_project(&project);
     let _ = crate::core::manifest::save_manifest(project_path, &manifest);
@@ -94,17 +94,17 @@ pub fn create_from_template(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::storage;
+    use crate::core::store;
     use serial_test::serial;
 
     /// Elimina un proyecto del projects.json por su path
     fn cleanup_by_path(path: &str) {
-        if let Ok(projects) = storage::load_projects() {
+        if let Ok(projects) = store::get().list_projects() {
             for p in projects.iter().filter(|p| p.path == path) {
-                let _ = storage::delete_env_vars(&p.id);
+                let _ = store::get().delete_env_vars(&p.id);
             }
             let filtered: Vec<_> = projects.into_iter().filter(|p| p.path != path).collect();
-            let _ = storage::save_projects(&filtered);
+            let _ = store::get().save_projects(&filtered);
         }
     }
 
@@ -117,6 +117,7 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_node_express_template_generates_files() {
+        crate::core::store::init_test_store();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("test-project");
         let path_str = path.to_str().unwrap();
@@ -136,6 +137,7 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_react_vite_template_generates_files() {
+        crate::core::store::init_test_store();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("my-react-app");
         let path_str = path.to_str().unwrap();
@@ -152,6 +154,7 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_python_fastapi_template() {
+        crate::core::store::init_test_store();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("my-api");
         let path_str = path.to_str().unwrap();
@@ -166,6 +169,7 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_invalid_template_returns_error() {
+        crate::core::store::init_test_store();
         let dir = tempfile::tempdir().unwrap();
         let result = create_from_template("nonexistent", dir.path().to_str().unwrap(), "test");
         assert!(result.is_err());

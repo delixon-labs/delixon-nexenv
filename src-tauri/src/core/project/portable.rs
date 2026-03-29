@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::error::DelixonError;
 use crate::core::manifest::{self, ProjectManifest};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
-use crate::core::storage;
+use crate::core::store;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,13 +29,13 @@ pub struct ExportedProject {
 
 /// Exporta un proyecto como JSON portable (.delixon)
 pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
-    let projects = storage::load_projects()?;
+    let projects = store::get().list_projects()?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
         .ok_or_else(|| DelixonError::ProjectNotFound(project_id.to_string()))?;
 
-    let env_vars = storage::load_env_vars(project_id)?;
+    let env_vars = store::get().load_env_vars(project_id)?;
     let env_keys: Vec<String> = env_vars.keys().cloned().collect();
 
     // Cargar manifest si existe
@@ -78,7 +78,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
     };
 
     // Verificar que no exista un proyecto en la misma ruta
-    let mut projects = storage::load_projects()?;
+    let mut projects = store::get().list_projects()?;
     if projects.iter().any(|p| p.path == target_path) {
         return Err(DelixonError::InvalidPath(format!(
             "Ya existe un proyecto registrado en esa ruta: {}",
@@ -87,7 +87,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
     }
 
     projects.push(project.clone());
-    storage::save_projects(&projects)?;
+    store::get().save_projects(&projects)?;
 
     // Crear env vars vacias con las keys exportadas
     if !export.project.env_keys.is_empty() {
@@ -97,7 +97,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
             .into_iter()
             .map(|k| (k, String::new()))
             .collect();
-        storage::save_env_vars(&project.id, &vars)?;
+        store::get().save_env_vars(&project.id, &vars)?;
     }
 
     // Restaurar manifest si viene en el export
@@ -112,7 +112,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
 mod tests {
     use super::*;
     use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
-    use crate::core::storage;
+    use crate::core::store;
     use serial_test::serial;
 
     fn make_test_project(suffix: &str) -> Project {
@@ -134,39 +134,40 @@ mod tests {
     }
 
     fn cleanup_project(id: &str) {
-        if let Ok(projects) = storage::load_projects() {
+        if let Ok(projects) = store::get().list_projects() {
             let filtered: Vec<_> = projects.into_iter().filter(|p| p.id != id).collect();
-            let _ = storage::save_projects(&filtered);
+            let _ = store::get().save_projects(&filtered);
         }
-        let _ = storage::delete_env_vars(id);
+        let _ = store::get().delete_env_vars(id);
     }
 
     fn cleanup_by_path(path: &str) {
-        if let Ok(projects) = storage::load_projects() {
+        if let Ok(projects) = store::get().list_projects() {
             // Find ids to clean env vars
             for p in projects.iter().filter(|p| p.path == path) {
-                let _ = storage::delete_env_vars(&p.id);
+                let _ = store::get().delete_env_vars(&p.id);
             }
             let filtered: Vec<_> = projects.into_iter().filter(|p| p.path != path).collect();
-            let _ = storage::save_projects(&filtered);
+            let _ = store::get().save_projects(&filtered);
         }
     }
 
     #[test]
     #[serial(disk)]
     fn test_export_import_roundtrip() {
+        crate::core::store::init_test_store();
         let proj = make_test_project("roundtrip");
         let proj_id = proj.id.clone();
 
         // Save project + env vars
-        let mut projects = storage::load_projects().unwrap_or_default();
+        let mut projects = store::get().list_projects().unwrap_or_default();
         projects.retain(|p| p.id != proj.id);
         projects.push(proj.clone());
-        storage::save_projects(&projects).unwrap();
+        store::get().save_projects(&projects).unwrap();
 
         let mut vars = std::collections::HashMap::new();
         vars.insert("SECRET".to_string(), "value123".to_string());
-        storage::save_env_vars(&proj.id, &vars).unwrap();
+        store::get().save_env_vars(&proj.id, &vars).unwrap();
 
         // Export
         let json = export_project(&proj.id).expect("export should succeed");
@@ -190,12 +191,14 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_export_nonexistent_project() {
+        crate::core::store::init_test_store();
         let result = export_project("nonexistent-project-xyz-portable-999");
         assert!(result.is_err(), "exporting nonexistent project should error");
     }
 
     #[test]
     fn test_import_invalid_json() {
+        crate::core::store::init_test_store();
         let result = import_project("this is not json", "/tmp/delixon-invalid");
         assert!(result.is_err(), "importing invalid JSON should error");
     }
@@ -203,15 +206,16 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_import_duplicate_path() {
+        crate::core::store::init_test_store();
         let proj = make_test_project("dup-path");
         let proj_id = proj.id.clone();
         let dup_path = proj.path.clone();
 
         // Save the project
-        let mut projects = storage::load_projects().unwrap_or_default();
+        let mut projects = store::get().list_projects().unwrap_or_default();
         projects.retain(|p| p.id != proj.id && p.path != proj.path);
         projects.push(proj.clone());
-        storage::save_projects(&projects).unwrap();
+        store::get().save_projects(&projects).unwrap();
 
         // Export then try to import at the SAME path
         let json = export_project(&proj.id).unwrap();
@@ -224,17 +228,18 @@ mod tests {
     #[test]
     #[serial(disk)]
     fn test_export_env_keys_not_values() {
+        crate::core::store::init_test_store();
         let proj = make_test_project("env-keys");
         let proj_id = proj.id.clone();
 
-        let mut projects = storage::load_projects().unwrap_or_default();
+        let mut projects = store::get().list_projects().unwrap_or_default();
         projects.retain(|p| p.id != proj.id);
         projects.push(proj.clone());
-        storage::save_projects(&projects).unwrap();
+        store::get().save_projects(&projects).unwrap();
 
         let mut vars = std::collections::HashMap::new();
         vars.insert("MY_SECRET".to_string(), "super_secret_value".to_string());
-        storage::save_env_vars(&proj.id, &vars).unwrap();
+        store::get().save_env_vars(&proj.id, &vars).unwrap();
 
         let json = export_project(&proj.id).unwrap();
 

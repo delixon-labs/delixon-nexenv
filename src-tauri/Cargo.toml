@@ -52,6 +52,7 @@ chrono = { version = "=0.4.44", features = ["serde"] }
 clap = { version = "=4.5.40", features = ["derive"] }
 colored = "=3.0.0"
 serde_yml = "=0.0.12"
+rusqlite = { version = "=0.32.1", features = ["bundled"] }
 
 [dev-dependencies]
 tempfile = "=3.20.0"
