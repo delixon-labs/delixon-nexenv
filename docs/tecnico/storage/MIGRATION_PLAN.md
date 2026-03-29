@@ -285,7 +285,7 @@ La migracion es **automatica al primer arranque post-actualizacion**:
 
 **Objetivo**: backend SQLite completo.
 
-- Anadir `rusqlite = { version = "0.32", features = ["bundled"] }`
+- Anadir `rusqlite = { version = "0.39", features = ["bundled"] }`
 - Crear `core/store/sqlite_store.rs` con `SqliteStore { conn: Mutex<Connection> }`
 - Crear sistema de migraciones versionadas
 - Implementar los 6 traits con queries SQL
@@ -361,11 +361,11 @@ La migracion es **automatica al primer arranque post-actualizacion**:
 ## Dependencias Rust a Anadir
 
 ```toml
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.39", features = ["bundled"] }
 async-trait = "0.1"
 ```
 
-`bundled` compila SQLite desde fuente — no requiere libsqlite3 instalada en Windows. Anade ~1.5MB al binario.
+`bundled` compila SQLite 3.49.1 desde fuente — no requiere libsqlite3 instalada en ningun SO. Anade ~1.5MB al binario.
 
 ---
 
