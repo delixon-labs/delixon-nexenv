@@ -172,6 +172,12 @@ enum Commands {
         /// Nombre del proyecto (opcional)
         project: Option<String>,
     },
+
+    /// Desvincula un proyecto de Delixon (no borra archivos)
+    Unlink {
+        /// Nombre del proyecto (busqueda parcial)
+        name: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -278,6 +284,7 @@ fn run_command(cmd: Commands) -> Result<(), String> {
         Commands::Diff { project } => cmd_diff(&project),
         Commands::Note { project, text } => cmd_note(&project, text.as_deref()),
         Commands::Ps { project } => cmd_ps(project.as_deref()),
+        Commands::Unlink { name } => cmd_unlink(&name),
     }
 }
 
@@ -323,18 +330,6 @@ fn cmd_open(name: &str) -> Result<(), String> {
     let cfg = config::load_config().map_err(|e| e.to_string())?;
     let editor = &cfg.default_editor;
 
-    use delixon_lib::core::utils::platform::{ALLOWED_EDITORS, find_editor_in_path};
-    if !ALLOWED_EDITORS.contains(&editor.as_str()) {
-        return Err(format!(
-            "Editor '{}' no permitido. Editores disponibles: {}",
-            editor,
-            ALLOWED_EDITORS.join(", ")
-        ));
-    }
-
-    let editor_bin = find_editor_in_path(editor)
-        .ok_or_else(|| format!("Editor '{}' no encontrado en PATH", editor))?;
-
     println!(
         "{} {} en {}...",
         "Abriendo".green().bold(),
@@ -342,10 +337,29 @@ fn cmd_open(name: &str) -> Result<(), String> {
         editor
     );
 
-    std::process::Command::new(&editor_bin)
-        .arg(&project.path)
-        .spawn()
-        .map_err(|e| format!("Error abriendo {}: {}", editor, e))?;
+    delixon_lib::core::utils::editor::open_in_editor(&project.path, editor)
+}
+
+fn cmd_unlink(name: &str) -> Result<(), String> {
+    let project = find_project(name)?;
+
+    let mut projects = storage::load_projects().map_err(|e| e.to_string())?;
+    let original_len = projects.len();
+    projects.retain(|p| p.id != project.id);
+
+    if projects.len() == original_len {
+        return Err(format!("Proyecto no encontrado: {}", name));
+    }
+
+    storage::save_projects(&projects).map_err(|e| e.to_string())?;
+    let _ = storage::delete_env_vars(&project.id);
+
+    println!(
+        "{} {} desvinculado (los archivos en {} no se han borrado)",
+        "Ok".green().bold(),
+        project.name.bold(),
+        project.path
+    );
 
     Ok(())
 }

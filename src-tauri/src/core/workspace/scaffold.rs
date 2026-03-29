@@ -548,6 +548,7 @@ pub fn register_scaffolded_project(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
 
     fn basic_config() -> ScaffoldConfig {
         ScaffoldConfig {
@@ -570,10 +571,12 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_generate_project() {
         let dir = tempfile::tempdir().unwrap();
+        let path_str = dir.path().to_str().unwrap().to_string();
         let config = ScaffoldConfig {
-            path: dir.path().to_str().unwrap().to_string(),
+            path: path_str.clone(),
             ..basic_config()
         };
         let result = generate_project(&config).unwrap();
@@ -581,6 +584,12 @@ mod tests {
         assert!(dir.path().join(".gitignore").exists());
         assert!(dir.path().join("README.md").exists());
         assert!(dir.path().join(".delixon/manifest.yaml").exists());
+
+        // Cleanup: eliminar proyecto de projects.json
+        if let Ok(projects) = crate::core::storage::load_projects() {
+            let filtered: Vec<_> = projects.into_iter().filter(|p| p.path != path_str).collect();
+            let _ = crate::core::storage::save_projects(&filtered);
+        }
     }
 
     #[test]

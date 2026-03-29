@@ -92,6 +92,7 @@ pub fn delete_env_vars(project_id: &str) -> Result<(), DelixonError> {
 mod tests {
     use super::*;
     use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
+    use serial_test::serial;
 
     fn make_test_project(suffix: &str) -> Project {
         Project {
@@ -120,6 +121,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_init_data_dir() {
         // First call creates dirs
         init_data_dir().expect("init_data_dir should succeed");
@@ -132,6 +134,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_save_load_projects_roundtrip() {
         let proj = make_test_project("roundtrip");
 
@@ -153,6 +156,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_load_projects_empty() {
         // load_projects must not panic even if the file is valid
         let result = load_projects();
@@ -160,6 +164,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_save_load_env_vars_roundtrip() {
         let id = "test-env-roundtrip";
         let mut vars = HashMap::new();
@@ -176,6 +181,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_load_env_vars_nonexistent() {
         let result = load_env_vars("nonexistent-project-xyz-999");
         assert!(result.is_ok());
@@ -183,6 +189,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_delete_env_vars() {
         let id = "test-env-delete";
         let mut vars = HashMap::new();
@@ -195,18 +202,21 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_delete_env_vars_nonexistent() {
         let result = delete_env_vars("nonexistent-env-xyz-999");
         assert!(result.is_ok(), "deleting nonexistent env vars should not error");
     }
 
     #[test]
+    #[serial(disk)]
     fn test_history_dir() {
         let dir = history_dir().expect("history_dir should return Ok");
         assert!(dir.to_str().unwrap().contains("history"));
     }
 
     #[test]
+    #[serial(disk)]
     fn test_get_history_path() {
         let path = get_history_path("my-project-123").expect("should return Ok");
         let path_str = path.to_str().unwrap();

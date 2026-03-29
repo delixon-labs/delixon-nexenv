@@ -162,20 +162,43 @@ pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
         },
     });
 
-    let editor = config::load_config()
+    let default_editor = config::load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
-    let editor_path = crate::core::utils::platform::find_editor_in_path(&editor);
-    checks.push(DoctorCheck {
-        group: "Herramientas".to_string(),
-        name: format!("Editor ({})", editor),
-        ok: editor_path.is_some(),
-        message: if let Some(path) = editor_path {
-            format!("{}", path.display())
-        } else {
-            "No encontrado en PATH".to_string()
-        },
-    });
+
+    // Mostrar todos los editores instalados
+    let installed = crate::core::utils::platform::detect_installed_editors();
+    if installed.is_empty() {
+        checks.push(DoctorCheck {
+            group: "Herramientas".to_string(),
+            name: "Editores".to_string(),
+            ok: false,
+            message: "Ningun editor encontrado en PATH".to_string(),
+        });
+    } else {
+        for (cmd, label) in &installed {
+            let is_default = *cmd == default_editor;
+            let tag = if is_default { " (configurado)" } else { "" };
+            let path = crate::core::utils::platform::find_editor_in_path(cmd)
+                .map(|p| format!("{}", p.display()))
+                .unwrap_or_default();
+            checks.push(DoctorCheck {
+                group: "Herramientas".to_string(),
+                name: format!("{}{}", label, tag),
+                ok: true,
+                message: path,
+            });
+        }
+        // Verificar que el editor configurado este instalado
+        if !installed.iter().any(|(cmd, _)| *cmd == default_editor) {
+            checks.push(DoctorCheck {
+                group: "Herramientas".to_string(),
+                name: format!("Editor configurado ({})", default_editor),
+                ok: false,
+                message: "No encontrado en PATH".to_string(),
+            });
+        }
+    }
 
     let overall_ok = checks.iter().all(|c| c.ok);
 

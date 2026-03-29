@@ -202,6 +202,8 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
       return Promise.resolve({ id: `mock-import-${Date.now()}`, name: "imported", path: "/tmp/imported", runtimes: [], status: "active", createdAt: new Date().toISOString(), tags: [] } as T);
 
     case "generate_vscode_workspace":
+      return Promise.resolve({ filesCreated: ["proyecto.code-workspace", ".vscode/tasks.json", ".vscode/launch.json", ".vscode/extensions.json"], filesSkipped: [], warnings: [] } as T);
+
     case "open_terminal":
     case "open_in_editor":
       console.info(`[mock] ${cmd} (simulado en navegador)`);
@@ -468,8 +470,14 @@ export async function importProject(json: string, targetPath: string): Promise<P
 
 // --- VSCode Workspace ---
 
-export async function generateVscodeWorkspace(projectId: string): Promise<void> {
-  return safeInvoke<void>("generate_vscode_workspace", { projectId });
+export interface VscodeGenerationResult {
+  filesCreated: string[];
+  filesSkipped: string[];
+  warnings: string[];
+}
+
+export async function generateVscodeWorkspace(projectId: string): Promise<VscodeGenerationResult> {
+  return safeInvoke<VscodeGenerationResult>("generate_vscode_workspace", { projectId });
 }
 
 // --- Shell / Editor ---

@@ -5,6 +5,7 @@ import * as api from "@/lib/tauri";
 interface ProjectsState {
   projects: Project[];
   isLoading: boolean;
+  hasFetched: boolean;
   error: string | null;
   searchQuery: string;
 
@@ -18,16 +19,20 @@ interface ProjectsState {
 export const useProjectsStore = create<ProjectsState>()((set, get) => ({
   projects: [],
   isLoading: false,
+  hasFetched: false,
   error: null,
   searchQuery: "",
 
   fetchProjects: async () => {
-    set({ isLoading: true, error: null });
+    // Solo mostrar spinner en la carga inicial, no en refrescos silenciosos
+    const isInitial = !get().hasFetched;
+    if (isInitial) set({ isLoading: true });
+    set({ error: null });
     try {
       const projects = await api.listProjects();
-      set({ projects, isLoading: false });
+      set({ projects, isLoading: false, hasFetched: true });
     } catch (e) {
-      set({ error: String(e), isLoading: false });
+      set({ error: String(e), isLoading: false, hasFetched: true });
     }
   },
 

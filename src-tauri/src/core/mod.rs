@@ -1,24 +1,24 @@
-pub mod catalog;
-pub mod config;
-pub mod detection;
-pub mod docker;
-pub mod doctor;
+// Fundacional
 pub mod error;
-pub mod git;
-pub mod health;
-pub mod manifest;
-pub mod notes;
-pub mod ports;
 pub mod models;
-pub mod portable;
-pub mod processes;
-pub mod recipes;
-pub mod rules;
-pub mod scaffold;
-pub mod scripts;
-pub mod snapshots;
-pub mod storage;
-pub mod templates;
 pub mod utils;
-pub mod versioning;
-pub mod vscode;
+
+// Existentes
+pub mod catalog;
+pub mod templates;
+pub mod recipes;
+
+// Nuevos subdirectorios
+pub mod analysis;
+pub mod history;
+pub mod project;
+pub mod runtime;
+pub mod workspace;
+
+// Re-exports para backward compat: crate::core::X sigue funcionando
+pub use self::project::{config, manifest, notes, portable, storage};
+pub use self::analysis::{detection, doctor, health, rules};
+pub use self::runtime::{docker, git, ports, processes, scripts};
+pub use self::workspace::{scaffold, vscode};
+pub use self::history::env as snapshots;
+pub use self::history::versioning;

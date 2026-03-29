@@ -95,22 +95,12 @@ pub async fn open_project(id: String) -> Result<(), String> {
     project.status = ProjectStatus::Active;
     storage::save_projects(&projects).map_err(|e| e.to_string())?;
 
-    // Abrir en editor configurado (default: code, validado contra whitelist)
+    // Abrir en editor configurado
     let editor = config::load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
 
-    if !crate::core::utils::platform::ALLOWED_EDITORS.contains(&editor.as_str()) {
-        return Err(format!("Editor '{}' no esta en la lista de editores permitidos", editor));
-    }
-
-    let editor_bin = crate::core::utils::platform::find_editor_in_path(&editor)
-        .ok_or_else(|| format!("Editor '{}' no encontrado en PATH", editor))?;
-
-    std::process::Command::new(&editor_bin)
-        .arg(&project_path)
-        .spawn()
-        .map_err(|e| format!("Error abriendo {}: {}", editor, e))?;
+    crate::core::utils::editor::open_in_editor(&project_path, &editor)?;
 
     Ok(())
 }

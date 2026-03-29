@@ -94,6 +94,19 @@ pub fn create_from_template(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::storage;
+    use serial_test::serial;
+
+    /// Elimina un proyecto del projects.json por su path
+    fn cleanup_by_path(path: &str) {
+        if let Ok(projects) = storage::load_projects() {
+            for p in projects.iter().filter(|p| p.path == path) {
+                let _ = storage::delete_env_vars(&p.id);
+            }
+            let filtered: Vec<_> = projects.into_iter().filter(|p| p.path != path).collect();
+            let _ = storage::save_projects(&filtered);
+        }
+    }
 
     #[test]
     fn test_all_templates_exist() {
@@ -102,10 +115,12 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_node_express_template_generates_files() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("test-project");
-        let result = create_from_template("node-express", path.to_str().unwrap(), "test-project");
+        let path_str = path.to_str().unwrap();
+        let result = create_from_template("node-express", path_str, "test-project");
         assert!(result.is_ok());
         assert!(path.join("package.json").exists());
         assert!(path.join(".gitignore").exists());
@@ -114,31 +129,42 @@ mod tests {
 
         let pkg = std::fs::read_to_string(path.join("package.json")).unwrap();
         assert!(pkg.contains("test-project"));
+
+        cleanup_by_path(path_str);
     }
 
     #[test]
+    #[serial(disk)]
     fn test_react_vite_template_generates_files() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("my-react-app");
-        let result = create_from_template("react-vite", path.to_str().unwrap(), "my-react-app");
+        let path_str = path.to_str().unwrap();
+        let result = create_from_template("react-vite", path_str, "my-react-app");
         assert!(result.is_ok(), "Failed: {:?}", result.err());
         assert!(path.join("package.json").exists());
         assert!(path.join("src/main.tsx").exists());
         assert!(path.join("src/App.tsx").exists());
         assert!(path.join("vite.config.ts").exists());
+
+        cleanup_by_path(path_str);
     }
 
     #[test]
+    #[serial(disk)]
     fn test_python_fastapi_template() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("my-api");
-        let result = create_from_template("python-fastapi", path.to_str().unwrap(), "my-api");
+        let path_str = path.to_str().unwrap();
+        let result = create_from_template("python-fastapi", path_str, "my-api");
         assert!(result.is_ok());
         assert!(path.join("requirements.txt").exists());
         assert!(path.join("app/main.py").exists());
+
+        cleanup_by_path(path_str);
     }
 
     #[test]
+    #[serial(disk)]
     fn test_invalid_template_returns_error() {
         let dir = tempfile::tempdir().unwrap();
         let result = create_from_template("nonexistent", dir.path().to_str().unwrap(), "test");

@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import * as api from "@/lib/tauri";
+import type { VscodeGenerationResult } from "@/lib/tauri";
 import type { Project, Runtime, RuntimeConfig } from "@/types/project";
 import { useProjectsStore } from "@/stores/projects";
+import { useSettingsStore } from "@/stores/settings";
 import ProjectTabs from "@/components/project/ProjectTabs";
 import type { TabDefinition } from "@/components/project/ProjectTabs";
 import HealthTab from "@/components/project/tabs/HealthTab";
@@ -43,6 +45,8 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { removeProject } = useProjectsStore();
+  const editorConfig = useSettingsStore((s) => s.config.defaultEditor);
+  const supportsWorkspace = ["code", "code-insiders", "cursor"].includes(editorConfig);
 
   const [project, setProject] = useState<Project | null>(null);
   const [envVars, setEnvVars] = useState<Record<string, string>>({});
@@ -53,7 +57,8 @@ export default function ProjectDetail() {
   const [envSaving, setEnvSaving] = useState(false);
   const [envSaved, setEnvSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [workspaceSaved, setWorkspaceSaved] = useState(false);
+  const [workspaceResult, setWorkspaceResult] = useState<VscodeGenerationResult | null>(null);
+  const [workspaceGenerating, setWorkspaceGenerating] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
@@ -85,6 +90,17 @@ export default function ProjectDetail() {
     if (!id) return;
     loadProject();
   }, [id, loadProject]);
+
+  // Si el proyecto fue eliminado externamente (CLI, otro proceso),
+  // el polling del store lo detecta — navegar al dashboard
+  const storeProjects = useProjectsStore((s) => s.projects);
+  const hasFetched = useProjectsStore((s) => s.hasFetched);
+  useEffect(() => {
+    if (!id || !hasFetched) return;
+    if (!storeProjects.some((p) => p.id === id)) {
+      navigate("/");
+    }
+  }, [id, storeProjects, hasFetched, navigate]);
 
   function startEditing() {
     if (!project) return;
@@ -184,11 +200,13 @@ export default function ProjectDetail() {
 
   async function handleGenerateWorkspace() {
     if (!project) return;
+    setWorkspaceGenerating(true);
     try {
-      await api.generateVscodeWorkspace(project.id);
-      setWorkspaceSaved(true);
-      setTimeout(() => setWorkspaceSaved(false), 2000);
+      const result = await api.generateVscodeWorkspace(project.id);
+      setWorkspaceResult(result);
+      setTimeout(() => setWorkspaceResult(null), 5000);
     } catch (err) { setError(String(err)); }
+    finally { setWorkspaceGenerating(false); }
   }
 
   async function handleDelete() {
@@ -244,9 +262,11 @@ export default function ProjectDetail() {
           <button onClick={handleOpenTerminal} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             Terminal
           </button>
-          <button onClick={handleGenerateWorkspace} className="px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
-            {workspaceSaved ? "Generado" : "Workspace"}
-          </button>
+          {supportsWorkspace && (
+            <button onClick={handleGenerateWorkspace} disabled={workspaceGenerating} className="px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 disabled:opacity-50 transition-colors">
+              {workspaceGenerating ? "Generando..." : workspaceResult ? `${workspaceResult.filesCreated.length} creados` : "Workspace"}
+            </button>
+          )}
           <button onClick={handleExport} className="px-3 py-2 rounded-lg bg-info/10 text-info-light text-sm font-medium hover:bg-info/20 transition-colors">
             Exportar
           </button>
@@ -255,6 +275,17 @@ export default function ProjectDetail() {
 
       {error && (
         <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">{error}</div>
+      )}
+
+      {workspaceResult && (
+        <div className="px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/20 text-sm mb-6">
+          {workspaceResult.filesCreated.length > 0 && (
+            <p className="text-green-400">Creados: {workspaceResult.filesCreated.join(", ")}</p>
+          )}
+          {workspaceResult.filesSkipped.length > 0 && (
+            <p className="text-yellow-400 mt-1">Ya existian: {workspaceResult.filesSkipped.join(", ")}</p>
+          )}
+        </div>
       )}
 
       {/* Section switcher */}

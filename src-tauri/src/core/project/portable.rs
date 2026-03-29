@@ -113,6 +113,7 @@ mod tests {
     use super::*;
     use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
     use crate::core::storage;
+    use serial_test::serial;
 
     fn make_test_project(suffix: &str) -> Project {
         Project {
@@ -152,6 +153,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_export_import_roundtrip() {
         let proj = make_test_project("roundtrip");
         let proj_id = proj.id.clone();
@@ -186,6 +188,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_export_nonexistent_project() {
         let result = export_project("nonexistent-project-xyz-portable-999");
         assert!(result.is_err(), "exporting nonexistent project should error");
@@ -198,6 +201,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_import_duplicate_path() {
         let proj = make_test_project("dup-path");
         let proj_id = proj.id.clone();
@@ -218,6 +222,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(disk)]
     fn test_export_env_keys_not_values() {
         let proj = make_test_project("env-keys");
         let proj_id = proj.id.clone();

@@ -20,7 +20,7 @@ cargo run --manifest-path src-tauri/Cargo.toml --bin delixon-cli -- <comando>
 
 ---
 
-## Comandos Disponibles (28 comandos)
+## Comandos Disponibles (29 comandos)
 
 ### Gestion de Proyectos
 
@@ -31,6 +31,7 @@ cargo run --manifest-path src-tauri/Cargo.toml --bin delixon-cli -- <comando>
 | `create <name> --path <ruta> [--template <id>]` | Crea y registra un nuevo proyecto | `delixon-cli create mi-app --path ./apps --template react-vite` |
 | `scan <path>` | Detecta stack de un proyecto existente y lo registra | `delixon-cli scan ./mi-proyecto` |
 | `status <project>` | Muestra estado Git del proyecto (rama, cambios, remoto) | `delixon-cli status mi-app` |
+| `unlink <name>` | Desvincula un proyecto de Delixon (no borra archivos) | `delixon-cli unlink mi-app` |
 
 #### Detalle: `list`
 ```
@@ -55,6 +56,12 @@ Crea el proyecto, lo registra en Delixon, y opcionalmente aplica un template.
 delixon-cli scan /projects/legacy-api
 ```
 Analiza el directorio y detecta: lenguaje, framework, package manager, ORM, DB, Docker, CI, testing, linters, TypeScript, y genera un "readiness score".
+
+#### Detalle: `unlink`
+```
+delixon-cli unlink cliente-a
+```
+Elimina el proyecto del registro de Delixon y limpia sus variables de entorno. Los archivos del proyecto en disco no se borran.
 
 ---
 
