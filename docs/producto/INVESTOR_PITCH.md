@@ -297,4 +297,4 @@ El objetivo no es levantar dinero para buscar un modelo de negocio. El modelo ex
 
 ---
 
-*delirestevez · delixon-technology · `github.com/delixon-technology/delixon`*
+*delirrestevez · delixon-technology · `github.com/delixon-technology/delixon`*
