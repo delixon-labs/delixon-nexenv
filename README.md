@@ -30,7 +30,7 @@ Delixon es una aplicación de escritorio local que gestiona el entorno de desarr
 
 ```bash
 # Requisitos: Node 20+, Rust 1.77+
-git clone https://github.com/deli-technology/delixon.git
+git clone https://github.com/delixon-technology/delixon.git
 cd delixon
 npm install
 cp .env.example .env.local
@@ -39,4 +39,4 @@ npm run tauri dev
 
 ---
 
-*deli-technology · [github.com/deli-technology/delixon](https://github.com/deli-technology/delixon)*
+*delixon-technology · [github.com/delixon-technology/delixon](https://github.com/delixon-technology/delixon)*

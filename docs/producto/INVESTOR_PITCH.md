@@ -148,7 +148,7 @@ Delixon se encuentra en fase de arquitectura avanzada y scaffolding completo.
 
 ### Ya construido
 
-- Repositorio principal configurado en GitHub (`deli-technology/delixon`).
+- Repositorio principal configurado en GitHub (`delixon-technology/delixon`).
 - Organización GitHub creada con estructura de equipos.
 - Stack técnico instalado, compilando y generando instaladores nativos.
 - Arquitectura backend modular en Rust/Tauri (6 módulos).
@@ -297,4 +297,4 @@ El objetivo no es levantar dinero para buscar un modelo de negocio. El modelo ex
 
 ---
 
-*dRaydel · deli-technology · `github.com/deli-technology/delixon`*
+*dRaydel · delixon-technology · `github.com/delixon-technology/delixon`*
