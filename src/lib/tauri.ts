@@ -576,8 +576,8 @@ export async function listProjectProcesses(projectId: string): Promise<ProjectPr
   return safeInvoke<ProjectProcess[]>("list_project_processes", { projectId });
 }
 
-export async function killProcess(pid: number): Promise<void> {
-  return safeInvoke<void>("kill_process", { pid });
+export async function killProcess(pid: number, projectId: string): Promise<void> {
+  return safeInvoke<void>("kill_process", { pid, projectId });
 }
 
 // --- Recipes ---

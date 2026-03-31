@@ -25,7 +25,7 @@ export default function ProcessesTab({ projectId }: { projectId: string; project
 
   async function handleKill(pid: number) {
     try {
-      await api.killProcess(pid);
+      await api.killProcess(pid, projectId);
       setConfirmKill(null);
       await load();
     } catch (err) {
