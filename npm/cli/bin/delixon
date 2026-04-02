@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+const { execFileSync } = require("child_process");
+const { join } = require("path");
+
+const ext = process.platform === "win32" ? ".exe" : "";
+const binary = join(__dirname, `delixon${ext}`);
+
+try {
+  execFileSync(binary, process.argv.slice(2), { stdio: "inherit" });
+} catch (error) {
+  if (error.status !== undefined) {
+    process.exit(error.status);
+  }
+  console.error("Delixon: no se pudo ejecutar el binario.");
+  console.error("Intenta reinstalar: npm install -g @delixon/cli");
+  process.exit(1);
+}
