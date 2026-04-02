@@ -1,3 +1,4 @@
+/* eslint-env node */
 const { platform, arch } = process;
 const { existsSync, copyFileSync, chmodSync } = require("fs");
 const { join } = require("path");
