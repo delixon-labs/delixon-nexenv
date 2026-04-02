@@ -43,5 +43,10 @@ anything Apache 2.0 allows — including commercial use.
 
 ## Legal entity
 
-Copyright holder: **Xplus Technology LLC**
-Product: **Delixon** by Delixon Technology
+| Role | Entity |
+|---|---|
+| Copyright holder and licensor | Xplus Technology LLC |
+| Public brand | Delixon Technology |
+| Product | Delixon |
+
+Delixon Technology is the public brand of Xplus Technology LLC.
