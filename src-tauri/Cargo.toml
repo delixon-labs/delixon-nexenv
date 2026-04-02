@@ -3,7 +3,7 @@ name = "delixon"
 version = "1.0.0"
 description = "Gestor de workspaces para desarrolladores"
 authors = ["delirrestevez"]
-license = "MIT"
+license = "FSL-1.1-ALv2"
 repository = "https://github.com/delixon-technology/delixon"
 edition = "2021"
 rust-version = "1.77"
@@ -31,6 +31,7 @@ tauri-app = [
     "dep:tauri-plugin-dialog",
     "dep:tauri-build",
 ]
+enterprise = ["dep:reqwest"]
 
 [build-dependencies]
 tauri-build = { version = "=2.5.6", features = [], optional = true }
@@ -53,6 +54,7 @@ clap = { version = "=4.5.40", features = ["derive"] }
 colored = "=3.0.0"
 serde_yml = "=0.0.12"
 rusqlite = { version = "=0.39.0", features = ["bundled"] }
+reqwest = { version = "=0.12.18", features = ["json"], optional = true }
 
 [dev-dependencies]
 tempfile = "=3.20.0"
