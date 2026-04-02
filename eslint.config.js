@@ -50,6 +50,6 @@ export default [
     },
   },
   {
-    ignores: ["dist/", "src-tauri/", "node_modules/"],
+    ignores: ["dist/", "src-tauri/", "node_modules/", "npm/"],
   },
 ];
