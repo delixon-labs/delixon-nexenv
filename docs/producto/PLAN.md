@@ -1,4 +1,7 @@
-# Delixon — Gestor de Workspaces para Desarrolladores
+# Nexenv — Gestor de Workspaces para Desarrolladores
+
+> Nexenv es un producto de Delixon (Delixon Labs), la vertiente de herramientas
+> para desarrolladores de XPlus Technologies LLC.
 
 > *Deja de configurar. Empieza a construir.*
 
@@ -9,12 +12,12 @@
 ## Índice
 
 1. [El problema real](#1-el-problema-real)
-2. [La solución: Delixon](#2-la-solución-delixon)
-3. [Qué hace Delixon](#3-qué-hace-delixon)
+2. [La solución: Nexenv](#2-la-solución-nexenv)
+3. [Qué hace Nexenv](#3-qué-hace-nexenv)
 4. [Ejemplos prácticos](#4-ejemplos-prácticos)
 5. [Stack tecnológico](#5-stack-tecnológico-tauri--react)
 6. [Arquitectura del sistema](#6-arquitectura-del-sistema)
-7. [Las capas de Delixon](#7-las-capas-de-delixon)
+7. [Las capas de Nexenv](#7-las-capas-de-nexenv)
 8. [Estructura del proyecto](#8-estructura-del-proyecto)
 9. [Arquitectura por capas](#9-arquitectura-por-capas)
 10. [Hoja de ruta y fases](#10-hoja-de-ruta-y-fases)
@@ -53,15 +56,15 @@ Estos problemas **tienden a multiplicarse** con cada proyecto nuevo. No son mole
 
 ---
 
-## 2. La solución: Delixon
+## 2. La solución: Nexenv
 
-Delixon es una **aplicacion de escritorio local + CLI** que actua como capa de organizacion e inteligencia entre el desarrollador y sus proyectos.
+Nexenv es una **aplicacion de escritorio local + CLI** que actua como capa de organizacion e inteligencia entre el desarrollador y sus proyectos.
 
-**No reemplaza ninguna herramienta.** El desarrollador sigue usando VSCode, su terminal preferida, Git, Docker, npm, pip — todo lo que ya conoce y domina. Delixon se encarga de que cada proyecto viva en su propio mundo perfectamente configurado, listo para trabajar desde el primer segundo.
+**No reemplaza ninguna herramienta.** El desarrollador sigue usando VSCode, su terminal preferida, Git, Docker, npm, pip — todo lo que ya conoce y domina. Nexenv se encarga de que cada proyecto viva en su propio mundo perfectamente configurado, listo para trabajar desde el primer segundo.
 
 ### Estrategia dual: GUI + CLI
 
-Delixon no es "GUI o CLI". Es **ambos, para todos los usuarios**:
+Nexenv no es "GUI o CLI". Es **ambos, para todos los usuarios**:
 
 | Interfaz | Para quien | Uso principal |
 |---|---|---|
@@ -71,30 +74,30 @@ Delixon no es "GUI o CLI". Es **ambos, para todos los usuarios**:
 **Tres perfiles de usuario:**
 
 1. **Usuario visual** — Usa solo GUI. Quiere clics, dashboards, colores. La GUI es su producto.
-2. **Usuario tecnico** — Usa solo CLI. Vive en la terminal. `delixon open`, `delixon scan`, `delixon run`.
+2. **Usuario tecnico** — Usa solo CLI. Vive en la terminal. `nexenv open`, `nexenv scan`, `nexenv run`.
 3. **Usuario mixto** — Usa GUI para explorar/configurar y CLI para operar rapido. El caso mas comun.
 
-> **Ambas interfaces comparten el mismo core (`delixon_lib`).** Misma logica, mismos datos, misma persistencia JSON/YAML. No son productos separados. La CLI no es "la version pobre" — es la version rapida. La GUI no es "la version lenta" — es la version visual.
+> **Ambas interfaces comparten el mismo core (`nexenv_lib`).** Misma logica, mismos datos, misma persistencia JSON/YAML. No son productos separados. La CLI no es "la version pobre" — es la version rapida. La GUI no es "la version lenta" — es la version visual.
 
 ### Principio central
 
-> El desarrollador abre Delixon, selecciona el proyecto, hace clic en "Abrir" y ya está trabajando. El entorno correcto, la terminal correcta, las variables correctas, las dependencias correctas. Sin pasos manuales. Sin documentos de 30 puntos. Sin sorpresas.
+> El desarrollador abre Nexenv, selecciona el proyecto, hace clic en "Abrir" y ya está trabajando. El entorno correcto, la terminal correcta, las variables correctas, las dependencias correctas. Sin pasos manuales. Sin documentos de 30 puntos. Sin sorpresas.
 
 ### Mensajes clave para comunicar
 
-- **"No necesita Docker"** — Diferenciador enorme. Muchos devs odian la complejidad de Docker para desarrollo local. Delixon usa symlinks y scopes, no contenedores.
+- **"No necesita Docker"** — Diferenciador enorme. Muchos devs odian la complejidad de Docker para desarrollo local. Nexenv usa symlinks y scopes, no contenedores.
 - **"No reemplaza nada"** — Se pone encima de las herramientas que ya usas.
 - **"Funciona offline"** — Como app de escritorio (Tauri), todo es local. Importante para empresas con restricciones de nube.
 - **"5 MB, no 200 MB"** — Tauri vs Electron. El instalador es tiny.
-- **"El archivo `.delixon`"** — Exportar/importar config completa. Killer feature para equipos.
+- **"El archivo `.nexenv`"** — Exportar/importar config completa. Killer feature para equipos.
 
 ---
 
-## 3. Qué hace Delixon
+## 3. Qué hace Nexenv
 
 ### 3.1 Aislamiento completo por proyecto
 
-Cada proyecto registrado en Delixon tiene su propio contexto completamente independiente:
+Cada proyecto registrado en Nexenv tiene su propio contexto completamente independiente:
 
 - **Terminal aislada**: historial de comandos propio, variables de entorno propias, PATH personalizado
 - **Versiones de runtimes independientes**: Node 18 en un proyecto, Node 20 en otro, Python 3.10 en uno, 3.12 en otro — sin conflictos
@@ -112,13 +115,13 @@ Cada proyecto registrado en Delixon tiene su propio contexto completamente indep
 **Qué NO se aísla (por diseño):**
 - Tu editor (VSCode, Cursor, etc.) → lo comparten todos
 - Tu configuración global de Git → misma identidad
-- Tus herramientas del sistema → Delixon linkea, no duplica
+- Tus herramientas del sistema → Nexenv linkea, no duplica
 
 ### 3.2 Gestión inteligente de dependencias
 
-Delixon no instala ciegamente. Antes de instalar una dependencia:
+Nexenv no instala ciegamente. Antes de instalar una dependencia:
 
-1. **Detecta** si ya existe una versión compatible en el sistema o en la caché de Delixon
+1. **Detecta** si ya existe una versión compatible en el sistema o en la caché de Nexenv
 2. **Vincula** la dependencia compartida si la versión es compatible (ahorro de disco y tiempo)
 3. **Instala aislada** si se necesita una versión diferente, solo para ese proyecto
 4. **Documenta** todo en los archivos de configuración del proyecto
@@ -127,7 +130,7 @@ Si el proyecto se mueve a otra máquina, los archivos de configuración tienen t
 
 ### 3.3 Plantillas preconstruidas con mejores prácticas
 
-Para las tecnologías más comunes, Delixon incluye plantillas listas para usar:
+Para las tecnologías más comunes, Nexenv incluye plantillas listas para usar:
 
 - Estructura de carpetas estándar y probada
 - Configuración de linter y formatter lista desde el día 1
@@ -139,7 +142,7 @@ Para las tecnologías más comunes, Delixon incluye plantillas listas para usar:
 
 ### 3.4 Apertura instantánea con contexto completo
 
-Al abrir un proyecto desde Delixon (en menos de 2 segundos):
+Al abrir un proyecto desde Nexenv (en menos de 2 segundos):
 1. Activa el runtime correcto (Node 20, Python 3.11...)
 2. Carga las variables de entorno del proyecto
 3. Establece el historial de terminal del proyecto
@@ -164,7 +167,7 @@ Vista central con el estado de todos los proyectos:
 
 ### Ejemplo A — Desarrollador freelance
 
-**Sin Delixon:**
+**Sin Nexenv:**
 ```
 Lunes: Trabaja en proyecto-cliente-A (Node 18, PostgreSQL)
 Martes: Cambia a proyecto-cliente-B (Node 20, MySQL)
@@ -174,14 +177,14 @@ Martes: Cambia a proyecto-cliente-B (Node 20, MySQL)
 - Pierde 45 minutos depurando por qué "todo está raro"
 ```
 
-**Con Delixon:**
+**Con Nexenv:**
 ```
-$ delixon list
+$ nexenv list
   📂 cliente-a/ecommerce    Node 18.17  ● corriendo
   📂 cliente-b/dashboard    Node 20.10  ○ parado
   📂 cliente-c/api          Python 3.11 ○ parado
 
-$ delixon open cliente-b/dashboard
+$ nexenv open cliente-b/dashboard
   ✅ Node 20.10 activado
   ✅ 12 variables de entorno cargadas
   ✅ VSCode abierto en /projects/cliente-b/dashboard
@@ -192,7 +195,7 @@ Ana cambia de proyecto en 2 segundos. Zero riesgo de cruzar datos.
 
 ### Ejemplo B — Nuevo desarrollador en el equipo
 
-**Sin Delixon (día típico de onboarding):**
+**Sin Nexenv (día típico de onboarding):**
 ```
 09:00  Clonar repos (3 repos, 15 min)
 09:15  Instalar Node... ¿qué versión? El README dice 16 pero usan 20
@@ -204,10 +207,10 @@ Ana cambia de proyecto en 2 segundos. Zero riesgo de cruzar datos.
 17:00  Se va a casa. Productividad del día: ~0
 ```
 
-**Con Delixon:**
+**Con Nexenv:**
 ```
-09:00  Instalar Delixon (2 min)
-09:02  $ delixon clone startupx/main-api
+09:00  Instalar Nexenv (2 min)
+09:02  $ nexenv clone startupx/main-api
        → Clona, detecta stack, instala runtime, carga env, abre editor
 09:10  Carlos está leyendo el código con todo funcionando
 09:30  Primer commit de Carlos
@@ -216,7 +219,7 @@ Ana cambia de proyecto en 2 segundos. Zero riesgo de cruzar datos.
 
 ### Ejemplo C — El proyecto olvidado
 
-**Sin Delixon:**
+**Sin Nexenv:**
 ```
 $ cd mi-proyecto-viejo
 $ npm start
@@ -227,9 +230,9 @@ $ cat .env.example  → ¿Cuáles eran los valores reales?
 (30 minutos después, si hay suerte)
 ```
 
-**Con Delixon:**
+**Con Nexenv:**
 ```
-$ delixon open mi-proyecto-viejo
+$ nexenv open mi-proyecto-viejo
 ✅ Node 16.20 activado (lo tenía registrado)
 ✅ Variables de entorno restauradas
 ✅ Dependencias verificadas
@@ -240,7 +243,7 @@ Como si nunca te hubieras ido.
 
 ### Ejemplo D — Microservicios
 
-**Sin Delixon:**
+**Sin Nexenv:**
 ```
 Terminal 1: cd auth && go run .
 Terminal 2: cd api && nvm use 20 && npm run dev
@@ -251,9 +254,9 @@ Terminal 5: docker-compose up postgres redis
 + rezar para que los puertos no colisionen
 ```
 
-**Con Delixon:**
+**Con Nexenv:**
 ```
-$ delixon workspace open mi-producto
+$ nexenv workspace open mi-producto
 ✅ auth      → Go 1.21, puerto 8080
 ✅ api       → Node 20, puerto 3000
 ✅ ml        → Python 3.11, puerto 5000
@@ -279,7 +282,7 @@ Un comando. Todo orquestado. Puertos verificados.
 | Acceso al sistema operativo | Rust (máximo control) | Node.js | .NET |
 | Seguridad | Alta (modelo de permisos estricto) | Media | Alta |
 
-**Para Delixon, Tauri es la elección adecuada porque:**
+**Para Nexenv, Tauri es la elección adecuada porque:**
 - Necesitamos interactuar profundamente con el sistema (procesos, archivos, variables de entorno, PATH)
 - Rust nos da ese control con máximo rendimiento y seguridad
 - React en el frontend nos permite una UI moderna y mantenible
@@ -310,7 +313,7 @@ Backend (Rust/Tauri):
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Delixon App                          │
+│                    Nexenv App                          │
 │                                                         │
 │  ┌─────────────────────┐   ┌─────────────────────────┐  │
 │  │   Frontend (React)  │   │    Backend (Rust/Tauri)  │  │
@@ -329,7 +332,7 @@ Backend (Rust/Tauri):
     │  Sistema de       │  │  Gestor de       │  │  Integraciones│
     │  Archivos         │  │  Runtimes        │  │  externas     │
     │                   │  │                  │  │               │
-    │  ~/.delixon/      │  │  - nvm/fnm       │  │  - VSCode     │
+    │  ~/.nexenv/      │  │  - nvm/fnm       │  │  - VSCode     │
     │  ├── projects/    │  │  - pyenv         │  │  - Git        │
     │  ├── templates/   │  │  - rustup        │  │  - Docker     │
     │  ├── shared-deps/ │  │  - go toolchain  │  │  - Terminals  │
@@ -343,7 +346,7 @@ Backend (Rust/Tauri):
 Usuario crea proyecto
         │
         ▼
-Delixon lee la plantilla seleccionada
+Nexenv lee la plantilla seleccionada
         │
         ▼
 Genera estructura de carpetas
@@ -361,7 +364,7 @@ Configura variables de entorno aisladas
 Inicializa Git con hooks preconfigurados
         │
         ▼
-Registra proyecto en Delixon con su perfil completo
+Registra proyecto en Nexenv con su perfil completo
         │
         ▼
 Abre VSCode con el workspace del proyecto listo
@@ -369,9 +372,9 @@ Abre VSCode con el workspace del proyecto listo
 
 ---
 
-## 7. Las capas de Delixon
+## 7. Las capas de Nexenv
 
-Delixon no es solo un gestor de workspaces. Es una **plataforma integral para el ciclo de vida completo del desarrollo**, organizada en capas donde cada una construye sobre la anterior.
+Nexenv no es solo un gestor de workspaces. Es una **plataforma integral para el ciclo de vida completo del desarrollo**, organizada en capas donde cada una construye sobre la anterior.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -395,19 +398,19 @@ Delixon no es solo un gestor de workspaces. Es una **plataforma integral para el
 │  · Apertura en editor · Export/Import · Settings             │
 ├─────────────────────────────────────────────────────────────┤
 │              CAPA 0: NUCLEO DECLARATIVO  ✅                  │
-│  Project Manifest (.delixon/manifest.yaml)                    │
+│  Project Manifest (.nexenv/manifest.yaml)                    │
 │  Todas las capas leen y escriben sobre el                     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Capa 0 (Nucleo)** — El manifest que unifica toda la info del proyecto. Sin el, todo lo demas seria una coleccion de botones inconexos.
-**Capa 1 (Workspace)** — El core. Aislamiento, env vars, runtimes, terminal, dashboard. Lo que hace que Delixon sea util TODOS los dias.
+**Capa 1 (Workspace)** — El core. Aislamiento, env vars, runtimes, terminal, dashboard. Lo que hace que Nexenv sea util TODOS los dias.
 **Capa 2 (Scaffolding)** — Motor de generacion y composicion. Crear, escanear, evolucionar el stack, validar arquitectura.
 **Capa 3 (Operacion)** — Trabajo diario real. Docker, Git, scripts, health, doctor, versionado. Lo que retiene usuarios.
 **Capa 4 (Inteligencia)** — Asistente que aprende, audita, sugiere y automatiza. Solo cuando las capas 0-3 esten blindadas con CI/CD, tests y metricas reales.
 **Capa 5 (Equipos)** — Colaboracion, onboarding, gobernanza. Lo que monetiza a escala.
 
-> **Capa 6 (vision futura): Servidor y cloud** — Delixon como servicio headless para gestionar entornos en servidores de desarrollo, CI/CD pipelines, y entornos de staging. La misma logica de capas 0-3 pero sin GUI, operando via CLI o API remota.
+> **Capa 6 (vision futura): Servidor y cloud** — Nexenv como servicio headless para gestionar entornos en servidores de desarrollo, CI/CD pipelines, y entornos de staging. La misma logica de capas 0-3 pero sin GUI, operando via CLI o API remota.
 
 ### 7.1 Capa 2: Motor de scaffolding
 
@@ -477,7 +480,7 @@ scaffold:
 #### Generación orientada por tipo de producto
 
 ```
-$ delixon create
+$ nexenv create
 
   ¿Qué vas a construir?
   → SaaS B2B / Dashboard interno / API pública / Landing page /
@@ -499,13 +502,13 @@ $ delixon create
 #### Recipes: módulos que se añaden a un proyecto existente
 
 ```
-$ delixon add auth --provider nextauth
+$ nexenv add auth --provider nextauth
   ✅ Instalado next-auth
   ✅ Creado app/api/auth/[...nextauth]/route.ts
   ✅ Creado lib/auth.ts con providers configurados
   ✅ Actualizado .env.example con variables de auth
 
-$ delixon add database --type postgresql --orm prisma
+$ nexenv add database --type postgresql --orm prisma
   ✅ Instalado prisma y @prisma/client
   ✅ Creado prisma/schema.prisma con modelo User base
   ✅ Agregado PostgreSQL a docker-compose.yml
@@ -517,7 +520,7 @@ Auth, Base de datos, Pagos, Email, Colas, Storage, Observabilidad, Testing, CI/C
 #### Modo "analizar proyecto existente"
 
 ```
-$ delixon scan ./mi-proyecto-viejo
+$ nexenv scan ./mi-proyecto-viejo
 
   Análisis completo:
   ├── Runtime: Node.js 18.17
@@ -546,24 +549,24 @@ $ delixon scan ./mi-proyecto-viejo
 
 ### 7.2 Capa 3: Inteligencia (futuro — depende de validacion de capas 0-3)
 
-> **Prerequisito:** Esta capa no se planifica ni implementa hasta que las capas 0-2 esten blindadas con CI/CD cross-platform, tests automatizados, y metricas reales de uso. La fortaleza de Delixon hoy es manifest + scan + open + doctor + scaffold + recipes + GUI/CLI dual. La IA amplifica eso, no lo reemplaza.
+> **Prerequisito:** Esta capa no se planifica ni implementa hasta que las capas 0-2 esten blindadas con CI/CD cross-platform, tests automatizados, y metricas reales de uso. La fortaleza de Nexenv hoy es manifest + scan + open + doctor + scaffold + recipes + GUI/CLI dual. La IA amplifica eso, no lo reemplaza.
 
 **Asistente IA integrado** — aprende de patrones de uso, se adapta al developer, sugiere stacks basados en preferencias anteriores. Memoria persistente de decisiones y errores resueltos.
 
 **Agentes especializados** — SecurityGuard (OWASP, secrets, CVEs), CodeReviewer (calidad, complejidad), TestBuilder (genera tests, cobertura), PerfAnalyzer (bundle, queries, N+1), DocWriter (README, API docs), InfraOps (Docker, CI/CD), DataOptimizer (schema, indices), APIDesigner (REST/GraphQL).
 
-**Pipeline de auditoria** — `delixon audit` ejecuta todos los agentes en un solo comando y genera un score general del proyecto. Es el producto premium para equipos.
+**Pipeline de auditoria** — `nexenv audit` ejecuta todos los agentes en un solo comando y genera un score general del proyecto. Es el producto premium para equipos.
 
 ### 7.3 Flujo entre capas
 
 ```
-1. CREAR (Capa 2)      → delixon new / scaffold wizard en GUI
+1. CREAR (Capa 2)      → nexenv new / scaffold wizard en GUI
 2. REGISTRAR (Capa 0+1) → Manifest generado, proyecto aislado con env vars y runtime
-3. TRABAJAR (Capa 1+3)  → delixon open → editor + terminal + Docker + health en 2s
-4. EVOLUCIONAR (Capa 2) → delixon add auth / add payments / snapshot save
-5. DIAGNOSTICAR (Capa 3) → delixon doctor / health / status / diff
-6. AUDITAR (Capa 4)     → delixon audit → seguridad, calidad, tests (futuro)
-7. COMPARTIR (Capa 1+5) → delixon export → archivo .delixon para onboarding
+3. TRABAJAR (Capa 1+3)  → nexenv open → editor + terminal + Docker + health en 2s
+4. EVOLUCIONAR (Capa 2) → nexenv add auth / add payments / snapshot save
+5. DIAGNOSTICAR (Capa 3) → nexenv doctor / health / status / diff
+6. AUDITAR (Capa 4)     → nexenv audit → seguridad, calidad, tests (futuro)
+7. COMPARTIR (Capa 1+5) → nexenv export → archivo .nexenv para onboarding
 ```
 
 > Este flujo funciona igual en **Windows, Linux y macOS**. El core Rust maneja rutas, shells y procesos de forma platform-aware (`cfg(target_os)`).
@@ -573,7 +576,7 @@ $ delixon scan ./mi-proyecto-viejo
 ## 8. Estructura del proyecto
 
 ```
-delixon/
+nexenv/
 ├── src-tauri/                    # Backend Rust
 │   ├── src/
 │   │   ├── main.rs               # Punto de entrada Tauri
@@ -602,7 +605,7 @@ delixon/
 │   ├── pages/                    # Dashboard, ProjectDetail, Catalog, Templates, Scaffold, Settings
 │   ├── stores/                   # Zustand stores
 │   ├── styles/
-│   │   ├── delixon/              # Paleta de colores, fonts, base CSS
+│   │   ├── nexenv/              # Paleta de colores, fonts, base CSS
 │   │   └── tech/                 # Colores de marca por tecnologia (brand + catalog)
 │   ├── lib/                      # Tauri bridge, tech-meta, catalog helpers
 │   └── i18n/                     # Traducciones (es.json, en.json)
@@ -610,7 +613,7 @@ delixon/
 └── docs/
 ```
 
-### Archivo de configuración delixon.yaml
+### Archivo de configuración nexenv.yaml
 
 ```yaml
 name: mi-api
@@ -652,9 +655,9 @@ on_open:
 
 ### Vision central
 
-> **Delixon es el sistema operativo local del developer.**
+> **Nexenv es el sistema operativo local del developer.**
 
-No es una coleccion de features sueltas. Es un sistema por capas donde cada capa construye sobre la anterior. **Delixon crea, entiende, ejecuta, aisla, amplia, valida y repara proyectos localmente desde una sola app.**
+No es una coleccion de features sueltas. Es un sistema por capas donde cada capa construye sobre la anterior. **Nexenv crea, entiende, ejecuta, aisla, amplia, valida y repara proyectos localmente desde una sola app.**
 
 ### Capas del producto
 
@@ -678,7 +681,7 @@ Capa 1 — Workspace (implementado)
   apertura en editor, terminal, dashboard, export/import
 
 Capa 0 — Nucleo declarativo (implementado)
-  Project Manifest (.delixon/manifest.yaml)
+  Project Manifest (.nexenv/manifest.yaml)
   Todas las capas leen y escriben sobre el
 ```
 
@@ -698,7 +701,7 @@ Capa 0 — Nucleo declarativo (implementado)
 | Concepto | Razon |
 |---|---|
 | DevContainers generation (.devcontainer/) | Va contra la filosofia "sin Docker para dev". Solo como export opcional futuro |
-| Monorepo con Turborepo | Delixon es monolito Tauri. No aplica |
+| Monorepo con Turborepo | Nexenv es monolito Tauri. No aplica |
 | SQLite como DB local | JSON funciona para <100 proyectos. Evaluar a futuro si escala a equipos |
 
 ### El nucleo declarativo (CRITICO)
@@ -708,7 +711,7 @@ Sin una capa declarativa solida, el producto seria fragil — "una coleccion de 
 **Project Manifest** — formato interno que define cada proyecto:
 
 ```yaml
-# .delixon/manifest.yaml (generado automáticamente, editable)
+# .nexenv/manifest.yaml (generado automáticamente, editable)
 schemaVersion: 1
 name: mi-saas
 projectType: saas-b2b
@@ -786,22 +789,22 @@ editor: code
    └── Perfiles de madurez: subir de rapid a production
 
 5. COMPARTIR
-   ├── Archivo .delixon → otro dev reproduce el entorno en 5 min
-   ├── .delixon-team → config de equipo sincronizada
+   ├── Archivo .nexenv → otro dev reproduce el entorno en 5 min
+   ├── .nexenv-team → config de equipo sincronizada
    └── Secrets vault → no más "pásame el .env por Slack"
 ```
 
 ### Principios de diseno
 
 **Fundamentos:**
-- **Una sola app, una sola UI** — GUI y CLI son interfaces al mismo core (`delixon_lib`)
+- **Una sola app, una sola UI** — GUI y CLI son interfaces al mismo core (`nexenv_lib`)
 - **Calidad sobre cantidad** — 30+ tecnologias solidas > 83 a medias; 7 templates probados > 20 sin mantener
 - **Cada capa construye sobre la anterior** — sin el manifest (Capa 0), todo lo demas seria un silo independiente
 - **Sin Docker para el dev** — Docker solo para servicios de infra (PostgreSQL, Redis). Runtimes nativos
 
 **4 verbos canonicos — filtro de producto:**
 
-Todo lo que Delixon hace cabe en 4 verbos. Si una feature no cabe en ninguno, no pertenece al producto:
+Todo lo que Nexenv hace cabe en 4 verbos. Si una feature no cabe en ninguno, no pertenece al producto:
 
 | Verbo | Que hace | Comandos asociados |
 |---|---|---|
@@ -814,7 +817,7 @@ Todo lo que Delixon hace cabe en 4 verbos. Si una feature no cabe en ninguno, no
 
 **`open` es la feature sagrada:**
 
-`open` es el comando que crea el habito. Si `delixon open mi-proyecto` no es la forma mas rapida de empezar a trabajar, el producto fracasa. Garantias:
+`open` es el comando que crea el habito. Si `nexenv open mi-proyecto` no es la forma mas rapida de empezar a trabajar, el producto fracasa. Garantias:
 - Abre en <2 segundos, sin excepciones
 - Activa el runtime correcto (nvm/fnm, pyenv, rustup)
 - Carga env vars aisladas
@@ -825,10 +828,10 @@ Todo lo que Delixon hace cabe en 4 verbos. Si una feature no cabe en ninguno, no
 
 | Tipo | Donde vive | Quien lo escribe | Ejemplo |
 |---|---|---|---|
-| **Estado deseado** | `.delixon/manifest.yaml` | El developer (via scaffold, add, edit) | "Este proyecto necesita Node 20, PostgreSQL, puerto 3000" |
-| **Estado observado** | Resultado de `doctor`/`health` | Delixon (via diagnostico en tiempo real) | "Node 20 no esta instalado, Puerto 3000 esta ocupado" |
+| **Estado deseado** | `.nexenv/manifest.yaml` | El developer (via scaffold, add, edit) | "Este proyecto necesita Node 20, PostgreSQL, puerto 3000" |
+| **Estado observado** | Resultado de `doctor`/`health` | Nexenv (via diagnostico en tiempo real) | "Node 20 no esta instalado, Puerto 3000 esta ocupado" |
 
-El manifest dice QUE deberia existir. Doctor/health dicen QUE existe realmente. El gap entre ambos es lo que Delixon ayuda a cerrar. Nunca mezclar: el manifest no se modifica segun lo observado automaticamente.
+El manifest dice QUE deberia existir. Doctor/health dicen QUE existe realmente. El gap entre ambos es lo que Nexenv ayuda a cerrar. Nunca mezclar: el manifest no se modifica segun lo observado automaticamente.
 
 **Patron universal preview/diff/confirm:**
 
@@ -850,7 +853,7 @@ El criterio es objetivo: tests + validacion + estabilidad. Toda feature empieza 
 
 **Mensajes de error — requisitos de calidad:**
 
-Todo error que Delixon muestre al usuario debe incluir 4 cosas:
+Todo error que Nexenv muestre al usuario debe incluir 4 cosas:
 1. **Que intento hacer** — "Intenté abrir el proyecto X en VS Code"
 2. **Que detecto** — "VS Code no está instalado o no está en el PATH"
 3. **Por que fallo** — "Sin editor disponible, no puedo abrir el proyecto"
@@ -865,7 +868,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 ### Estado actual — Lo que YA funciona
 
 **Capa 0 — Nucleo declarativo:**
-- [x] Project Manifest (`.delixon/manifest.yaml`) — techs, servicios, env vars, comandos, puertos, recipes, health checks
+- [x] Project Manifest (`.nexenv/manifest.yaml`) — techs, servicios, env vars, comandos, puertos, recipes, health checks
 - [x] schema_version, metadata (description, created_at, author), editor opcional
 - [x] Validacion y normalizacion obligatoria antes de guardar (validate + normalize en save_manifest)
 
@@ -878,10 +881,10 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Apertura de terminal con env vars cargadas
 - [x] Dashboard con busqueda, filtros y grid de proyectos
 - [x] Pagina de detalle de proyecto con gestion de env vars
-- [x] Export/import de configuracion (.delixon portable)
+- [x] Export/import de configuracion (.nexenv portable)
 - [x] Settings: editor, tema, idioma, deteccion de runtimes
 - [x] Sidebar con navegacion y proyectos recientes
-- [x] Persistencia local (JSON en `~/.local/share/delixon/`) — migracion a SQLite planificada (ver `docs/tecnico/storage/MIGRATION_PLAN.md`)
+- [x] Persistencia local (JSON en `~/.local/share/nexenv/`) — migracion a SQLite planificada (ver `docs/tecnico/storage/MIGRATION_PLAN.md`)
 
 **Capa 2 — Scaffolding y composicion:**
 - [x] Catalogo de 30+ tecnologias en YAML con metadatos completos y UI de browse/search
@@ -920,7 +923,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Documentacion tecnica: estructura-backend.md, refactor-core-v1.md
 
 **Sistema de diseno (GUI):**
-- [x] Paleta semantica Delixon: info (azul), success (verde), warning (ambar), error (rojo), dlx-grays (6 niveles fondo + 6 texto)
+- [x] Paleta semantica Nexenv: info (azul), success (verde), warning (ambar), error (rojo), dlx-grays (6 niveles fondo + 6 texto)
 - [x] Colores de marca por tecnologia en CSS (`src/styles/tech/`): brand.css (texto en project cards) y catalog.css (fondos en catalog cards)
 - [x] Safelist de clases Tailwind para colores dinamicos (`src/lib/tech-safelist.ts`)
 - [x] Sistema de aliases de tech IDs (node→nodejs, postgres→postgresql, etc.) en `tech-meta.ts`
@@ -929,7 +932,7 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 - [x] Botones con patron uniforme: accion→success, navegacion→info, peligro→error, neutral→dlx-grays (hover solo fondo, texto fijo)
 - [x] i18n parcial (es/en) con react-i18next
 
-**Landing page (delixon-web):**
+**Landing page (nexenv-web):**
 - [x] Landing completa con paneles expandibles, efectos 3D, i18n ES/EN
 - [x] Waitlist backend: Fastify + PostgreSQL + Docker
 - [x] Admin panel, referidos, double opt-in
@@ -938,11 +941,11 @@ Un error sin "que hacer" es un error inutil. Un error sin contexto ("Error: file
 
 > **"Primero indispensable. Luego potente. Después ambicioso."**
 >
-> Hoy, "indispensable" para Delixon es: manifest, open, doctor, health, scan, CLI, 3-5 templates perfectos, 2-4 recipes impecables. Todo lo demás puede esperar.
+> Hoy, "indispensable" para Nexenv es: manifest, open, doctor, health, scan, CLI, 3-5 templates perfectos, 2-4 recipes impecables. Todo lo demás puede esperar.
 
 **Instalacion insultantemente facil:**
 
-Si un developer no puede ir de "descargar Delixon" a "primer proyecto abierto con entorno correcto" en menos de 5 minutos, hay un problema de producto, no de usuario. El onboarding no es una feature secundaria — es la primera impresion y para muchos la unica oportunidad.
+Si un developer no puede ir de "descargar Nexenv" a "primer proyecto abierto con entorno correcto" en menos de 5 minutos, hay un problema de producto, no de usuario. El onboarding no es una feature secundaria — es la primera impresion y para muchos la unica oportunidad.
 
 **Windows es el campo de batalla principal:**
 
@@ -956,7 +959,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 > Sin CLI, pierdes a la mayoría de devs. Sin Linux, pierdes a la mitad del público.
 
 **P0 — Nucleo declarativo (la columna vertebral):**
-- [x] Definir formato de `project manifest` (.delixon/manifest.yaml) — techs, servicios, env vars, comandos, puertos, recipes, health checks
+- [x] Definir formato de `project manifest` (.nexenv/manifest.yaml) — techs, servicios, env vars, comandos, puertos, recipes, health checks
 - [x] Catalogo YAML con 30+ tecnologias, metadatos completos, UI de browse/search
 - [x] Integrar RulesEngine con dependencias auto, incompatibilidades, puertos, sugerencias
 - [x] Generar manifest automaticamente al crear o importar un proyecto
@@ -964,49 +967,49 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 **P0 — Completar workspace (Capa 1):**
 - [ ] Historial de terminal aislado por proyecto
 - [ ] Activacion automatica de runtimes al abrir proyecto — integracion con nvm/fnm (Node), pyenv (Python), rustup (Rust)
-- [x] Exportar/importar configuracion de proyecto (archivo `.delixon`) — portable.rs + UI
+- [x] Exportar/importar configuracion de proyecto (archivo `.nexenv`) — portable.rs + UI
 - [x] Deteccion de conflictos de puertos entre proyectos — ports.rs con TCP check
 
 **P0 — CLI desde el día 1 (los devs viven en la terminal):**
 - [x] Arquitectura CLI con subcomandos (clap en Rust, binario separado que invoca el mismo core)
 - [x] La CLI y la GUI comparten el mismo core (misma lógica, mismos datos, misma persistencia)
-- [ ] Instalable globalmente: el dev escribe `delixon` desde cualquier terminal
+- [ ] Instalable globalmente: el dev escribe `nexenv` desde cualquier terminal
 
-**29 comandos implementados (delixon-cli):**
+**29 comandos implementados (nexenv-cli):**
 
 | Comando | Descripción | Uso |
 |---|---|---|
-| `list` | Lista todos los proyectos registrados | `delixon-cli list` |
-| `open <name>` | Abre proyecto en el editor configurado | `delixon-cli open mi-proyecto` |
-| `create <name> --path <ruta>` | Crea un nuevo proyecto | `delixon-cli create mi-app --path ./apps --template id` |
-| `scan <path>` | Detecta el stack de un proyecto existente | `delixon-cli scan ./mi-proyecto` |
-| `doctor` | Verifica el estado del sistema | `delixon-cli doctor` |
-| `env <project> get` | Muestra variables de entorno | `delixon-cli env mi-app get` |
-| `env <project> set <key> <val>` | Establece variable de entorno | `delixon-cli env mi-app set PORT 3000` |
-| `export <project>` | Exporta proyecto como `.delixon` | `delixon-cli export mi-app -o archivo.delixon` |
-| `import <file> --path <ruta>` | Importa desde archivo `.delixon` | `delixon-cli import app.delixon --path ./apps` |
-| `manifest <project>` | Muestra el manifest del proyecto | `delixon-cli manifest mi-app` |
-| `catalog [id]` | Navega catálogo de tecnologías | `delixon-cli catalog` o `delixon-cli catalog rust` |
-| `validate <techs...>` | Valida combinación de tecnologías | `delixon-cli validate rust react docker` |
-| `health <project>` | Ejecuta health checks del proyecto | `delixon-cli health mi-app` |
-| `ports` | Muestra puertos en uso por proyectos | `delixon-cli ports` |
-| `new <name> --path <ruta>` | Genera proyecto desde scaffold | `delixon-cli new api --path ./apps --type api --profile standard --techs rust,docker` |
-| `add <recipe>` | Aplica una recipe al proyecto | `delixon-cli add testing-vitest --project mi-app --preview` |
-| `recipes` | Lista recipes disponibles | `delixon-cli recipes` |
-| `status <project>` | Muestra estado Git del proyecto | `delixon-cli status mi-app` |
-| `docker up <project>` | Inicia servicios Docker Compose | `delixon-cli docker up mi-app` |
-| `docker down <project>` | Detiene servicios Docker | `delixon-cli docker down mi-app` |
-| `docker status <project>` | Estado de servicios Docker | `delixon-cli docker status mi-app` |
-| `docker logs <project>` | Muestra logs Docker | `delixon-cli docker logs mi-app --lines 100` |
-| `run <script>` | Ejecuta script del manifest | `delixon-cli run dev --project mi-app` |
-| `snapshot save <project>` | Guarda snapshot del manifest | `delixon-cli snapshot save mi-app` |
-| `snapshot list <project>` | Lista snapshots guardados | `delixon-cli snapshot list mi-app` |
-| `snapshot diff <project> <v1> <v2>` | Compara dos versiones | `delixon-cli snapshot diff mi-app 1 2` |
-| `snapshot rollback <project> <ver>` | Restaura versión anterior | `delixon-cli snapshot rollback mi-app 1` |
-| `diff <project>` | Cambios desde último snapshot | `delixon-cli diff mi-app` |
-| `note <project> [text]` | Gestiona notas (sin texto = lista) | `delixon-cli note mi-app "nota aquí"` |
-| `ps [project]` | Lista procesos en puertos del proyecto | `delixon-cli ps mi-app` |
-| `unlink <name>` | Desvincula proyecto de Delixon (no borra archivos) | `delixon-cli unlink mi-app` |
+| `list` | Lista todos los proyectos registrados | `nexenv-cli list` |
+| `open <name>` | Abre proyecto en el editor configurado | `nexenv-cli open mi-proyecto` |
+| `create <name> --path <ruta>` | Crea un nuevo proyecto | `nexenv-cli create mi-app --path ./apps --template id` |
+| `scan <path>` | Detecta el stack de un proyecto existente | `nexenv-cli scan ./mi-proyecto` |
+| `doctor` | Verifica el estado del sistema | `nexenv-cli doctor` |
+| `env <project> get` | Muestra variables de entorno | `nexenv-cli env mi-app get` |
+| `env <project> set <key> <val>` | Establece variable de entorno | `nexenv-cli env mi-app set PORT 3000` |
+| `export <project>` | Exporta proyecto como `.nexenv` | `nexenv-cli export mi-app -o archivo.nexenv` |
+| `import <file> --path <ruta>` | Importa desde archivo `.nexenv` | `nexenv-cli import app.nexenv --path ./apps` |
+| `manifest <project>` | Muestra el manifest del proyecto | `nexenv-cli manifest mi-app` |
+| `catalog [id]` | Navega catálogo de tecnologías | `nexenv-cli catalog` o `nexenv-cli catalog rust` |
+| `validate <techs...>` | Valida combinación de tecnologías | `nexenv-cli validate rust react docker` |
+| `health <project>` | Ejecuta health checks del proyecto | `nexenv-cli health mi-app` |
+| `ports` | Muestra puertos en uso por proyectos | `nexenv-cli ports` |
+| `new <name> --path <ruta>` | Genera proyecto desde scaffold | `nexenv-cli new api --path ./apps --type api --profile standard --techs rust,docker` |
+| `add <recipe>` | Aplica una recipe al proyecto | `nexenv-cli add testing-vitest --project mi-app --preview` |
+| `recipes` | Lista recipes disponibles | `nexenv-cli recipes` |
+| `status <project>` | Muestra estado Git del proyecto | `nexenv-cli status mi-app` |
+| `docker up <project>` | Inicia servicios Docker Compose | `nexenv-cli docker up mi-app` |
+| `docker down <project>` | Detiene servicios Docker | `nexenv-cli docker down mi-app` |
+| `docker status <project>` | Estado de servicios Docker | `nexenv-cli docker status mi-app` |
+| `docker logs <project>` | Muestra logs Docker | `nexenv-cli docker logs mi-app --lines 100` |
+| `run <script>` | Ejecuta script del manifest | `nexenv-cli run dev --project mi-app` |
+| `snapshot save <project>` | Guarda snapshot del manifest | `nexenv-cli snapshot save mi-app` |
+| `snapshot list <project>` | Lista snapshots guardados | `nexenv-cli snapshot list mi-app` |
+| `snapshot diff <project> <v1> <v2>` | Compara dos versiones | `nexenv-cli snapshot diff mi-app 1 2` |
+| `snapshot rollback <project> <ver>` | Restaura versión anterior | `nexenv-cli snapshot rollback mi-app 1` |
+| `diff <project>` | Cambios desde último snapshot | `nexenv-cli diff mi-app` |
+| `note <project> [text]` | Gestiona notas (sin texto = lista) | `nexenv-cli note mi-app "nota aquí"` |
+| `ps [project]` | Lista procesos en puertos del proyecto | `nexenv-cli ps mi-app` |
+| `unlink <name>` | Desvincula proyecto de Nexenv (no borra archivos) | `nexenv-cli unlink mi-app` |
 
 > **Decisión de diseño:** CLI y GUI son dos interfaces al mismo motor. No son productos separados, no compiten. La CLI es para acciones rápidas, la GUI es para explorar y configurar. Ambas leen/escriben sobre el mismo manifest y la misma persistencia.
 
@@ -1024,17 +1027,17 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 - [x] 7 templates funcionales: Node+Express, React+Vite, Python+FastAPI, Python+Django, Fullstack, Rust CLI, Docker Compose
 - [x] Cada template genera: estructura, deps, scripts, docker-compose, .env.example, README, Makefile, CI workflows, VS Code config
 - [ ] Tests automatizados de generacion: cada template se genera y arranca sin errores
-- [x] `delixon create` y `delixon new` desde CLI con parametros de stack
+- [x] `nexenv create` y `nexenv new` desde CLI con parametros de stack
 
-**P1 — Diagnosticar (lo que hace que Delixon sea util el dia 1):**
+**P1 — Diagnosticar (lo que hace que Nexenv sea util el dia 1):**
 - [x] `doctor` del sistema: verificar runtimes (Node, Python, Rust, Go, PHP, Ruby), Docker, Git, config, datos
 - [x] Health checks por proyecto: directorio, README, Git, .gitignore, deps, runtimes, puertos
 - [x] HealthTab en GUI con sugerencias de fix por cada check
-- [x] `delixon doctor` y `delixon health <proyecto>` desde CLI
+- [x] `nexenv doctor` y `nexenv health <proyecto>` desde CLI
 
 **P1 — Scan de proyectos existentes (duplica el publico objetivo):**
-- [x] `delixon scan ./mi-proyecto` → detecta: lenguaje, framework, package manager, ORM, DB, scripts, Docker, CI, testing, linters, TypeScript, fullstack
-- [x] Generar manifest desde scan → registrar proyecto → gestionar con Delixon
+- [x] `nexenv scan ./mi-proyecto` → detecta: lenguaje, framework, package manager, ORM, DB, scripts, Docker, CI, testing, linters, TypeScript, fullstack
+- [x] Generar manifest desde scan → registrar proyecto → gestionar con Nexenv
 - [x] Readiness score con breakdown detallado por categoria
 
 **Entregable:** ✅ MVP completado — se pueden CREAR proyectos completos desde GUI (wizard) o CLI (`new`/`create`), IMPORTAR proyectos existentes con `scan`, ver el ESTADO REAL con health/doctor, gestionar Docker/Git/scripts/env. Manifest unifica todo. **Pendiente:** CI/CD multi-SO, tests automatizados de templates, terminal integrada.
@@ -1043,10 +1046,10 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 
 > **Operación diaria completa + evolución de proyectos**
 >
-> Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Delixon me dice qué falla".
+> Lo que retiene usuarios: "puedo evolucionar mi proyecto sin miedo y Nexenv me dice qué falla".
 
-**P1 — Recipes (lo que hace que Delixon sirva despues del dia 1):**
-- [x] Sistema de recipes: `delixon add <recipe>` con preview y aplicacion
+**P1 — Recipes (lo que hace que Nexenv sirva despues del dia 1):**
+- [x] Sistema de recipes: `nexenv add <recipe>` con preview y aplicacion
 - [x] Preview de cambios antes de aplicar (`--preview` flag)
 - [x] 6 recipes funcionales: testing-vitest, testing-pytest, docker, ci-github, linting-biome, prisma
 - [ ] **3 recipes criticas (prioridad maxima):** Auth (NextAuth/Clerk/JWT), Database+ORM (PostgreSQL+Prisma / SQLAlchemy), Monitoring (health endpoint + logging estructurado) — sin estas 3, la propuesta de recipes se siente incompleta
@@ -1060,10 +1063,10 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 
 **P2 — Operacion diaria avanzada:**
 - [x] Docker Compose management integrado — up/down/status/logs desde GUI (DockerTab) y CLI
-- [ ] Terminal integrada dentro de Delixon (panel embebido)
+- [ ] Terminal integrada dentro de Nexenv (panel embebido)
 - [x] Contexto de Git integrado — rama, cambios, remoto, commits (GitTab + CLI status)
-- [x] Scripts con alias unificados — `delixon run <script>` ejecuta desde manifest (ScriptsTab + CLI)
-- [x] Gestion de procesos — `delixon ps`, kill desde GUI (ProcessesTab + CLI)
+- [x] Scripts con alias unificados — `nexenv run <script>` ejecuta desde manifest (ScriptsTab + CLI)
+- [x] Gestion de procesos — `nexenv ps`, kill desde GUI (ProcessesTab + CLI)
 - [x] Snapshots de entorno — comparar runtimes y deps entre momentos (snapshots.rs)
 - [ ] Gestion de runtimes: instalar/cambiar versiones desde la app
 - [ ] Notificaciones de dependencias desactualizadas o vulnerables
@@ -1080,8 +1083,8 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 > Lo que monetiza: equipos pagan, individuos no.
 
 **P3 — Equipos (Capa 5):**
-- [ ] Exportacion de configuracion de equipo (`.delixon-team`)
-- [ ] Onboarding automatizado: nuevo dev → `delixon setup` → entorno completo en 5 min
+- [ ] Exportacion de configuracion de equipo (`.nexenv-team`)
+- [ ] Onboarding automatizado: nuevo dev → `nexenv setup` → entorno completo en 5 min
 - [ ] Secrets vault encriptado (AES-256) para compartir credenciales
 - [x] Project notes / contexto rapido — implementado con CRUD, UUID, timestamps (GUI NotesTab + CLI)
 
@@ -1108,26 +1111,26 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 
 - [ ] Catalogos corporativos (tecnologias aprobadas/prohibidas por empresa)
 - [ ] Templates privadas de organizacion con politicas y cobertura minima
-- [ ] Configuracion de equipo (`.delixon-team`) — sincronizar preferencias
+- [ ] Configuracion de equipo (`.nexenv-team`) — sincronizar preferencias
 - [ ] Onboarding automatizado — nuevo dev productivo en 5 min
 - [ ] Secrets vault encriptado (AES-256)
 
 **Capa 6: Servidor y cloud**
 
-> Delixon no tiene por que limitarse a desktop local. La misma logica de capas 0-3 puede operar en servidores sin GUI.
+> Nexenv no tiene por que limitarse a desktop local. La misma logica de capas 0-3 puede operar en servidores sin GUI.
 
 - [ ] CLI headless para servidores de desarrollo (Linux, sin Tauri, sin GUI)
 - [ ] API remota para gestionar entornos desde CI/CD pipelines
 - [ ] Gestion de multiples proyectos en produccion (modo servidor)
 - [ ] Integracion con herramientas de monitoreo (Grafana, Prometheus)
-- [ ] Delixon como servicio en entornos de staging/pre-produccion
-- [ ] Delixon agent: proceso que vigila health, puertos y servicios en background
+- [ ] Nexenv como servicio en entornos de staging/pre-produccion
+- [ ] Nexenv agent: proceso que vigila health, puertos y servicios en background
 
-> **Caso de uso servidor:** Un equipo de 10 devs tiene un servidor de desarrollo compartido. Delixon corre en modo headless, cada dev usa `delixon-cli` para gestionar sus entornos remotos. El servidor mantiene aislamiento por proyecto, health checks automaticos, y notifica si algo se rompe. Funciona en **Linux** (principal), **Windows Server** y **macOS** (CI runners).
+> **Caso de uso servidor:** Un equipo de 10 devs tiene un servidor de desarrollo compartido. Nexenv corre en modo headless, cada dev usa `nexenv-cli` para gestionar sus entornos remotos. El servidor mantiene aislamiento por proyecto, health checks automaticos, y notifica si algo se rompe. Funciona en **Linux** (principal), **Windows Server** y **macOS** (CI runners).
 
 **Ecosistema y distribucion**
 
-- [ ] Sistema de plugins (la comunidad extiende Delixon)
+- [ ] Sistema de plugins (la comunidad extiende Nexenv)
 - [ ] Marketplace de templates y recipes
 - [ ] Exportacion automatica de decisiones tecnicas (ADR)
 - [ ] Editor visual de plantillas y catalogos
@@ -1158,16 +1161,16 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 | Abrir un proyecto existente | En 1 clic, VSCode abre con el entorno correcto cargado |
 | Aislamiento de entorno | Las variables de un proyecto no son visibles desde otro |
 | Historial aislado | El historial de terminal de cada proyecto es independiente |
-| Exportar configuración | Se genera un archivo `.delixon` que reconstruye el entorno en otra máquina |
+| Exportar configuración | Se genera un archivo `.nexenv` que reconstruye el entorno en otra máquina |
 
 ### Fase 2 — Objetivos concretos
 
 | Objetivo | Criterio de éxito |
 |----------|-------------------|
 | Motor de scaffolding | Un proyecto nuevo con stack validado en menos de 3 minutos |
-| Gestión de dependencias | Delixon detecta y vincula dependencias compartidas automáticamente |
+| Gestión de dependencias | Nexenv detecta y vincula dependencias compartidas automáticamente |
 | Dashboard funcional | El usuario ve el estado real de todos sus proyectos en una vista |
-| Gestión de runtimes | Instalar/cambiar versiones de Node, Python, etc. desde Delixon |
+| Gestión de runtimes | Instalar/cambiar versiones de Node, Python, etc. desde Nexenv |
 | Recipes | Agregar auth/database/testing a un proyecto existente sin romper nada |
 | Scan de proyectos | Analizar un proyecto existente y sugerir mejoras con score |
 
@@ -1176,7 +1179,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 | Objetivo | Criterio de éxito |
 |----------|-------------------|
 | Onboarding rápido | Un nuevo desarrollador productivo en menos de 10 minutos |
-| Configuración de equipo | Un archivo `.delixon-team` sincroniza configuración entre todos |
+| Configuración de equipo | Un archivo `.nexenv-team` sincroniza configuración entre todos |
 | Secrets seguros | Vault encriptado reemplaza "pásame el .env por Slack" |
 
 ---
@@ -1185,7 +1188,7 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 
 ### Para el desarrollador individual
 
-| Antes de Delixon | Con Delixon | Mejora |
+| Antes de Nexenv | Con Nexenv | Mejora |
 |------------------|-------------|--------|
 | 2-4 horas configurar entorno nuevo | 5-10 minutos | **95% menos tiempo** |
 | Errores por mezcla de entornos: frecuentes | Minimizados por diseño | **Reducción significativa** |
@@ -1222,9 +1225,9 @@ No "compatible con Windows". Windows PRIMERO. Mas del 40% de developers usan Win
 | **Docker Compose** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **mise (ex rtx)** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
 | **Scripts manuales** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| **Delixon** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Nexenv** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-Delixon integra en una sola experiencia capacidades que hoy estan fragmentadas en 4-5 herramientas distintas. No es que cada competidor sea malo — es que el developer tiene que ensamblar la solucion a mano.
+Nexenv integra en una sola experiencia capacidades que hoy estan fragmentadas en 4-5 herramientas distintas. No es que cada competidor sea malo — es que el developer tiene que ensamblar la solucion a mano.
 
 ### Competidor más cercano: mise (antes rtx)
 
@@ -1232,7 +1235,7 @@ Delixon integra en una sola experiencia capacidades que hoy estan fragmentadas e
 - Gestiona múltiples runtimes, carga env vars por directorio, ejecuta tareas, CLI puro
 - Activacion automatica por directorio, plugins, ecosistema maduro
 
-**Donde mise no llega (y Delixon si):**
+**Donde mise no llega (y Nexenv si):**
 - GUI con dashboard visual para explorar y configurar
 - Scaffolding completo: templates, recipes, wizard de creacion
 - Health checks y diagnostico del sistema (`doctor`, `health`)
@@ -1241,11 +1244,11 @@ Delixon integra en una sola experiencia capacidades que hoy estan fragmentadas e
 - Deteccion y scan de proyectos existentes
 
 **Donde mise es mas fuerte hoy:**
-- Activacion automatica de runtimes por directorio (Delixon aun no lo implementa)
+- Activacion automatica de runtimes por directorio (Nexenv aun no lo implementa)
 - Ecosistema de plugins mas maduro
 - Mas tiempo en produccion con comunidad establecida
 
-Delixon no compite con mise en gestion de runtimes. Delixon integra gestion de runtimes dentro de una plataforma mas amplia que cubre todo el ciclo de vida del workspace.
+Nexenv no compite con mise en gestion de runtimes. Nexenv integra gestion de runtimes dentro de una plataforma mas amplia que cubre todo el ciclo de vida del workspace.
 
 ---
 
@@ -1265,7 +1268,7 @@ Al abrir un segundo proyecto, detecta si hay puertos en conflicto:
 
 Toma un snapshot cada vez que abres un proyecto. Si algo deja de funcionar:
 ```
-$ delixon diff mi-proyecto
+$ nexenv diff mi-proyecto
 ⚠️ Node global cambió: 20.10 → 20.11
 ⚠️ Variable DB_HOST eliminada del sistema
 ✅ Python 3.11 sin cambios
@@ -1295,12 +1298,12 @@ Dashboard muestra:
 
 ### F) Scripts con alias unificados
 
-`delixon run start` funciona sin importar si el stack es Node, Python o Go.
+`nexenv run start` funciona sin importar si el stack es Node, Python o Go.
 
 ### G) Gestión de procesos en background
 
 ```
-$ delixon ps mi-proyecto
+$ nexenv ps mi-proyecto
 PID   NAME    STATUS    PORT    UPTIME
 1234  api     running   3000    2h 15m
 1235  worker  running   -       2h 15m
@@ -1321,7 +1324,7 @@ Al abrir un proyecto olvidado:
 ### Catálogos corporativos
 
 ```yaml
-# delixon-org.yaml
+# nexenv-org.yaml
 organization: "MiEmpresa"
 
 approved_technologies:
@@ -1367,7 +1370,7 @@ Cuando alguien pregunta "¿por qué usamos X?", la respuesta está documentada.
 
 ## 16. Landing page y waitlist
 
-### Estado actual de la landing (delixon-web)
+### Estado actual de la landing (nexenv-web)
 
 La landing page está en producción con:
 
@@ -1444,7 +1447,7 @@ En fase de waitlist, NO mostrar precios, descarga, ni planes. El mensaje es "ap�
 
 ### Preguntas de producto por resolver
 
-1. **¿GUI + CLI desde Fase 1?** — Muchos devs prefieren CLI desde el día 1 (`delixon open`, `delixon list`)
+1. **¿GUI + CLI desde Fase 1?** — Muchos devs prefieren CLI desde el día 1 (`nexenv open`, `nexenv list`)
 2. **¿Formato de config: YAML o JSON?** — YAML es más legible (docker-compose, GitHub Actions)
 3. **¿Secrets en vault o en proyecto?** — Vault por defecto con fallback a .env local
 4. **¿Multi-editor?** — VSCode primero (80% mercado), extensible via plugins
@@ -1457,12 +1460,12 @@ En fase de waitlist, NO mostrar precios, descarga, ni planes. El mensaje es "ap�
 
 ## 17. Opinión sincera y riesgos
 
-### Lo que Delixon tiene a favor
+### Lo que Nexenv tiene a favor
 
 1. **El problema es real y universal**. Todo dev con 2+ proyectos ha sufrido esto.
 2. **No hay competidor directo completo**. DevContainers es pesado, mise es CLI puro, direnv solo env vars.
 3. **Tauri es la elección correcta**. Ligero, nativo, Rust por debajo.
-4. **El archivo `.delixon`** es un killer feature para equipos.
+4. **El archivo `.nexenv`** es un killer feature para equipos.
 5. **La landing tiene nivel visual alto**. Genera confianza y profesionalismo.
 
 ### Lo que preocupa
@@ -1485,7 +1488,7 @@ En fase de waitlist, NO mostrar precios, descarga, ni planes. El mensaje es "ap�
 ## 18. Resumen ejecutivo
 
 ```
-DELIXON — El sistema operativo local del developer
+NEXENV — El sistema operativo local del developer
 
 MISIÓN:
   Crear, entender, ejecutar, aislar, ampliar, validar y reparar
@@ -1510,7 +1513,7 @@ DIFERENCIAL:
   - Unica herramienta que integra todas las capas del ciclo de vida
   - Sin Docker para el dev (solo para servicios de infra)
   - App nativa de 5MB (Tauri, no Electron)
-  - Archivo .delixon para onboarding de equipo en 5 min
+  - Archivo .nexenv para onboarding de equipo en 5 min
   - Funciona offline, todo local, zero vendor lock-in
   - Sirve para proyectos NUEVOS y EXISTENTES (scan + import)
   - Doctor + Health = sabe qué falta y cómo arreglarlo
@@ -1526,7 +1529,7 @@ COMPETENCIA:
   mise = CLI puro, sin GUI, sin scaffolding, sin health checks
   DevContainers = Pesado, requiere Docker, sin dashboard, sin scan
   direnv = Solo env vars
-  Delixon = Todo integrado en una app nativa moderna
+  Nexenv = Todo integrado en una app nativa moderna
 
 PÚBLICO:
   Dev individual → Productividad personal
@@ -1542,19 +1545,19 @@ MODELO:
 
 ## 19. Analisis de estado y vision final
 
-> Estado real de cada capacidad de Delixon y hacia donde va.
+> Estado real de cada capacidad de Nexenv y hacia donde va.
 
-### 19.1 Vision — Que es Delixon
+### 19.1 Vision — Que es Nexenv
 
 | Aspecto | Estado actual | Opinión final — Cómo debería funcionar |
 |---|---|---|
 | **Identidad** | ✅ GUI + CLI dual | **"Sistema operativo local del developer"** — gestiona TODO el ciclo de vida local: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar, reparar |
-| **Nucleo declarativo** | ✅ Implementado | Manifest `.delixon/manifest.yaml` con schema_version, metadata, editor, validacion y normalizacion obligatoria |
+| **Nucleo declarativo** | ✅ Implementado | Manifest `.nexenv/manifest.yaml` con schema_version, metadata, editor, validacion y normalizacion obligatoria |
 | **Flujo de creacion** | ✅ Wizard completo | Scaffold multi-step en GUI + `new`/`create` en CLI. Elegir tipo → stack → validar → generar → registrar |
-| **Scan/import** | ✅ Implementado | `scan` detecta 15+ aspectos del stack. Export/import con formato `.delixon` portable |
+| **Scan/import** | ✅ Implementado | `scan` detecta 15+ aspectos del stack. Export/import con formato `.nexenv` portable |
 | **Health + Doctor** | ✅ Implementado | Doctor del sistema + health por proyecto. GUI (HealthTab) + CLI. Sugerencias de fix |
 | **Versionado de stack** | ✅ Implementado | save/list/diff/rollback de manifest. GUI (VersioningTab) + CLI snapshot commands |
-| **CLI** | ✅ 29 comandos | Estrategia dual GUI+CLI. Ambas interfaces al mismo `delixon_lib`. Falta: autocompletado shell, instalacion global |
+| **CLI** | ✅ 29 comandos | Estrategia dual GUI+CLI. Ambas interfaces al mismo `nexenv_lib`. Falta: autocompletado shell, instalacion global |
 | **Templates** | ✅ 7 funcionales | Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose. Ampliar con mas recipes |
 | **Docker** | ✅ Integrado | up/down/status/logs desde GUI (DockerTab) y CLI. Deteccion de puertos |
 | **Perfiles madurez** | ✅ Integrados | rapid/standard/production en scaffold. Cambian archivos reales |
@@ -1568,13 +1571,13 @@ MODELO:
 | **P1 — Operar** | Health + doctor + Docker + env vars + Git + scripts + procesos | ✅ Completado |
 | **P2 — Evolucionar** | Versionado + diff/rollback + perfiles + notas + export/import | ✅ Completado |
 | **P2 — Expandir** | CLI 28 cmds + output formateado | ✅ Completado. Pendiente: terminal integrada, autocompletado shell |
-| **P3 — Equipos** | `.delixon-team` + onboarding + secrets vault + multi-editor | Pendiente — lo que monetiza |
+| **P3 — Equipos** | `.nexenv-team` + onboarding + secrets vault + multi-editor | Pendiente — lo que monetiza |
 | **P4 — Inteligencia** (Capa 4) | IA + agentes + auditoria automatizada | Pendiente — lo que diferencia |
-| **P5 — Equipos y empresa** (Capa 5) | `.delixon-team` + onboarding + secrets vault + catalogos corporativos + marketplace | Pendiente — lo que monetiza a escala |
+| **P5 — Equipos y empresa** (Capa 5) | `.nexenv-team` + onboarding + secrets vault + catalogos corporativos + marketplace | Pendiente — lo que monetiza a escala |
 
 ### 19.3 Conclusion
 
-Delixon es **el sistema operativo local del developer**: una sola app que crea, entiende, ejecuta, aisla, amplia, valida y repara proyectos.
+Nexenv es **el sistema operativo local del developer**: una sola app que crea, entiende, ejecuta, aisla, amplia, valida y repara proyectos.
 
 **Lo critico:** el nucleo declarativo (Project Manifest) es la columna vertebral. Todas las capas leen y escriben sobre el. Sin el, el producto seria una coleccion de botones inconexos.
 
@@ -1614,11 +1617,11 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 | **UX** | User Experience | Calidad de la experiencia del usuario final |
 | **YAML** | YAML Ain't Markup Language | Formato de configuración legible por humanos, usado en Docker Compose, GitHub Actions, etc. |
 
-### Tecnologías del stack de Delixon (app de escritorio)
+### Tecnologías del stack de Nexenv (app de escritorio)
 
-| Tecnología | Qué es | Por qué se usa en Delixon |
+| Tecnología | Qué es | Por qué se usa en Nexenv |
 |------------|--------|---------------------------|
-| **Tauri** | Framework para crear apps de escritorio usando web tech + Rust | Core de Delixon: app nativa ligera (~5MB), acceso completo al SO |
+| **Tauri** | Framework para crear apps de escritorio usando web tech + Rust | Core de Nexenv: app nativa ligera (~5MB), acceso completo al SO |
 | **Rust** | Lenguaje de programación de sistemas, seguro y rápido | Backend nativo de Tauri: manejo de archivos, procesos, env vars, PATH |
 | **React** | Librería JavaScript para construir interfaces de usuario | Frontend de la app: dashboard, settings, formularios |
 | **TypeScript** | JavaScript con tipos estáticos | Código más seguro y mantenible, autocompletado en el IDE |
@@ -1675,7 +1678,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 | **Drizzle** | ORM ligero para TypeScript, más cercano a SQL puro |
 | **Redis** | Base de datos en memoria, usada para caché y colas |
 | **SQLite** | Base de datos embebida en un solo archivo, sin servidor |
-| **Symlinks** | Enlaces simbólicos del SO — Delixon los usa para compartir dependencias sin duplicar |
+| **Symlinks** | Enlaces simbólicos del SO — Nexenv los usa para compartir dependencias sin duplicar |
 
 ---
 
@@ -1758,7 +1761,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 
 ## 22. Checklist general de implementación
 
-### Landing page (delixon-web) — Completado
+### Landing page (nexenv-web) — Completado
 - [x] Estructura de carpetas por sección (`layout/`, `hero/`, `problem/`, `solution/`, `how-it-works/`, `waitlist/`)
 - [x] Componentes compartidos: `SectionTag`, `SectionTitle`
 - [x] Subcomponentes: `ProblemExpanded`, `SolutionExpanded`, `HowItWorksExpanded`, `WaitlistForm`
@@ -1771,7 +1774,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 
 ### Waitlist backend — Completado
 - [x] API Fastify: signup, referral, double opt-in, profile update
-- [x] PostgreSQL en Docker (contenedor `delixon-db`, puerto 5480)
+- [x] PostgreSQL en Docker (contenedor `nexenv-db`, puerto 5480)
 - [x] Sistema de referidos (link compartible, boost de posición)
 - [x] Perfil opcional (nombre, stack, equipo, OS, fuente)
 - [x] Admin panel HTML: stats, breakdowns, tabla paginada, filtro, CSV export
@@ -1798,7 +1801,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [ ] Discord y Twitter/X para comunidad
 
 ### Producto — Capa 0: Nucleo declarativo ✅
-- [x] Project Manifest (`.delixon/manifest.yaml`) — techs, servicios, env vars, comandos, puertos, recipes, health checks
+- [x] Project Manifest (`.nexenv/manifest.yaml`) — techs, servicios, env vars, comandos, puertos, recipes, health checks
 - [x] Todas las capas leen y escriben sobre el manifest
 - [x] `schema_version` en el manifest — permite migraciones futuras sin romper manifests existentes
 - [x] `metadata` (description, created_at, author) — metadatos basicos para entender el proyecto
@@ -1807,10 +1810,10 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [x] `normalize_manifest()` — limpia y deduplica antes de guardar (puertos, techs, recipes, whitespace)
 - [x] `save_manifest()` valida y normaliza SIEMPRE antes de escribir — nunca se guarda basura
 - [x] Manifests antiguos (sin schema_version) se normalizan automaticamente al cargar
-- [x] Export/import incluye manifest completo — el archivo `.delixon` ahora transporta el manifest
+- [x] Export/import incluye manifest completo — el archivo `.nexenv` ahora transporta el manifest
 - [x] Separacion clara: manifest = schema (que necesita el proyecto), envs/*.json = valores reales (secretos fuera del manifest)
 
-> **Principio de diseno:** El manifest es el contrato central que define que es un proyecto para Delixon. Todas las capas leen y escriben sobre el. Las notas (`notes/*.json`) y los valores de env vars (`envs/*.json`) se mantienen separados por diseno: las notas son efimeras y de alta frecuencia, los valores de env vars son sensibles y varian por maquina.
+> **Principio de diseno:** El manifest es el contrato central que define que es un proyecto para Nexenv. Todas las capas leen y escriben sobre el. Las notas (`notes/*.json`) y los valores de env vars (`envs/*.json`) se mantienen separados por diseno: las notas son efimeras y de alta frecuencia, los valores de env vars son sensibles y varian por maquina.
 
 ### Producto — Capa 1: Workspace ✅
 - [x] Persistencia de proyectos (CRUD completo)
@@ -1820,7 +1823,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [x] Apertura de terminal con env vars cargadas
 - [x] Dashboard con busqueda, filtros, grid de proyectos
 - [x] Pagina de detalle con gestion de env vars
-- [x] Archivo `.delixon` export/import (formato portable)
+- [x] Archivo `.nexenv` export/import (formato portable)
 - [x] Deteccion de conflictos de puertos (TCP check)
 - [x] Settings: editor, tema, idioma, runtimes
 - [x] Generacion de `.code-workspace` con extensiones recomendadas
@@ -1831,13 +1834,13 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [x] Catalogo de 30+ tecnologias en YAML con UI de browse/search/filtros
 - [x] RulesEngine: dependencias auto, incompatibilidades, puertos, sugerencias
 - [x] Scaffold wizard multi-step en GUI (info → stack → preview → generar)
-- [x] `delixon-cli new` con parametros de tipo/perfil/techs
+- [x] `nexenv-cli new` con parametros de tipo/perfil/techs
 - [x] 7 templates funcionales (Node+Express, React+Vite, FastAPI, Django, Fullstack, Rust CLI, Docker Compose)
 - [x] 6 recipes con preview (vitest, pytest, docker, ci-github, biome, prisma)
 - [x] Full-stack detection (frontend/ + backend/) con readiness score
 - [x] Perfiles de madurez (rapid/standard/production)
 - [x] Scan de proyectos existentes — detecta 15+ aspectos del stack
-- [x] Validacion de combinaciones de tecnologias (`delixon-cli validate`)
+- [x] Validacion de combinaciones de tecnologias (`nexenv-cli validate`)
 - [ ] Recipe: Auth — NextAuth/Clerk/JWT (lo primero que todo proyecto real necesita)
 - [ ] Recipe: Database + ORM — PostgreSQL + Prisma (Node) / SQLAlchemy (Python) como recipe aplicable
 - [ ] Recipe: Monitoring basico — health endpoint + logging estructurado
@@ -1858,7 +1861,7 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [x] Gestion de puertos — ver puertos en uso, conflictos (GUI + CLI)
 - [x] Gestion de procesos — listar/kill por puerto (GUI ProcessesTab + CLI)
 - [x] Output formateado con colores (colored crate)
-- [ ] Terminal integrada dentro de Delixon (panel embebido)
+- [ ] Terminal integrada dentro de Nexenv (panel embebido)
 - [ ] Gestion de runtimes: instalar/cambiar versiones desde la app
 - [ ] Notificaciones de dependencias desactualizadas o vulnerables
 - [ ] Autocompletado para bash/zsh/fish/PowerShell
@@ -1866,12 +1869,12 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 ### Producto — Capa 4: Inteligencia (futuro)
 - [ ] Asistente IA con aprendizaje adaptativo
 - [ ] Agentes especializados (SecurityGuard, CodeReviewer, TestBuilder, PerfAnalyzer, DocWriter)
-- [ ] Pipeline de auditoria completa (`delixon audit`)
+- [ ] Pipeline de auditoria completa (`nexenv audit`)
 - [ ] Modo "arquitecto asistente" — sugiere stack segun tipo de producto
 - [ ] Sugerencias contextuales basadas en patrones de uso
 
 ### Producto — Capa 5: Equipos y empresa (futuro)
-- [ ] Configuracion de equipo (`.delixon-team`)
+- [ ] Configuracion de equipo (`.nexenv-team`)
 - [ ] Onboarding automatizado — nuevo dev productivo en 5 min
 - [ ] Secrets vault encriptado (AES-256)
 - [ ] Catalogos corporativos y templates privadas de organizacion
@@ -1883,14 +1886,14 @@ Delixon es **el sistema operativo local del developer**: una sola app que crea, 
 - [ ] CI/CD con GitHub Actions: build y test en Windows, Ubuntu y macOS en cada PR
 - [ ] Documentar diferencias por SO: rutas de datos, terminales, binarios
 - [ ] Probar CLI en los tres SO
-- [ ] Instalacion global del CLI (`delixon` desde cualquier terminal en cualquier SO)
+- [ ] Instalacion global del CLI (`nexenv` desde cualquier terminal en cualquier SO)
 
 ### Producto — Capa 6: Servidor y cloud (vision futura)
 - [ ] CLI headless para servidores de desarrollo (sin GUI, sin Tauri)
 - [ ] API remota para gestionar entornos desde CI/CD pipelines
 - [ ] Gestion de multiples proyectos en produccion (modo servidor)
 - [ ] Integracion con herramientas de monitoreo (Grafana, Prometheus)
-- [ ] Delixon como servicio en entornos de staging/pre-produccion
+- [ ] Nexenv como servicio en entornos de staging/pre-produccion
 
 ### Distribucion y ecosistema (futuro)
 - [ ] Sistema de plugins
@@ -1950,7 +1953,7 @@ El concepto de `on_open` (ejecutar comandos al abrir un proyecto) es util pero p
 
 ## 23. Vision del producto — Que no deberia faltar
 
-> Escrito desde la perspectiva del equipo de desarrollo de Delixon, pensando como un product manager senior que ademas es developer y usuario final del producto.
+> Escrito desde la perspectiva del equipo de desarrollo de Nexenv, pensando como un product manager senior que ademas es developer y usuario final del producto.
 
 ### Lo que ya tenemos y esta bien
 
@@ -1958,7 +1961,7 @@ La arquitectura de las capas 0-3 esta completada: manifest, workspace, scaffoldi
 
 ### Lo que NO puede faltar antes de lanzar
 
-Estas son las cosas que si un developer descarga Delixon y no encuentra, cierra la app y no vuelve:
+Estas son las cosas que si un developer descarga Nexenv y no encuentra, cierra la app y no vuelve:
 
 **1. Cross-platform real (no solo "compila")**
 
@@ -1968,12 +1971,12 @@ No basta con que Tauri compile en los tres SO. Necesitamos:
 - Documentar las diferencias reales: donde se guardan los datos, que terminal se abre, como se detectan runtimes
 - El instalador debe funcionar limpio en los tres SO
 
-Si un usuario de Linux o macOS descarga Delixon y algo no funciona, no va a reportar un bug. Va a desinstalarlo.
+Si un usuario de Linux o macOS descarga Nexenv y algo no funciona, no va a reportar un bug. Va a desinstalarlo.
 
 **2. Instalacion global del CLI**
 
-`cargo run --manifest-path src-tauri/Cargo.toml --bin delixon-cli -- doctor` no es aceptable para un usuario final. Necesitamos:
-- `delixon doctor` desde cualquier terminal, en cualquier SO
+`cargo run --manifest-path src-tauri/Cargo.toml --bin nexenv-cli -- doctor` no es aceptable para un usuario final. Necesitamos:
+- `nexenv doctor` desde cualquier terminal, en cualquier SO
 - Instalador que agregue al PATH automaticamente
 - Considerar: brew (macOS), scoop/winget (Windows), apt/snap (Linux)
 - Que la GUI instale el CLI automaticamente al instalarse
@@ -1981,7 +1984,7 @@ Si un usuario de Linux o macOS descarga Delixon y algo no funciona, no va a repo
 **3. Activacion de runtimes**
 
 Detectar que un proyecto usa Node 20 y no activarlo es como un GPS que te dice donde estas pero no te da direcciones. Necesitamos:
-- Al hacer `delixon open`, que se active la version correcta de Node/Python/Rust
+- Al hacer `nexenv open`, que se active la version correcta de Node/Python/Rust
 - Integracion con nvm/fnm (Node), pyenv (Python), rustup (Rust)
 - Si la version requerida no esta instalada, sugerir instalarla
 
@@ -1996,46 +1999,46 @@ Detectar que un proyecto usa Node 20 y no activarlo es como un GPS que te dice d
 
 **5. Terminal integrada**
 
-No para reemplazar la terminal del developer, sino para que desde Delixon pueda ejecutar comandos rapidos sin salir de la app. Es la diferencia entre "gestor de proyectos" y "entorno de desarrollo". Un panel con la terminal del proyecto actual, env vars ya cargadas, runtime activado.
+No para reemplazar la terminal del developer, sino para que desde Nexenv pueda ejecutar comandos rapidos sin salir de la app. Es la diferencia entre "gestor de proyectos" y "entorno de desarrollo". Un panel con la terminal del proyecto actual, env vars ya cargadas, runtime activado.
 
 **6. Notificaciones de dependencias**
 
-El developer deja un proyecto 2 meses. Vuelve. Las deps estan desactualizadas. Algunas tienen CVEs. Delixon deberia decirle eso en el dashboard antes de que lo descubra en produccion. Un badge amarillo "3 deps desactualizadas" en la tarjeta del proyecto.
+El developer deja un proyecto 2 meses. Vuelve. Las deps estan desactualizadas. Algunas tienen CVEs. Nexenv deberia decirle eso en el dashboard antes de que lo descubra en produccion. Un badge amarillo "3 deps desactualizadas" en la tarjeta del proyecto.
 
 **7. Generacion por tipo de producto**
 
-"¿Que vas a construir?" → SaaS / API / Landing / CLI / Desktop → stack recomendado. Es la feature que convierte a Delixon de "herramienta para devs que saben lo que quieren" a "herramienta que te guia si no sabes por donde empezar". Amplía el publico objetivo.
+"¿Que vas a construir?" → SaaS / API / Landing / CLI / Desktop → stack recomendado. Es la feature que convierte a Nexenv de "herramienta para devs que saben lo que quieren" a "herramienta que te guia si no sabes por donde empezar". Amplía el publico objetivo.
 
 ### La vision de servidor (Capa 6) — Por que importa
 
-Delixon como app local es el producto de hoy. Pero el producto de manana es Delixon en servidores:
+Nexenv como app local es el producto de hoy. Pero el producto de manana es Nexenv en servidores:
 
 **Caso real:** Una startup con 15 developers tiene un servidor de desarrollo compartido. Cada dev tiene 3-4 proyectos. Hoy cada uno configura su entorno a mano, los puertos se pisan, las variables de entorno se contaminan, y cuando alguien nuevo entra tarda 2 dias en tener todo funcionando.
 
-**Con Delixon servidor:**
-- El admin instala `delixon-server` (CLI headless, sin GUI)
-- Cada dev usa `delixon-cli` para gestionar sus entornos remotos
+**Con Nexenv servidor:**
+- El admin instala `nexenv-server` (CLI headless, sin GUI)
+- Cada dev usa `nexenv-cli` para gestionar sus entornos remotos
 - El servidor mantiene aislamiento por proyecto automaticamente
 - Health checks corren en background y notifican si algo se rompe
-- Nuevo dev: `delixon setup --team acme` → entorno listo en 5 minutos
+- Nuevo dev: `nexenv setup --team acme` → entorno listo en 5 minutos
 - Funciona en Linux (principal), Windows Server y macOS (CI runners)
 
-Esto es lo que convierte a Delixon de herramienta individual gratuita a producto empresarial que factura. El modelo: gratis para individuos, de pago para equipos y servidores.
+Esto es lo que convierte a Nexenv de herramienta individual gratuita a producto empresarial que factura. El modelo: gratis para individuos, de pago para equipos y servidores.
 
 ### Medir la primera semana obsesivamente
 
-La primera semana de un usuario nuevo determina si Delixon se convierte en habito o se desinstala. Metricas locales (sin telemetria externa, sin enviar datos) que Delixon deberia trackear internamente:
+La primera semana de un usuario nuevo determina si Nexenv se convierte en habito o se desinstala. Metricas locales (sin telemetria externa, sin enviar datos) que Nexenv deberia trackear internamente:
 
 | Metrica | Que mide | Señal de exito |
 |---|---|---|
 | Tiempo hasta primer `open` | ¿Cuanto tarda en abrir un proyecto? | < 5 min desde instalacion |
-| Proyectos registrados en 7 dias | ¿Adopta Delixon para su flujo real? | ≥ 3 proyectos |
+| Proyectos registrados en 7 dias | ¿Adopta Nexenv para su flujo real? | ≥ 3 proyectos |
 | Uso de `doctor`/`health` | ¿Descubre el diagnostico? | ≥ 2 usos en 7 dias |
 | Retorno al dia 2, 3, 7 | ¿Vuelve a abrirlo? | Dia 2: si. Dia 7: si |
-| Recipes aplicadas | ¿Evoluciona proyectos con Delixon? | ≥ 1 recipe en 7 dias |
+| Recipes aplicadas | ¿Evoluciona proyectos con Nexenv? | ≥ 1 recipe en 7 dias |
 | Errores encontrados sin solucion | ¿Se queda atascado? | 0 idealmente |
 
-Estas metricas son locales — un archivo JSON en `~/.local/share/delixon/metrics.json` que solo el usuario puede ver. No se envian a ningun servidor. Sirven para que el equipo de desarrollo sepa QUE medir cuando haga pruebas con beta testers, no para tracking de usuarios.
+Estas metricas son locales — un archivo JSON en `~/.local/share/nexenv/metrics.json` que solo el usuario puede ver. No se envian a ningun servidor. Sirven para que el equipo de desarrollo sepa QUE medir cuando haga pruebas con beta testers, no para tracking de usuarios.
 
 > Si no medimos la primera semana, estamos adivinando. Y adivinar es caro.
 
@@ -2047,7 +2050,7 @@ Estas metricas son locales — un archivo JSON en `~/.local/share/delixon/metric
 
 3. **No ignorar Windows.** Muchos productos dev-tools tratan Windows como ciudadano de segunda. Mas del 40% de developers usan Windows. Cada path hardcodeado con `/` en vez de usar `Path::new()`, cada `lsof` sin su equivalente `tasklist`, es un usuario perdido.
 
-4. **No competir con Docker.** Delixon no es Docker. Docker es para servidores y servicios. Delixon es para el entorno del developer. La filosofia "Docker solo para servicios (PostgreSQL, Redis), runtimes nativos" es el diferencial. No diluirlo.
+4. **No competir con Docker.** Nexenv no es Docker. Docker es para servidores y servicios. Nexenv es para el entorno del developer. La filosofia "Docker solo para servicios (PostgreSQL, Redis), runtimes nativos" es el diferencial. No diluirlo.
 
 5. **No lanzar sin CI/CD cross-platform.** Si no estamos probando automaticamente en Windows + Linux + macOS en cada PR, vamos a romper cosas sin darnos cuenta. Es la primera infraestructura que hay que montar.
 
@@ -2065,4 +2068,4 @@ Estas metricas son locales — un archivo JSON en `~/.local/share/delixon/metric
 
 ---
 
-*Delixon — Deja de configurar. Empieza a construir.*
+*Nexenv — Deja de configurar. Empieza a construir.*

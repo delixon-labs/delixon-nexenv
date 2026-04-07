@@ -12,6 +12,9 @@
     // ─── Tauri ──────────────────────────────────────────────
     "tauri-apps.tauri-vscode",
 
+    // ─── Debug nativo (Rust / C / C++) ─────────────────────
+    "vadimcn.vscode-lldb",
+
     // ─── Git ────────────────────────────────────────────────
     "eamodio.gitlens",
     "mhutchie.git-graph",
@@ -24,7 +27,6 @@
     "editorconfig.editorconfig",
     "mikestead.dotenv",
     "christian-kohler.path-intellisense",
-    "streetsidesoftware.code-spell-checker",
     "usernamehw.errorlens"
   ]
 }

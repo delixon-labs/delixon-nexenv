@@ -2,7 +2,7 @@
 
 ## Contexto
 
-Delixon almacena actualmente toda su informacion (proyectos, config, env vars, snapshots, notas) en archivos JSON planos en `%LOCALAPPDATA%/delixon/`. Esta decision fue correcta para la v1, pero se queda corta para:
+Nexenv almacena actualmente toda su informacion (proyectos, config, env vars, snapshots, notas) en archivos JSON planos en `%LOCALAPPDATA%/nexenv/`. Esta decision fue correcta para la v1, pero se queda corta para:
 
 - **Filtrado entre proyectos** (ej: "todos los proyectos con React que usan puerto 3000")
 - **Deteccion de inconsistencias** (extensiones/tecnologias conflictivas)
@@ -46,49 +46,49 @@ Seis traits pequenos (Interface Segregation Principle) + un super-trait compuest
 
 #[async_trait]
 pub trait ProjectStore: Send + Sync {
-    async fn list_projects(&self) -> Result<Vec<Project>, DelixonError>;
-    async fn get_project(&self, id: &str) -> Result<Option<Project>, DelixonError>;
-    async fn create_project(&self, project: &Project) -> Result<(), DelixonError>;
-    async fn update_project(&self, project: &Project) -> Result<(), DelixonError>;
-    async fn delete_project(&self, id: &str) -> Result<(), DelixonError>;
+    async fn list_projects(&self) -> Result<Vec<Project>, NexenvError>;
+    async fn get_project(&self, id: &str) -> Result<Option<Project>, NexenvError>;
+    async fn create_project(&self, project: &Project) -> Result<(), NexenvError>;
+    async fn update_project(&self, project: &Project) -> Result<(), NexenvError>;
+    async fn delete_project(&self, id: &str) -> Result<(), NexenvError>;
     // Queries avanzadas (para IA y deteccion)
-    async fn find_projects_by_tag(&self, tag: &str) -> Result<Vec<Project>, DelixonError>;
-    async fn find_projects_by_status(&self, status: &str) -> Result<Vec<Project>, DelixonError>;
-    async fn search_projects(&self, query: &str) -> Result<Vec<Project>, DelixonError>;
+    async fn find_projects_by_tag(&self, tag: &str) -> Result<Vec<Project>, NexenvError>;
+    async fn find_projects_by_status(&self, status: &str) -> Result<Vec<Project>, NexenvError>;
+    async fn search_projects(&self, query: &str) -> Result<Vec<Project>, NexenvError>;
 }
 
 #[async_trait]
 pub trait ConfigStore: Send + Sync {
-    async fn load_config(&self) -> Result<DelixonConfig, DelixonError>;
-    async fn save_config(&self, config: &DelixonConfig) -> Result<(), DelixonError>;
+    async fn load_config(&self) -> Result<NexenvConfig, NexenvError>;
+    async fn save_config(&self, config: &NexenvConfig) -> Result<(), NexenvError>;
 }
 
 #[async_trait]
 pub trait NoteStore: Send + Sync {
-    async fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, DelixonError>;
-    async fn add_note(&self, project_id: &str, note: &ProjectNote) -> Result<(), DelixonError>;
-    async fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), DelixonError>;
+    async fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, NexenvError>;
+    async fn add_note(&self, project_id: &str, note: &ProjectNote) -> Result<(), NexenvError>;
+    async fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), NexenvError>;
 }
 
 #[async_trait]
 pub trait EnvVarStore: Send + Sync {
-    async fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, DelixonError>;
-    async fn save_env_vars(&self, project_id: &str, vars: &HashMap<String, String>) -> Result<(), DelixonError>;
-    async fn delete_env_vars(&self, project_id: &str) -> Result<(), DelixonError>;
+    async fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, NexenvError>;
+    async fn save_env_vars(&self, project_id: &str, vars: &HashMap<String, String>) -> Result<(), NexenvError>;
+    async fn delete_env_vars(&self, project_id: &str) -> Result<(), NexenvError>;
 }
 
 #[async_trait]
 pub trait SnapshotStore: Send + Sync {
-    async fn save_snapshot(&self, project_id: &str, snapshot: &Snapshot) -> Result<(), DelixonError>;
-    async fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, DelixonError>;
-    async fn get_snapshot(&self, project_id: &str, version: u32) -> Result<Option<Snapshot>, DelixonError>;
-    async fn next_version(&self, project_id: &str) -> Result<u32, DelixonError>;
+    async fn save_snapshot(&self, project_id: &str, snapshot: &Snapshot) -> Result<(), NexenvError>;
+    async fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, NexenvError>;
+    async fn get_snapshot(&self, project_id: &str, version: u32) -> Result<Option<Snapshot>, NexenvError>;
+    async fn next_version(&self, project_id: &str) -> Result<u32, NexenvError>;
 }
 
 #[async_trait]
 pub trait EnvSnapshotStore: Send + Sync {
-    async fn save_env_snapshot(&self, project_id: &str, snapshot: &EnvSnapshot) -> Result<(), DelixonError>;
-    async fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, DelixonError>;
+    async fn save_env_snapshot(&self, project_id: &str, snapshot: &EnvSnapshot) -> Result<(), NexenvError>;
+    async fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, NexenvError>;
 }
 
 // Super-trait compuesto
@@ -229,11 +229,11 @@ CREATE VIRTUAL TABLE IF NOT EXISTS projects_fts USING fts5(
 
 La migracion es **automatica al primer arranque post-actualizacion**:
 
-1. La app intenta abrir/crear `{LOCALAPPDATA}/delixon/delixon.db`
+1. La app intenta abrir/crear `{LOCALAPPDATA}/nexenv/nexenv.db`
 2. Si la DB no tiene tablas: aplica schema inicial
 3. Detecta si existen archivos JSON legacy
 4. Si existen: ejecuta migracion **dentro de una transaccion SQL**
-5. Si la transaccion tiene exito: mueve JSON a `{LOCALAPPDATA}/delixon/json_backup/`
+5. Si la transaccion tiene exito: mueve JSON a `{LOCALAPPDATA}/nexenv/json_backup/`
 6. Si falla: ROLLBACK, log del error, fallback a JsonStore
 
 ### Mapeo de datos
@@ -257,7 +257,7 @@ La migracion es **automatica al primer arranque post-actualizacion**:
 
 - Crear modulo `core/store/` con `mod.rs` y `traits.rs`
 - Anadir `async-trait` a Cargo.toml
-- Anadir variante `Database(String)` a `DelixonError`
+- Anadir variante `Database(String)` a `NexenvError`
 
 **Verificacion**: `cargo check` compila, `cargo test` pasa todo.
 
@@ -351,7 +351,7 @@ La migracion es **automatica al primer arranque post-actualizacion**:
 
 ## Sin Cambios
 
-- `src-tauri/src/core/project/manifest.rs` — sigue en `.delixon/manifest.yaml` (es del proyecto)
+- `src-tauri/src/core/project/manifest.rs` — sigue en `.nexenv/manifest.yaml` (es del proyecto)
 - `src-tauri/src/core/catalog/` — YAML read-only embebido
 - `src-tauri/src/core/recipes/` — hardcoded
 - `src-tauri/src/core/runtime/` — no usa storage
@@ -383,7 +383,7 @@ Ruta de crecimiento:
 
   v1 (hoy)        → JSON files
   v2 (esta migracion) → SQLite local
-  v3 (futuro)      → PostgreSQL + API server + Delixon como cliente
+  v3 (futuro)      → PostgreSQL + API server + Nexenv como cliente
 ```
 
 ---
@@ -391,8 +391,8 @@ Ruta de crecimiento:
 ## Estructura final de disco post-migracion
 
 ```
-{LOCALAPPDATA}/delixon/
-├── delixon.db                      # SQLite (todo centralizado)
+{LOCALAPPDATA}/nexenv/
+├── nexenv.db                      # SQLite (todo centralizado)
 ├── config.json                     # Solo si falla SQLite (fallback)
 └── json_backup/                    # Backup automatico post-migracion
     ├── projects.json
@@ -403,6 +403,6 @@ Ruta de crecimiento:
     └── env_snapshots/
 
 {PROJECT_PATH}/
-└── .delixon/
+└── .nexenv/
     └── manifest.yaml               # Sigue en el proyecto (sin cambios)
 ```

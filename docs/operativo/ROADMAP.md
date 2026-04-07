@@ -1,4 +1,4 @@
-# Delixon — Roadmap Operativo
+# Nexenv — Roadmap Operativo
 
 > Documento de ejecucion. Se actualiza cada sprint. El plan maestro (PLAN.md) no se toca.
 >
@@ -8,7 +8,7 @@
 
 ## Sprint 1 — "Que se pueda usar de verdad" (30 dias)
 
-> **Objetivo:** Un developer descarga Delixon, instala en <5 min, abre su primer proyecto con el entorno correcto, y vuelve al dia siguiente.
+> **Objetivo:** Un developer descarga Nexenv, instala en <5 min, abre su primer proyecto con el entorno correcto, y vuelve al dia siguiente.
 
 ### 1.1 `open` perfecto (<2 segundos)
 
@@ -26,12 +26,12 @@
 
 | Tarea | Estado | Criterio de done |
 |---|---|---|
-| Build del binario `delixon` (no `delixon-cli`) para release | [ ] Pendiente | Binario unico funcional |
-| Instalador Windows (scoop o winget manifest) | [ ] Pendiente | `scoop install delixon` funciona |
-| Instalador macOS (brew tap) | [ ] Pendiente | `brew install delixon` funciona |
+| Build del binario `nexenv` (no `nexenv-cli`) para release | [ ] Pendiente | Binario unico funcional |
+| Instalador Windows (scoop o winget manifest) | [ ] Pendiente | `scoop install nexenv` funciona |
+| Instalador macOS (brew tap) | [ ] Pendiente | `brew install nexenv` funciona |
 | Instalador Linux (apt/snap o binario en releases) | [ ] Pendiente | Descarga + PATH funciona |
 | La GUI instala el CLI automaticamente al instalarse | [ ] Pendiente | CLI disponible post-install GUI |
-| `delixon doctor` funciona desde cualquier terminal en cualquier SO | [ ] Pendiente | Test manual en 3 SO |
+| `nexenv doctor` funciona desde cualquier terminal en cualquier SO | [ ] Pendiente | Test manual en 3 SO |
 
 ### 1.3 CI/CD multi-SO minimo
 
@@ -51,7 +51,7 @@
 | Auditar errores en `scan` — los 4 campos | [ ] Pendiente | Idem |
 | Auditar errores en `add` (recipes) — los 4 campos | [ ] Pendiente | Idem |
 
-**Entregable Sprint 1:** Un developer puede instalar Delixon globalmente, hacer `delixon open mi-proyecto` y tener su entorno activado en <2 segundos. CI corre en los 3 SO.
+**Entregable Sprint 1:** Un developer puede instalar Nexenv globalmente, hacer `nexenv open mi-proyecto` y tener su entorno activado en <2 segundos. CI corre en los 3 SO.
 
 ---
 
@@ -111,10 +111,10 @@
 
 | Criterio | Estado | Verificado |
 |---|---|---|
-| `delixon` instalable globalmente en Windows | [ ] | [ ] |
-| `delixon` instalable globalmente en macOS | [ ] | [ ] |
-| `delixon` instalable globalmente en Linux | [ ] | [ ] |
-| `delixon open` activa runtime en <2s | [ ] | [ ] |
+| `nexenv` instalable globalmente en Windows | [ ] | [ ] |
+| `nexenv` instalable globalmente en macOS | [ ] | [ ] |
+| `nexenv` instalable globalmente en Linux | [ ] | [ ] |
+| `nexenv open` activa runtime en <2s | [ ] | [ ] |
 | CI pasa en los 3 SO | [ ] | [ ] |
 | 7 templates se generan sin errores en CI | [ ] | [ ] |
 | 9 recipes se aplican sin errores | [ ] | [ ] |
@@ -142,9 +142,9 @@
 
 | Flujo | Estado |
 |---|---|
-| Instalar Delixon desde cero en Windows limpio | [ ] |
+| Instalar Nexenv desde cero en Windows limpio | [ ] |
 | Crear proyecto con scaffold wizard (GUI) | [ ] |
-| Crear proyecto con `delixon new` (CLI) | [ ] |
+| Crear proyecto con `nexenv new` (CLI) | [ ] |
 | Scan de proyecto existente real | [ ] |
 | Aplicar recipe a proyecto existente | [ ] |
 | Export → Import en otra maquina/carpeta | [ ] |

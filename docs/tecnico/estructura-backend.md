@@ -1,6 +1,6 @@
 # Estructura Backend — `src-tauri/src/`
 
-Arquitectura modular del backend Rust de Delixon. Cada subdirectorio agrupa archivos por **dominio funcional**.
+Arquitectura modular del backend Rust de Nexenv. Cada subdirectorio agrupa archivos por **dominio funcional**.
 
 ---
 
@@ -11,7 +11,7 @@ src-tauri/src/
   main.rs               Punto de entrada del binario Tauri
   lib.rs                Registro de plugins y comandos IPC
   bin/
-    cli.rs              CLI standalone (delixon-cli)
+    cli.rs              CLI standalone (nexenv-cli)
   commands/             Handlers IPC Tauri (capa fina, delega a core/)
   core/                 Logica de negocio
 ```
@@ -23,7 +23,7 @@ src-tauri/src/
 ```
 core/
   mod.rs                Re-exports para backward compat
-  error.rs              DelixonError — tipos de error centrales
+  error.rs              NexenvError — tipos de error centrales
 
   models/               Estructuras de datos compartidas
     project.rs          Project, RuntimeConfig, ProjectStatus, CreateProjectInput
@@ -45,9 +45,9 @@ core/
 
   project/              Ciclo de vida del proyecto
     storage.rs          Funciones JSON legacy + helpers filesystem (history_dir)
-    config.rs           DelixonConfig (editor, tema, idioma)
+    config.rs           NexenvConfig (editor, tema, idioma)
     manifest.rs         ProjectManifest — schema, carga, generacion, validacion
-    portable.rs         Export/import de proyectos (.delixon)
+    portable.rs         Export/import de proyectos (.nexenv)
     notes.rs            Notas por proyecto (CRUD)
 
   analysis/             Deteccion, diagnostico y validacion (solo lectura)
@@ -123,7 +123,7 @@ Capa fina que expone la logica de `core/` como comandos Tauri. Cada archivo mape
 
 ## `bin/cli.rs` — CLI standalone
 
-Binario independiente (`delixon-cli`) que usa `core/` directamente sin Tauri. 29 subcomandos incluyendo `list`, `open`, `create`, `unlink`, `doctor`, `scan`, `export`, `import`, etc.
+Binario independiente (`nexenv-cli`) que usa `core/` directamente sin Tauri. 29 subcomandos incluyendo `list`, `open`, `create`, `unlink`, `doctor`, `scan`, `export`, `import`, etc.
 
 ---
 

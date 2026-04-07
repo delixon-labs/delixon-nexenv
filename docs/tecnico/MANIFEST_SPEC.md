@@ -1,4 +1,4 @@
-# Delixon — Especificacion Tecnica del Manifest
+# Nexenv — Especificacion Tecnica del Manifest
 
 > Documento tecnico del nucleo declarativo. Define el schema, invariantes, validacion, normalizacion y reglas de evolucion del Project Manifest.
 >
@@ -10,16 +10,16 @@
 
 ## 1. Que es el manifest
 
-El archivo `.delixon/manifest.yaml` es el **contrato central** que define que es un proyecto para Delixon. Todas las capas (workspace, scaffolding, operacion, versionado) leen y escriben sobre el.
+El archivo `.nexenv/manifest.yaml` es el **contrato central** que define que es un proyecto para Nexenv. Todas las capas (workspace, scaffolding, operacion, versionado) leen y escriben sobre el.
 
-Sin manifest, Delixon no sabe que es el proyecto. Con manifest invalido, Delixon no lo guarda.
+Sin manifest, Nexenv no sabe que es el proyecto. Con manifest invalido, Nexenv no lo guarda.
 
 ---
 
 ## 2. Schema actual (v1)
 
 ```yaml
-# .delixon/manifest.yaml
+# .nexenv/manifest.yaml
 schemaVersion: 1
 name: "mi-proyecto"
 projectType: "api"
@@ -143,7 +143,7 @@ save_manifest(path, manifest)
   ├── 2. normalize_manifest(&mut clone)
   ├── 3. validate_manifest(&clone)?  ← si falla, NO se escribe
   ├── 4. Serializar a YAML
-  └── 5. Escribir a .delixon/manifest.yaml
+  └── 5. Escribir a .nexenv/manifest.yaml
 ```
 
 **Garantia:** Si `save_manifest` retorna `Ok(())`, el manifest en disco es valido y normalizado. Si retorna `Err`, el disco no se toco.
@@ -153,7 +153,7 @@ save_manifest(path, manifest)
 ```
 load_manifest(path)
   │
-  ├── 1. Leer .delixon/manifest.yaml
+  ├── 1. Leer .nexenv/manifest.yaml
   ├── 2. Deserializar
   └── 3. normalize_manifest (upgrade schema si es antiguo)
 ```
@@ -164,11 +164,11 @@ load_manifest(path)
 
 | Tipo de dato | Donde vive | Por que |
 |---|---|---|
-| **Schema del proyecto** (que necesita) | `.delixon/manifest.yaml` | Declarativo, versionable, portable |
-| **Valores de env vars** (secretos) | `~/.local/share/delixon/envs/{id}.json` | Sensibles, varian por maquina, fuera del repo |
-| **Notas** | `~/.local/share/delixon/notes/{id}.json` | Efimeras, alta frecuencia, no son schema |
-| **Snapshots** | `~/.local/share/delixon/snapshots/{id}/` | Historico, copias del manifest en el tiempo |
-| **Configuracion global** | `~/.local/share/delixon/config.json` | Preferencias del usuario, no del proyecto |
+| **Schema del proyecto** (que necesita) | `.nexenv/manifest.yaml` | Declarativo, versionable, portable |
+| **Valores de env vars** (secretos) | `~/.local/share/nexenv/envs/{id}.json` | Sensibles, varian por maquina, fuera del repo |
+| **Notas** | `~/.local/share/nexenv/notes/{id}.json` | Efimeras, alta frecuencia, no son schema |
+| **Snapshots** | `~/.local/share/nexenv/snapshots/{id}/` | Historico, copias del manifest en el tiempo |
+| **Configuracion global** | `~/.local/share/nexenv/config.json` | Preferencias del usuario, no del proyecto |
 
 **Regla critica:** El manifest guarda **nombres** de env vars (`DATABASE_URL`), nunca **valores** (`postgresql://localhost:5432/mydb`). Los valores van en el JSON aislado.
 

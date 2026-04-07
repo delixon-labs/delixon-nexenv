@@ -1,4 +1,4 @@
-# Delixon — One-Pager Ejecutivo
+# Nexenv — One-Pager Ejecutivo
 
 > Ultima actualizacion: 2026-03-27
 
@@ -6,7 +6,7 @@
 
 ## Que es
 
-Delixon es una **app de escritorio + CLI** que gestiona el ciclo de vida completo de proyectos de desarrollo: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar y reparar — todo desde una sola herramienta.
+Nexenv es una **app de escritorio + CLI** que gestiona el ciclo de vida completo de proyectos de desarrollo: crear, configurar, aislar, ejecutar, evolucionar, diagnosticar y reparar — todo desde una sola herramienta.
 
 **GUI** (Tauri + React) para usuarios visuales. **CLI** (Rust + clap) para power users. Ambas comparten el mismo core.
 
@@ -27,9 +27,9 @@ No hay ninguna herramienta que integre todo esto en una sola experiencia.
 
 ## La solucion
 
-Un **Project Manifest** (`.delixon/manifest.yaml`) como columna vertebral. Todo lo demas lee y escribe sobre el.
+Un **Project Manifest** (`.nexenv/manifest.yaml`) como columna vertebral. Todo lo demas lee y escribe sobre el.
 
-4 verbos que resumen todo lo que Delixon hace:
+4 verbos que resumen todo lo que Nexenv hace:
 
 | Verbo | Que hace |
 |---|---|
@@ -52,7 +52,7 @@ Un **Project Manifest** (`.delixon/manifest.yaml`) como columna vertebral. Todo 
 - [x] Env vars aisladas por proyecto
 - [x] Deteccion de 7 runtimes (Node, Python, Rust, Go, .NET, PHP, Ruby)
 - [x] Apertura en editor configurado (VS Code, Cursor, Zed, Neovim, Sublime)
-- [x] Export/import portable (.delixon) con manifest incluido
+- [x] Export/import portable (.nexenv) con manifest incluido
 - [x] Settings: editor, tema, idioma, runtimes
 
 ### Scaffolding (Capa 2)
@@ -90,14 +90,14 @@ Un **Project Manifest** (`.delixon/manifest.yaml`) como columna vertebral. Todo 
 
 ## Por que gana
 
-| vs | Delixon gana porque |
+| vs | Nexenv gana porque |
 |---|---|
 | **DevContainers** | Sin Docker obligatorio, 5MB vs 200MB, dashboard visual |
 | **mise** | GUI + scaffolding + health checks + recipes + scan + versionado |
-| **direnv** | Solo carga env vars. Delixon gestiona el ciclo de vida completo |
-| **Scripts manuales** | Cada dev reinventa la rueda. Delixon estandariza |
+| **direnv** | Solo carga env vars. Nexenv gestiona el ciclo de vida completo |
+| **Scripts manuales** | Cada dev reinventa la rueda. Nexenv estandariza |
 
-**Posicionamiento:** Delixon integra en una sola experiencia lo que hoy requiere combinar 4-5 herramientas. No es que cada competidor sea malo — es que el developer tiene que ensamblar la solucion a mano.
+**Posicionamiento:** Nexenv integra en una sola experiencia lo que hoy requiere combinar 4-5 herramientas. No es que cada competidor sea malo — es que el developer tiene que ensamblar la solucion a mano.
 
 ---
 
@@ -126,8 +126,8 @@ Un **Project Manifest** (`.delixon/manifest.yaml`) como columna vertebral. Todo 
 
 - **Gratis** para developer individual
 - **Pro** para equipos: catalogos corporativos, templates privadas, secrets vault, onboarding automatizado
-- **Servidor** (futuro): Delixon headless para entornos compartidos
+- **Servidor** (futuro): Nexenv headless para entornos compartidos
 
 ---
 
-*Delixon — Deja de configurar. Empieza a construir.*
+*Nexenv — Deja de configurar. Empieza a construir.*

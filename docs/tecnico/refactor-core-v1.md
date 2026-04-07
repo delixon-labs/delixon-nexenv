@@ -57,7 +57,7 @@ Tests de `templates` y `scaffold` creaban proyectos en `projects.json` sin limpi
 
 ### 6. Comando `unlink` en CLI
 
-Agregado `delixon-cli unlink <name>` para desvincular proyectos desde la terminal (paridad con el boton "Desvincular" de la GUI).
+Agregado `nexenv-cli unlink <name>` para desvincular proyectos desde la terminal (paridad con el boton "Desvincular" de la GUI).
 
 ### 7. Reactividad GUI ante cambios externos
 

@@ -1,6 +1,4 @@
-<!-- cSpell:enable -->
-<!-- cSpell:words delixon tauri zustand radix shadcn vite vitest -->
-# Delixon — Investor Memo
+# Nexenv — Investor Memo
 
 > *Un clic. Proyecto abierto. Entorno correcto.*
 
@@ -8,13 +6,13 @@
 
 ## Resumen ejecutivo
 
-Delixon es una aplicación de escritorio local que organiza y aísla entornos de desarrollo por proyecto, permitiendo a los desarrolladores abrir cualquier proyecto con su configuración correcta en un clic.
+Nexenv es una aplicación de escritorio local que organiza y aísla entornos de desarrollo por proyecto, permitiendo a los desarrolladores abrir cualquier proyecto con su configuración correcta en un clic.
 
 Resuelve un problema cotidiano y costoso: la pérdida de tiempo causada por conflictos entre versiones, variables de entorno, dependencias y configuraciones al trabajar en varios proyectos con stacks distintos.
 
 **La propuesta de valor es simple: un clic, proyecto abierto, entorno correcto.**
 
-Delixon no reemplaza herramientas como VSCode, Git, Docker, nvm o pyenv. Se sitúa por encima de ellas como una capa de organización que coordina el contexto técnico de cada proyecto para que el desarrollador pueda empezar a trabajar sin fricción.
+Nexenv no reemplaza herramientas como VSCode, Git, Docker, nvm o pyenv. Se sitúa por encima de ellas como una capa de organización que coordina el contexto técnico de cada proyecto para que el desarrollador pueda empezar a trabajar sin fricción.
 
 ---
 
@@ -50,9 +48,9 @@ La mayoría de herramientas actuales resuelven piezas aisladas del problema, per
 
 ## La solución
 
-Delixon actúa como punto de entrada operativo para el desarrollador.
+Nexenv actúa como punto de entrada operativo para el desarrollador.
 
-Cuando el usuario selecciona un proyecto en Delixon:
+Cuando el usuario selecciona un proyecto en Nexenv:
 
 - Se abre el workspace correcto.
 - Se carga el entorno adecuado.
@@ -77,11 +75,11 @@ La primera versión está enfocada en una experiencia local de escritorio, prior
 - Aislamiento de variables de entorno por proyecto.
 - Historial de terminal separado por proyecto.
 - Integración con VSCode.
-- Exportación e importación de configuración (archivo `.delixon`).
+- Exportación e importación de configuración (archivo `.nexenv`).
 
 ### Evolución prevista
 
-En fases posteriores, Delixon incorporará:
+En fases posteriores, Nexenv incorporará:
 
 - Gestión inteligente de dependencias.
 - Gestor integrado de runtimes.
@@ -94,14 +92,14 @@ En fases posteriores, Delixon incorporará:
 
 ## Stack y decisión técnica
 
-Delixon está construido con:
+Nexenv está construido con:
 
 - **Backend:** Tauri 2 + Rust
 - **Frontend:** React 18 + TypeScript + TailwindCSS
 
 Esta elección responde a criterios de producto, no solo de ingeniería.
 
-| Criterio | Delixon (Tauri/Rust) | Alternativa típica (Electron) |
+| Criterio | Nexenv (Tauri/Rust) | Alternativa típica (Electron) |
 |----------|----------------------|-------------------------------|
 | Tamaño del instalador | ~2-5 MB | ~80-150 MB |
 | Uso de RAM | ~50 MB | ~300-500 MB |
@@ -123,32 +121,32 @@ La fragmentación del ecosistema de desarrollo ha aumentado de forma estructural
 - Más necesidad de onboarding rápido en equipos pequeños.
 - Más complejidad local incluso en entornos aparentemente simples.
 
-Las herramientas existentes ayudan, pero obligan al desarrollador a orquestarlas manualmente. Delixon nace para simplificar precisamente esa capa de coordinación que nadie ha abordado de forma completa.
+Las herramientas existentes ayudan, pero obligan al desarrollador a orquestarlas manualmente. Nexenv nace para simplificar precisamente esa capa de coordinación que nadie ha abordado de forma completa.
 
 ---
 
 ## Ventaja de producto
 
-La tesis central de Delixon es que el problema no es solo técnico, sino organizativo.
+La tesis central de Nexenv es que el problema no es solo técnico, sino organizativo.
 
 No se trata únicamente de instalar dependencias o cambiar versiones. El problema real es que cada proyecto necesita su propio contexto operativo, y ese contexto hoy se reconstruye manualmente demasiadas veces.
 
-Delixon busca convertirse en la capa desde la que el desarrollador entra a trabajar. Esa posición es estratégica porque aumenta:
+Nexenv busca convertirse en la capa desde la que el desarrollador entra a trabajar. Esa posición es estratégica porque aumenta:
 
 - **Frecuencia de uso** — se abre cada vez que el desarrollador trabaja.
 - **Retención** — el contexto acumulado hace difícil abandonar la herramienta.
-- **Dependencia funcional** — los equipos sincronizan sus entornos a través de Delixon.
+- **Dependencia funcional** — los equipos sincronizan sus entornos a través de Nexenv.
 - **Potencial de monetización** — a nivel individual y de equipo.
 
 ---
 
 ## Estado actual del proyecto
 
-Delixon se encuentra en fase de arquitectura avanzada y scaffolding completo.
+Nexenv se encuentra en fase de arquitectura avanzada y scaffolding completo.
 
 ### Ya construido
 
-- Repositorio principal configurado en GitHub (`delixon-technology/delixon`).
+- Repositorio principal configurado en GitHub (`delixon-labs/nexenv`).
 - Organización GitHub creada con estructura de equipos.
 - Stack técnico instalado, compilando y generando instaladores nativos.
 - Arquitectura backend modular en Rust/Tauri (6 módulos).
@@ -174,7 +172,7 @@ En términos prácticos: la base está definida y construida. El trabajo princip
 
 ### Fase 1 — MVP Windows `[3-4 meses]`
 
-Objetivo: entregar una versión funcional que permita usar Delixon en casos reales.
+Objetivo: entregar una versión funcional que permita usar Nexenv en casos reales.
 
 - Crear proyecto desde plantilla.
 - Abrir proyecto existente con entorno correcto.
@@ -254,13 +252,13 @@ La oportunidad no está solo en el tamaño del mercado, sino en la **recurrencia
 - Afecta a usuarios técnicos que valoran las buenas herramientas.
 - Genera dolor claro tanto en uso individual como en equipos.
 
-Si Delixon consigue convertirse en herramienta de entrada diaria al proyecto, puede capturar una posición con alto valor estratégico dentro del flujo de trabajo del desarrollador.
+Si Nexenv consigue convertirse en herramienta de entrada diaria al proyecto, puede capturar una posición con alto valor estratégico dentro del flujo de trabajo del desarrollador.
 
 ---
 
 ## Riesgos principales
 
-Como todo proyecto en esta fase, Delixon tiene riesgos reales:
+Como todo proyecto en esta fase, Nexenv tiene riesgos reales:
 
 | Riesgo | Estrategia de mitigación |
 |--------|--------------------------|
@@ -268,7 +266,7 @@ Como todo proyecto en esta fase, Delixon tiene riesgos reales:
 | Definir mal el alcance inicial | Foco extremo en el problema central, iterar con feedback |
 | Abarcar demasiado antes de validar | MVP mínimo → beta → iterar. No más. |
 | Adopción si la propuesta no se comunica bien | Frase clara, demo visual, beta con usuarios reales |
-| Competidor grande entra al espacio | Ventaja de foco: Delixon resuelve un problema concreto, no es un feature de otra plataforma |
+| Competidor grande entra al espacio | Ventaja de foco: Nexenv resuelve un problema concreto, no es un feature de otra plataforma |
 
 ---
 
@@ -285,7 +283,7 @@ Actualmente buscamos una combinación de:
 
 ## Cierre
 
-Delixon parte de una observación sencilla:
+Nexenv parte de una observación sencilla:
 
 > Los desarrolladores pierden demasiadas horas en preparar el contexto de trabajo antes de empezar a construir.
 
@@ -297,4 +295,4 @@ El objetivo no es levantar dinero para buscar un modelo de negocio. El modelo ex
 
 ---
 
-*delirrestevez · delixon-technology · `github.com/delixon-technology/delixon`*
+*delirrestevez · delixon-labs · `github.com/delixon-labs/nexenv`*
