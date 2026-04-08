@@ -45,7 +45,8 @@ desktop.ini
 # Claude AI (memoria y contexto local — nunca al repo)
 .claude/
 
-# Documentacion privada del proyecto
+# Documentacion del proyecto
+docs/
 .delixonPrivateDocs/
 
 # Archivos de configuracion de Delixon (los generara la app)
