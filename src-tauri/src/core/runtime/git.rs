@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::path::Path;
 use std::process::Command;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -26,10 +26,10 @@ pub struct GitCommit {
     pub date: String,
 }
 
-pub fn git_status(project_path: &str) -> Result<GitStatus, DelixonError> {
+pub fn git_status(project_path: &str) -> Result<GitStatus, NexenvError> {
     let path = Path::new(project_path);
     if !path.join(".git").exists() {
-        return Err(DelixonError::InvalidConfig(
+        return Err(NexenvError::InvalidConfig(
             "No es un repositorio Git".to_string(),
         ));
     }
@@ -83,7 +83,7 @@ pub fn git_status(project_path: &str) -> Result<GitStatus, DelixonError> {
     })
 }
 
-pub fn git_log(project_path: &str, count: u32) -> Result<Vec<GitCommit>, DelixonError> {
+pub fn git_log(project_path: &str, count: u32) -> Result<Vec<GitCommit>, NexenvError> {
     let output = run_git(
         project_path,
         &[
@@ -111,14 +111,14 @@ pub fn git_log(project_path: &str, count: u32) -> Result<Vec<GitCommit>, Delixon
     Ok(commits)
 }
 
-fn git_last_commit(project_path: &str) -> Result<GitCommit, DelixonError> {
+fn git_last_commit(project_path: &str) -> Result<GitCommit, NexenvError> {
     let commits = git_log(project_path, 1)?;
     commits.into_iter().next().ok_or_else(|| {
-        DelixonError::InvalidConfig("No hay commits".to_string())
+        NexenvError::InvalidConfig("No hay commits".to_string())
     })
 }
 
-fn run_git(project_path: &str, args: &[&str]) -> Result<String, DelixonError> {
+fn run_git(project_path: &str, args: &[&str]) -> Result<String, NexenvError> {
     let output = Command::new("git")
         .args(args)
         .current_dir(project_path)
@@ -128,7 +128,7 @@ fn run_git(project_path: &str, args: &[&str]) -> Result<String, DelixonError> {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     } else {
         let err = String::from_utf8_lossy(&output.stderr).to_string();
-        Err(DelixonError::InvalidConfig(format!("Git error: {}", err)))
+        Err(NexenvError::InvalidConfig(format!("Git error: {}", err)))
     }
 }
 

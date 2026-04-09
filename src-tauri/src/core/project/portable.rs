@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest::{self, ProjectManifest};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::store;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DelixonExport {
+pub struct NexenvExport {
     pub version: String,
     pub exported_at: String,
     pub project: ExportedProject,
@@ -27,13 +27,13 @@ pub struct ExportedProject {
     pub env_keys: Vec<String>,
 }
 
-/// Exporta un proyecto como JSON portable (.delixon)
-pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
+/// Exporta un proyecto como JSON portable (.nexenv)
+pub fn export_project(project_id: &str) -> Result<String, NexenvError> {
     let projects = store::get().list_projects()?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
-        .ok_or_else(|| DelixonError::ProjectNotFound(project_id.to_string()))?;
+        .ok_or_else(|| NexenvError::ProjectNotFound(project_id.to_string()))?;
 
     let env_vars = store::get().load_env_vars(project_id)?;
     let env_keys: Vec<String> = env_vars.keys().cloned().collect();
@@ -41,7 +41,7 @@ pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
     // Cargar manifest si existe
     let project_manifest = manifest::load_manifest(&project.path).unwrap_or(None);
 
-    let export = DelixonExport {
+    let export = NexenvExport {
         version: "1".to_string(),
         exported_at: chrono::Utc::now().to_rfc3339(),
         project: ExportedProject {
@@ -59,9 +59,9 @@ pub fn export_project(project_id: &str) -> Result<String, DelixonError> {
     Ok(json)
 }
 
-/// Importa un proyecto desde JSON portable (.delixon)
-pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonError> {
-    let export: DelixonExport = serde_json::from_str(json)?;
+/// Importa un proyecto desde JSON portable (.nexenv)
+pub fn import_project(json: &str, target_path: &str) -> Result<Project, NexenvError> {
+    let export: NexenvExport = serde_json::from_str(json)?;
 
     let now = chrono::Utc::now().to_rfc3339();
     let project = Project {
@@ -80,7 +80,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, DelixonE
     // Verificar que no exista un proyecto en la misma ruta
     let mut projects = store::get().list_projects()?;
     if projects.iter().any(|p| p.path == target_path) {
-        return Err(DelixonError::InvalidPath(format!(
+        return Err(NexenvError::InvalidPath(format!(
             "Ya existe un proyecto registrado en esa ruta: {}",
             target_path
         )));
@@ -119,7 +119,7 @@ mod tests {
         Project {
             id: format!("test-portable-{}", suffix),
             name: format!("Portable Test {}", suffix),
-            path: format!("/tmp/delixon-portable-test-{}", suffix),
+            path: format!("/tmp/nexenv-portable-test-{}", suffix),
             description: Some("portable test".to_string()),
             runtimes: vec![RuntimeConfig {
                 runtime: "node".to_string(),
@@ -173,7 +173,7 @@ mod tests {
         let json = export_project(&proj.id).expect("export should succeed");
 
         // Import at a different path
-        let import_path = "/tmp/delixon-portable-import-roundtrip";
+        let import_path = "/tmp/nexenv-portable-import-roundtrip";
         cleanup_by_path(import_path);
         let imported = import_project(&json, import_path).expect("import should succeed");
 
@@ -199,7 +199,7 @@ mod tests {
     #[test]
     fn test_import_invalid_json() {
         crate::core::store::init_test_store();
-        let result = import_project("this is not json", "/tmp/delixon-invalid");
+        let result = import_project("this is not json", "/tmp/nexenv-invalid");
         assert!(result.is_err(), "importing invalid JSON should error");
     }
 

@@ -85,7 +85,7 @@ export default function Dashboard() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".delixon"
+            accept=".nexenv"
             onChange={handleImportFile}
             className="hidden"
           />
@@ -147,7 +147,7 @@ export default function Dashboard() {
           </h3>
           <p className="text-sm text-gray-500 mb-6 max-w-sm">
             Registra un proyecto existente o crea uno nuevo desde una plantilla.
-            Delixon gestionara su entorno, variables y configuracion.
+            Nexenv gestionara su entorno, variables y configuracion.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}

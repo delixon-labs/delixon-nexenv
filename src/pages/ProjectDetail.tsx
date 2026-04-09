@@ -192,7 +192,7 @@ export default function ProjectDetail() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${project.name}.delixon`;
+      a.download = `${project.name}.nexenv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) { setError(String(err)); }

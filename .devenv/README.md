@@ -33,8 +33,8 @@ Puedes modificarlo a tu gusto sin afectar al resto del equipo.
 ### 2. Abrir la terminal del proyecto
 
 La terminal se configura automaticamente al abrir VSCode con los perfiles:
-- **PowerShell (Delixon)** — usa `terminal-init.ps1`
-- **Git Bash (Delixon)** — usa `terminal-init.sh`
+- **PowerShell (Nexenv)** — usa `terminal-init.ps1`
+- **Git Bash (Nexenv)** — usa `terminal-init.sh`
 
 Ambos cargan el entorno del proyecto de forma aislada sin modificar
 el perfil global de tu sistema.

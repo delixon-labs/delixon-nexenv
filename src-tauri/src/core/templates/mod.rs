@@ -7,7 +7,7 @@ mod react_vite;
 mod registry;
 mod rust_cli;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::store;
 use crate::core::utils::fs::ensure_dir;
@@ -33,11 +33,11 @@ pub fn create_from_template(
     template_id: &str,
     project_path: &str,
     project_name: &str,
-) -> Result<Project, DelixonError> {
+) -> Result<Project, NexenvError> {
     let template = all_templates()
         .into_iter()
         .find(|t| t.id == template_id)
-        .ok_or_else(|| DelixonError::TemplateNotFound(template_id.to_string()))?;
+        .ok_or_else(|| NexenvError::TemplateNotFound(template_id.to_string()))?;
 
     let base = Path::new(project_path);
     ensure_dir(base)?;

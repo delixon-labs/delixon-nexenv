@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import AppLayout from "./components/layout/AppLayout";
+import Titlebar from "./components/layout/Titlebar";
 import Dashboard from "./pages/Dashboard";
 import ProjectDetail from "./pages/ProjectDetail";
 import Templates from "./pages/Templates";
@@ -34,6 +35,8 @@ function App() {
   }, [fontPack]);
 
   return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <Titlebar />
     <AppLayout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
@@ -44,6 +47,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </AppLayout>
+    </div>
   );
 }
 

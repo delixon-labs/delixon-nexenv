@@ -1,24 +1,24 @@
 [package]
-name = "delixon"
+name = "nexenv"
 version = "1.0.0"
 description = "Gestor de workspaces para desarrolladores"
 authors = ["delirrestevez"]
 license = "FSL-1.1-ALv2"
-repository = "https://github.com/delixon-technology/delixon"
+repository = "https://github.com/delixon-labs/delixon-nexenv"
 edition = "2021"
 rust-version = "1.77"
-default-run = "delixon"
+default-run = "nexenv"
 
 [lib]
-name = "delixon_lib"
+name = "nexenv_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [[bin]]
-name = "delixon"
+name = "nexenv"
 path = "src/main.rs"
 
 [[bin]]
-name = "delixon-cli"
+name = "nexenv-cli"
 path = "src/bin/cli.rs"
 
 [features]
@@ -39,9 +39,9 @@ tauri-build = { version = "=2.5.6", features = [], optional = true }
 [dependencies]
 tauri = { version = "=2.10.3", features = [], optional = true }
 tauri-plugin-shell = { version = "=2.3.5", optional = true }
-tauri-plugin-fs = { version = "=2.4.5", optional = true }
+tauri-plugin-fs = { version = "=2.5.0", optional = true }
 tauri-plugin-process = { version = "=2.3.1", optional = true }
-tauri-plugin-dialog = { version = "=2.2.0", optional = true }
+tauri-plugin-dialog = { version = "=2.7.0", optional = true }
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.149"
 tokio = { version = "=1.50.0", features = ["full"] }

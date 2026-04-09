@@ -1,6 +1,6 @@
-/// Devuelve la ruta base de datos de Delixon segun el SO
+/// Devuelve la ruta base de datos de Nexenv segun el SO
 pub fn get_data_dir() -> Option<std::path::PathBuf> {
-    dirs::data_local_dir().map(|p| p.join("delixon"))
+    dirs::data_local_dir().map(|p| p.join("nexenv"))
 }
 
 /// Editores permitidos (whitelist de seguridad) — fuente unica de verdad

@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::storage;
 use crate::core::utils::platform::get_data_dir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct DelixonConfig {
+pub struct NexenvConfig {
     pub version: String,
     pub data_dir: String,
     pub default_editor: String,
@@ -15,7 +15,7 @@ pub struct DelixonConfig {
     pub auto_check_updates: bool,
 }
 
-impl Default for DelixonConfig {
+impl Default for NexenvConfig {
     fn default() -> Self {
         Self {
             version: "1.0.0".to_string(),
@@ -28,27 +28,27 @@ impl Default for DelixonConfig {
     }
 }
 
-fn config_file() -> Result<std::path::PathBuf, DelixonError> {
+fn config_file() -> Result<std::path::PathBuf, NexenvError> {
     let dir = get_data_dir().ok_or_else(|| {
-        DelixonError::InvalidConfig("No se pudo determinar el directorio de datos".to_string())
+        NexenvError::InvalidConfig("No se pudo determinar el directorio de datos".to_string())
     })?;
     Ok(dir.join("config.json"))
 }
 
-pub fn load_config() -> Result<DelixonConfig, DelixonError> {
+pub fn load_config() -> Result<NexenvConfig, NexenvError> {
     storage::init_data_dir()?;
     let path = config_file()?;
     if !path.exists() {
-        let config = DelixonConfig::default();
+        let config = NexenvConfig::default();
         save_config(&config)?;
         return Ok(config);
     }
     let data = std::fs::read_to_string(&path)?;
-    let config: DelixonConfig = serde_json::from_str(&data)?;
+    let config: NexenvConfig = serde_json::from_str(&data)?;
     Ok(config)
 }
 
-pub fn save_config(config: &DelixonConfig) -> Result<(), DelixonError> {
+pub fn save_config(config: &NexenvConfig) -> Result<(), NexenvError> {
     storage::init_data_dir()?;
     let path = config_file()?;
     let data = serde_json::to_string_pretty(config)?;
@@ -71,7 +71,7 @@ mod tests {
 
     #[test]
     fn test_default_config() {
-        let config = DelixonConfig::default();
+        let config = NexenvConfig::default();
         assert_eq!(config.default_editor, "code");
         assert_eq!(config.theme, "dark");
         assert_eq!(config.language, "es");
@@ -79,9 +79,9 @@ mod tests {
 
     #[test]
     fn test_config_serialization() {
-        let config = DelixonConfig::default();
+        let config = NexenvConfig::default();
         let json = serde_json::to_string(&config).unwrap();
-        let parsed: DelixonConfig = serde_json::from_str(&json).unwrap();
+        let parsed: NexenvConfig = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.default_editor, config.default_editor);
         assert_eq!(parsed.theme, config.theme);
     }

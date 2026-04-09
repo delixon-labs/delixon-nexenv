@@ -3,12 +3,12 @@ use std::sync::Mutex;
 
 use rusqlite::{params, Connection};
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::history::env::{EnvDiff, EnvSnapshot, RuntimeSnapshot};
 use crate::core::history::versioning::{Snapshot, SnapshotDiff};
 use crate::core::manifest::ProjectManifest;
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
-use crate::core::project::config::DelixonConfig;
+use crate::core::project::config::NexenvConfig;
 use crate::core::project::notes::ProjectNote;
 use crate::core::store::traits::*;
 
@@ -19,27 +19,27 @@ pub struct SqliteStore {
 }
 
 impl SqliteStore {
-    pub fn new(path: &str) -> Result<Self, DelixonError> {
+    pub fn new(path: &str) -> Result<Self, NexenvError> {
         let conn = Connection::open(path)
-            .map_err(|e| DelixonError::Database(e.to_string()))?;
+            .map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute_batch("PRAGMA foreign_keys = ON;")
-            .map_err(|e| DelixonError::Database(e.to_string()))?;
+            .map_err(|e| NexenvError::Database(e.to_string()))?;
         let store = SqliteStore { conn: Mutex::new(conn) };
         store.run_migrations()?;
         Ok(store)
     }
 
-    pub fn in_memory() -> Result<Self, DelixonError> {
+    pub fn in_memory() -> Result<Self, NexenvError> {
         Self::new(":memory:")
     }
 
-    fn run_migrations(&self) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn run_migrations(&self) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         migrations::run_migrations(&conn)
     }
 
-    fn db_err(e: rusqlite::Error) -> DelixonError {
-        DelixonError::Database(e.to_string())
+    fn db_err(e: rusqlite::Error) -> NexenvError {
+        NexenvError::Database(e.to_string())
     }
 }
 
@@ -48,8 +48,8 @@ impl SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl ProjectStore for SqliteStore {
-    fn list_projects(&self) -> Result<Vec<Project>, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn list_projects(&self) -> Result<Vec<Project>, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
 
         let mut stmt = conn.prepare(
             "SELECT id, name, path, description, status, created_at, last_opened_at, template_id FROM projects ORDER BY name"
@@ -97,8 +97,8 @@ impl ProjectStore for SqliteStore {
         Ok(projects)
     }
 
-    fn save_projects(&self, projects: &[Project]) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn save_projects(&self, projects: &[Project]) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
 
         conn.execute_batch("BEGIN TRANSACTION;").map_err(Self::db_err)?;
 
@@ -144,14 +144,14 @@ impl ProjectStore for SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl ConfigStore for SqliteStore {
-    fn load_config(&self) -> Result<DelixonConfig, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn load_config(&self) -> Result<NexenvConfig, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT version, data_dir, default_editor, theme, language, auto_check_updates FROM config WHERE id = 1"
         ).map_err(Self::db_err)?;
 
         stmt.query_row([], |row| {
-            Ok(DelixonConfig {
+            Ok(NexenvConfig {
                 version: row.get(0)?,
                 data_dir: row.get(1)?,
                 default_editor: row.get(2)?,
@@ -162,8 +162,8 @@ impl ConfigStore for SqliteStore {
         }).map_err(Self::db_err)
     }
 
-    fn save_config(&self, config: &DelixonConfig) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn save_config(&self, config: &NexenvConfig) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute(
             "UPDATE config SET version = ?1, data_dir = ?2, default_editor = ?3, theme = ?4, language = ?5, auto_check_updates = ?6 WHERE id = 1",
             params![config.version, config.data_dir, config.default_editor, config.theme, config.language, config.auto_check_updates as i32],
@@ -177,8 +177,8 @@ impl ConfigStore for SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl NoteStore for SqliteStore {
-    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, text, created_at FROM notes WHERE project_id = ?1 ORDER BY created_at DESC"
         ).map_err(Self::db_err)?;
@@ -196,13 +196,13 @@ impl NoteStore for SqliteStore {
         Ok(notes)
     }
 
-    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, DelixonError> {
+    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, NexenvError> {
         let note = ProjectNote {
             id: uuid::Uuid::new_v4().to_string(),
             text: text.to_string(),
             created_at: chrono::Utc::now().to_rfc3339(),
         };
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute(
             "INSERT INTO notes (id, project_id, text, created_at) VALUES (?1, ?2, ?3, ?4)",
             params![note.id, project_id, note.text, note.created_at],
@@ -210,8 +210,8 @@ impl NoteStore for SqliteStore {
         Ok(note)
     }
 
-    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute(
             "DELETE FROM notes WHERE id = ?1 AND project_id = ?2",
             params![note_id, project_id],
@@ -225,8 +225,8 @@ impl NoteStore for SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl EnvVarStore for SqliteStore {
-    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT key, value FROM env_vars WHERE project_id = ?1"
         ).map_err(Self::db_err)?;
@@ -243,8 +243,8 @@ impl EnvVarStore for SqliteStore {
         Ok(vars)
     }
 
-    fn save_env_vars(&self, project_id: &str, vars: &HashMap<String, String>) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn save_env_vars(&self, project_id: &str, vars: &HashMap<String, String>) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute("DELETE FROM env_vars WHERE project_id = ?1", [project_id]).map_err(Self::db_err)?;
         for (key, value) in vars {
             conn.execute(
@@ -255,8 +255,8 @@ impl EnvVarStore for SqliteStore {
         Ok(())
     }
 
-    fn delete_env_vars(&self, project_id: &str) -> Result<(), DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn delete_env_vars(&self, project_id: &str) -> Result<(), NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         conn.execute("DELETE FROM env_vars WHERE project_id = ?1", [project_id]).map_err(Self::db_err)?;
         Ok(())
     }
@@ -267,11 +267,11 @@ impl EnvVarStore for SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl SnapshotStore for SqliteStore {
-    fn save_snapshot(&self, project_id: &str, project_path: &str) -> Result<Snapshot, DelixonError> {
+    fn save_snapshot(&self, project_id: &str, project_path: &str) -> Result<Snapshot, NexenvError> {
         let manifest = crate::core::manifest::load_manifest(project_path)?
-            .ok_or_else(|| DelixonError::InvalidManifest("No se encontro manifest para snapshot".to_string()))?;
+            .ok_or_else(|| NexenvError::InvalidManifest("No se encontro manifest para snapshot".to_string()))?;
 
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
 
         let next_version: u32 = conn
             .prepare("SELECT COALESCE(MAX(version), 0) + 1 FROM snapshots WHERE project_id = ?1")
@@ -290,8 +290,8 @@ impl SnapshotStore for SqliteStore {
         Ok(Snapshot { version: next_version, timestamp, manifest })
     }
 
-    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT version, timestamp, manifest FROM snapshots WHERE project_id = ?1 ORDER BY version"
         ).map_err(Self::db_err)?;
@@ -312,13 +312,13 @@ impl SnapshotStore for SqliteStore {
         Ok(snapshots)
     }
 
-    fn diff_snapshots(&self, project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff, DelixonError> {
+    fn diff_snapshots(&self, project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff, NexenvError> {
         let snapshots = self.list_snapshots(project_id)?;
 
         let s1 = snapshots.iter().find(|s| s.version == v1)
-            .ok_or_else(|| DelixonError::InvalidManifest(format!("Snapshot v{} no encontrado", v1)))?;
+            .ok_or_else(|| NexenvError::InvalidManifest(format!("Snapshot v{} no encontrado", v1)))?;
         let s2 = snapshots.iter().find(|s| s.version == v2)
-            .ok_or_else(|| DelixonError::InvalidManifest(format!("Snapshot v{} no encontrado", v2)))?;
+            .ok_or_else(|| NexenvError::InvalidManifest(format!("Snapshot v{} no encontrado", v2)))?;
 
         let added_techs: Vec<String> = s2.manifest.technologies.iter()
             .filter(|t| !s1.manifest.technologies.contains(t))
@@ -349,10 +349,10 @@ impl SnapshotStore for SqliteStore {
         })
     }
 
-    fn rollback_snapshot(&self, _project_id: &str, project_path: &str, version: u32) -> Result<(), DelixonError> {
+    fn rollback_snapshot(&self, _project_id: &str, project_path: &str, version: u32) -> Result<(), NexenvError> {
         let snapshots = self.list_snapshots(_project_id)?;
         let snapshot = snapshots.iter().find(|s| s.version == version)
-            .ok_or_else(|| DelixonError::InvalidManifest(format!("Snapshot v{} no encontrado", version)))?;
+            .ok_or_else(|| NexenvError::InvalidManifest(format!("Snapshot v{} no encontrado", version)))?;
 
         crate::core::manifest::save_manifest(project_path, &snapshot.manifest)?;
         Ok(())
@@ -364,12 +364,12 @@ impl SnapshotStore for SqliteStore {
 // ---------------------------------------------------------------------------
 
 impl EnvSnapshotStore for SqliteStore {
-    fn take_env_snapshot(&self, project_id: &str, project_path: &str) -> Result<EnvSnapshot, DelixonError> {
+    fn take_env_snapshot(&self, project_id: &str, project_path: &str) -> Result<EnvSnapshot, NexenvError> {
         // Detectar runtimes y deps hash desde el filesystem (igual que JsonStore)
         let snapshot = crate::core::history::env::take_snapshot(project_id, project_path)?;
 
         // Guardar en SQLite
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let runtimes_json = serde_json::to_string(&snapshot.runtimes)?;
 
         conn.execute(
@@ -380,8 +380,8 @@ impl EnvSnapshotStore for SqliteStore {
         Ok(snapshot)
     }
 
-    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, DelixonError> {
-        let conn = self.conn.lock().map_err(|e| DelixonError::Database(e.to_string()))?;
+    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, NexenvError> {
+        let conn = self.conn.lock().map_err(|e| NexenvError::Database(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT timestamp, runtimes, deps_hash FROM env_snapshots WHERE project_id = ?1"
         ).map_err(Self::db_err)?;
@@ -404,7 +404,7 @@ impl EnvSnapshotStore for SqliteStore {
         }
     }
 
-    fn diff_env_snapshot(&self, project_id: &str, project_path: &str) -> Result<Option<EnvDiff>, DelixonError> {
+    fn diff_env_snapshot(&self, project_id: &str, project_path: &str) -> Result<Option<EnvDiff>, NexenvError> {
         // Cargar snapshot anterior desde SQLite
         let prev = match self.load_env_snapshot(project_id)? {
             Some(s) => s,

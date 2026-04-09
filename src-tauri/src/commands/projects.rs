@@ -3,7 +3,7 @@ use crate::core::models::project::{CreateProjectInput, Project, ProjectStatus, R
 use crate::core::store;
 use tauri::command;
 
-/// Devuelve la lista de todos los proyectos registrados en Delixon
+/// Devuelve la lista de todos los proyectos registrados en Nexenv
 #[command]
 pub async fn list_projects() -> Result<Vec<Project>, String> {
     store::get().list_projects().map_err(|e| e.to_string())
@@ -144,7 +144,7 @@ pub async fn update_project(
     Ok(updated)
 }
 
-/// Elimina un proyecto del registro de Delixon (no borra los archivos del disco)
+/// Elimina un proyecto del registro de Nexenv (no borra los archivos del disco)
 #[command]
 pub async fn delete_project(id: String) -> Result<(), String> {
     let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;

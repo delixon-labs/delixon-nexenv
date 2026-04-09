@@ -1,23 +1,23 @@
 {
-  "name": "@delixon/cli",
+  "name": "nexenv",
   "version": "0.0.1",
-  "description": "Delixon — Project management for developers",
+  "description": "Nexenv — Project management for developers",
   "license": "FSL-1.1-ALv2",
-  "author": "Delixon Technology <hello@delixon.dev> (https://delixon.dev)",
+  "author": "Delixon Labs <hello@delixon.dev> (https://delixon.dev)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/delixon-technology/delixon"
+    "url": "https://github.com/delixon-labs/delixon-nexenv"
   },
-  "homepage": "https://delixon.dev",
+  "homepage": "https://delixon.dev/nexenv",
   "keywords": [
-    "delixon",
+    "nexenv",
     "cli",
     "devtools",
     "project-management",
     "developer-tools"
   ],
   "bin": {
-    "delixon": "bin/delixon"
+    "nexenv": "bin/nexenv"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.js"
@@ -35,9 +35,9 @@
     "node": ">=18"
   },
   "optionalDependencies": {
-    "@delixon/cli-win32-x64": "0.0.1",
-    "@delixon/cli-linux-x64": "0.0.1",
-    "@delixon/cli-darwin-arm64": "0.0.1",
-    "@delixon/cli-darwin-x64": "0.0.1"
+    "nexenv-win32-x64": "0.0.1",
+    "nexenv-linux-x64": "0.0.1",
+    "nexenv-darwin-arm64": "0.0.1",
+    "nexenv-darwin-x64": "0.0.1"
   }
 }

@@ -65,4 +65,4 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
 
       - name: Check CLI builds independently
-        run: cargo check --manifest-path src-tauri/Cargo.toml --bin delixon-cli --no-default-features
+        run: cargo check --manifest-path src-tauri/Cargo.toml --bin nexenv-cli --no-default-features

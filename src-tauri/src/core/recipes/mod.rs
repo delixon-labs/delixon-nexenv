@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::path::Path;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest;
 use crate::core::utils::fs::ensure_dir;
 
@@ -58,9 +58,9 @@ pub fn get_recipe(id: &str) -> Option<Recipe> {
     list_recipes().into_iter().find(|r| r.id == id)
 }
 
-pub fn preview_recipe(project_path: &str, recipe_id: &str) -> Result<RecipePreview, DelixonError> {
+pub fn preview_recipe(project_path: &str, recipe_id: &str) -> Result<RecipePreview, NexenvError> {
     let recipe = get_recipe(recipe_id).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Recipe no encontrada: {}", recipe_id))
+        NexenvError::InvalidConfig(format!("Recipe no encontrada: {}", recipe_id))
     })?;
 
     let path = Path::new(project_path);
@@ -77,9 +77,9 @@ pub fn preview_recipe(project_path: &str, recipe_id: &str) -> Result<RecipePrevi
     })
 }
 
-pub fn apply_recipe(project_path: &str, recipe_id: &str) -> Result<RecipeApplyResult, DelixonError> {
+pub fn apply_recipe(project_path: &str, recipe_id: &str) -> Result<RecipeApplyResult, NexenvError> {
     let recipe = get_recipe(recipe_id).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Recipe no encontrada: {}", recipe_id))
+        NexenvError::InvalidConfig(format!("Recipe no encontrada: {}", recipe_id))
     })?;
 
     let path = Path::new(project_path);

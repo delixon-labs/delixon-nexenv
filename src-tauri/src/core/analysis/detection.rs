@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::path::Path;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::models::project::RuntimeConfig;
 
 #[derive(Debug, Serialize, Clone)]
@@ -48,10 +48,10 @@ pub struct ScoreItem {
     pub present: bool,
 }
 
-pub fn detect_stack(project_path: &str) -> Result<DetectedStack, DelixonError> {
+pub fn detect_stack(project_path: &str) -> Result<DetectedStack, NexenvError> {
     let path = Path::new(project_path);
     if !path.exists() || !path.is_dir() {
-        return Err(DelixonError::InvalidPath(format!(
+        return Err(NexenvError::InvalidPath(format!(
             "La ruta no existe o no es un directorio: {}",
             project_path
         )));

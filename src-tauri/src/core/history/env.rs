@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::Command;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
 
@@ -36,16 +36,16 @@ pub struct RuntimeChange {
     pub new_version: String,
 }
 
-fn snapshot_file(project_id: &str) -> Result<PathBuf, DelixonError> {
+fn snapshot_file(project_id: &str) -> Result<PathBuf, NexenvError> {
     let base = get_data_dir().ok_or_else(|| {
-        DelixonError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
+        NexenvError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
     })?;
     let dir = base.join("env_snapshots");
     ensure_dir(&dir)?;
     Ok(dir.join(format!("{}.json", project_id)))
 }
 
-pub fn take_snapshot(project_id: &str, project_path: &str) -> Result<EnvSnapshot, DelixonError> {
+pub fn take_snapshot(project_id: &str, project_path: &str) -> Result<EnvSnapshot, NexenvError> {
     let runtimes = detect_runtime_versions();
     let deps_hash = compute_deps_hash(project_path);
 
@@ -62,7 +62,7 @@ pub fn take_snapshot(project_id: &str, project_path: &str) -> Result<EnvSnapshot
     Ok(snapshot)
 }
 
-pub fn load_snapshot(project_id: &str) -> Result<Option<EnvSnapshot>, DelixonError> {
+pub fn load_snapshot(project_id: &str) -> Result<Option<EnvSnapshot>, NexenvError> {
     let file = snapshot_file(project_id)?;
     if !file.exists() {
         return Ok(None);
@@ -72,7 +72,7 @@ pub fn load_snapshot(project_id: &str) -> Result<Option<EnvSnapshot>, DelixonErr
     Ok(Some(snapshot))
 }
 
-pub fn diff_snapshot(project_id: &str, project_path: &str) -> Result<Option<EnvDiff>, DelixonError> {
+pub fn diff_snapshot(project_id: &str, project_path: &str) -> Result<Option<EnvDiff>, NexenvError> {
     let prev = match load_snapshot(project_id)? {
         Some(s) => s,
         None => return Ok(None),

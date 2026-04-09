@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Sugerir una nueva funcionalidad para Delixon
+about: Sugerir una nueva funcionalidad para Nexenv
 title: "[FEAT] "
 labels: enhancement
 assignees: ''

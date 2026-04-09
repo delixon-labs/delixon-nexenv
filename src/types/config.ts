@@ -1,4 +1,4 @@
-export interface DelixonConfig {
+export interface NexenvConfig {
   version: string;
   dataDir: string;
   defaultEditor: string;
@@ -8,7 +8,7 @@ export interface DelixonConfig {
   autoCheckUpdates: boolean;
 }
 
-export const DEFAULT_CONFIG: DelixonConfig = {
+export const DEFAULT_CONFIG: NexenvConfig = {
   version: "1.0.0",
   dataDir: "",
   defaultEditor: "code",

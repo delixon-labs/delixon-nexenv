@@ -5,7 +5,7 @@ const VALIDATION_URL: &str = "https://app.delixon.dev/api/store/license/validate
 
 fn license_key_path() -> PathBuf {
     let home = dirs::home_dir().expect("No se encontro el directorio home");
-    home.join(".delixon").join("license.key")
+    home.join(".nexenv").join("license.key")
 }
 
 fn read_license_key() -> Option<String> {

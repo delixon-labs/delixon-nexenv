@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
 
@@ -13,16 +13,16 @@ pub struct ProjectNote {
     pub created_at: String,
 }
 
-fn notes_file(project_id: &str) -> Result<PathBuf, DelixonError> {
+fn notes_file(project_id: &str) -> Result<PathBuf, NexenvError> {
     let base = get_data_dir().ok_or_else(|| {
-        DelixonError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
+        NexenvError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
     })?;
     let dir = base.join("notes");
     ensure_dir(&dir)?;
     Ok(dir.join(format!("{}.json", project_id)))
 }
 
-pub fn get_notes(project_id: &str) -> Result<Vec<ProjectNote>, DelixonError> {
+pub fn get_notes(project_id: &str) -> Result<Vec<ProjectNote>, NexenvError> {
     let file = notes_file(project_id)?;
     if !file.exists() {
         return Ok(Vec::new());
@@ -32,7 +32,7 @@ pub fn get_notes(project_id: &str) -> Result<Vec<ProjectNote>, DelixonError> {
     Ok(notes)
 }
 
-pub fn add_note(project_id: &str, text: &str) -> Result<ProjectNote, DelixonError> {
+pub fn add_note(project_id: &str, text: &str) -> Result<ProjectNote, NexenvError> {
     let mut notes = get_notes(project_id)?;
     let note = ProjectNote {
         id: uuid::Uuid::new_v4().to_string(),
@@ -48,7 +48,7 @@ pub fn add_note(project_id: &str, text: &str) -> Result<ProjectNote, DelixonErro
     Ok(note)
 }
 
-pub fn delete_note(project_id: &str, note_id: &str) -> Result<(), DelixonError> {
+pub fn delete_note(project_id: &str, note_id: &str) -> Result<(), NexenvError> {
     let mut notes = get_notes(project_id)?;
     notes.retain(|n| n.id != note_id);
 

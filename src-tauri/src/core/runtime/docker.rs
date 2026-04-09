@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::path::Path;
 use std::process::Command;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +20,7 @@ pub struct DockerService {
     pub ports: String,
 }
 
-pub fn compose_status(project_path: &str) -> Result<DockerComposeStatus, DelixonError> {
+pub fn compose_status(project_path: &str) -> Result<DockerComposeStatus, NexenvError> {
     let path = Path::new(project_path);
     let compose_file = find_compose_file(path);
 
@@ -41,15 +41,15 @@ pub fn compose_status(project_path: &str) -> Result<DockerComposeStatus, Delixon
     })
 }
 
-pub fn compose_up(project_path: &str) -> Result<String, DelixonError> {
+pub fn compose_up(project_path: &str) -> Result<String, NexenvError> {
     run_compose(project_path, &["up", "-d"])
 }
 
-pub fn compose_down(project_path: &str) -> Result<String, DelixonError> {
+pub fn compose_down(project_path: &str) -> Result<String, NexenvError> {
     run_compose(project_path, &["down"])
 }
 
-pub fn compose_logs(project_path: &str, lines: u32) -> Result<String, DelixonError> {
+pub fn compose_logs(project_path: &str, lines: u32) -> Result<String, NexenvError> {
     run_compose(project_path, &["logs", "--tail", &lines.to_string()])
 }
 
@@ -93,7 +93,7 @@ fn parse_running_services(project_path: &str) -> Vec<DockerService> {
     }
 }
 
-fn run_compose(project_path: &str, args: &[&str]) -> Result<String, DelixonError> {
+fn run_compose(project_path: &str, args: &[&str]) -> Result<String, NexenvError> {
     let output = Command::new("docker")
         .arg("compose")
         .args(args)
@@ -106,7 +106,7 @@ fn run_compose(project_path: &str, args: &[&str]) -> Result<String, DelixonError
     if output.status.success() {
         Ok(format!("{}{}", stdout, stderr))
     } else {
-        Err(DelixonError::InvalidConfig(format!(
+        Err(NexenvError::InvalidConfig(format!(
             "docker compose error: {}",
             stderr
         )))

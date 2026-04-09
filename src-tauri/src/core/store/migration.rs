@@ -1,4 +1,4 @@
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::project::{config, notes, storage};
 use crate::core::store::sqlite_store::SqliteStore;
 use crate::core::store::traits::*;
@@ -13,7 +13,7 @@ pub fn json_data_exists() -> bool {
 }
 
 /// Migra todos los datos de JSON files a SQLite dentro de una transaccion
-pub fn migrate_json_to_sqlite(sqlite: &SqliteStore) -> Result<MigrationResult, DelixonError> {
+pub fn migrate_json_to_sqlite(sqlite: &SqliteStore) -> Result<MigrationResult, NexenvError> {
     let mut result = MigrationResult::default();
 
     // 1. Proyectos
@@ -77,9 +77,9 @@ pub struct MigrationResult {
 }
 
 /// Mueve archivos JSON a json_backup/
-fn backup_json_files() -> Result<(), DelixonError> {
+fn backup_json_files() -> Result<(), NexenvError> {
     let data_dir = crate::core::utils::platform::get_data_dir()
-        .ok_or_else(|| DelixonError::InvalidConfig("No data dir".to_string()))?;
+        .ok_or_else(|| NexenvError::InvalidConfig("No data dir".to_string()))?;
 
     let backup_dir = data_dir.join("json_backup");
     std::fs::create_dir_all(&backup_dir)?;
@@ -110,5 +110,5 @@ fn backup_json_files() -> Result<(), DelixonError> {
 
 /// Ruta de la base de datos SQLite
 pub fn db_path() -> Option<std::path::PathBuf> {
-    crate::core::utils::platform::get_data_dir().map(|d| d.join("delixon.db"))
+    crate::core::utils::platform::get_data_dir().map(|d| d.join("nexenv.db"))
 }

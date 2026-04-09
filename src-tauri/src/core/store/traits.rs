@@ -1,36 +1,36 @@
 use std::collections::HashMap;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::history::env::{EnvDiff, EnvSnapshot};
 use crate::core::history::versioning::{Snapshot, SnapshotDiff};
 use crate::core::models::project::Project;
-use crate::core::project::config::DelixonConfig;
+use crate::core::project::config::NexenvConfig;
 use crate::core::project::notes::ProjectNote;
 
 pub trait ProjectStore: Send + Sync {
-    fn list_projects(&self) -> Result<Vec<Project>, DelixonError>;
-    fn save_projects(&self, projects: &[Project]) -> Result<(), DelixonError>;
+    fn list_projects(&self) -> Result<Vec<Project>, NexenvError>;
+    fn save_projects(&self, projects: &[Project]) -> Result<(), NexenvError>;
 }
 
 pub trait ConfigStore: Send + Sync {
-    fn load_config(&self) -> Result<DelixonConfig, DelixonError>;
-    fn save_config(&self, config: &DelixonConfig) -> Result<(), DelixonError>;
+    fn load_config(&self) -> Result<NexenvConfig, NexenvError>;
+    fn save_config(&self, config: &NexenvConfig) -> Result<(), NexenvError>;
 }
 
 pub trait NoteStore: Send + Sync {
-    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, DelixonError>;
-    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, DelixonError>;
-    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), DelixonError>;
+    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, NexenvError>;
+    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, NexenvError>;
+    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), NexenvError>;
 }
 
 pub trait EnvVarStore: Send + Sync {
-    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, DelixonError>;
+    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, NexenvError>;
     fn save_env_vars(
         &self,
         project_id: &str,
         vars: &HashMap<String, String>,
-    ) -> Result<(), DelixonError>;
-    fn delete_env_vars(&self, project_id: &str) -> Result<(), DelixonError>;
+    ) -> Result<(), NexenvError>;
+    fn delete_env_vars(&self, project_id: &str) -> Result<(), NexenvError>;
 }
 
 pub trait SnapshotStore: Send + Sync {
@@ -38,20 +38,20 @@ pub trait SnapshotStore: Send + Sync {
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<Snapshot, DelixonError>;
-    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, DelixonError>;
+    ) -> Result<Snapshot, NexenvError>;
+    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, NexenvError>;
     fn diff_snapshots(
         &self,
         project_id: &str,
         v1: u32,
         v2: u32,
-    ) -> Result<SnapshotDiff, DelixonError>;
+    ) -> Result<SnapshotDiff, NexenvError>;
     fn rollback_snapshot(
         &self,
         project_id: &str,
         project_path: &str,
         version: u32,
-    ) -> Result<(), DelixonError>;
+    ) -> Result<(), NexenvError>;
 }
 
 pub trait EnvSnapshotStore: Send + Sync {
@@ -59,13 +59,13 @@ pub trait EnvSnapshotStore: Send + Sync {
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<EnvSnapshot, DelixonError>;
-    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, DelixonError>;
+    ) -> Result<EnvSnapshot, NexenvError>;
+    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, NexenvError>;
     fn diff_env_snapshot(
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<Option<EnvDiff>, DelixonError>;
+    ) -> Result<Option<EnvDiff>, NexenvError>;
 }
 
 /// Super-trait que combina todos los stores

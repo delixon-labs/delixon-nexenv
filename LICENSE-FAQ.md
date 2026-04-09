@@ -1,6 +1,6 @@
-# Delixon — License FAQ
+# Nexenv — License FAQ
 
-Delixon is **source-available** software under the
+Nexenv is **source-available** software under the
 [Functional Source License (FSL-1.1-ALv2)](LICENSE).
 
 This is NOT open source in the traditional sense. The code is visible and
@@ -18,7 +18,7 @@ with it. After 2 years, it converts to Apache 2.0 automatically.
 
 ## What you CANNOT do
 
-- Sell or offer a commercial product or service that competes with Delixon
+- Sell or offer a commercial product or service that competes with Nexenv
 - Offer the same or substantially similar functionality as a commercial service
 - Repackage it as your own product
 
@@ -46,7 +46,7 @@ anything Apache 2.0 allows — including commercial use.
 | Role | Entity |
 |---|---|
 | Copyright holder and licensor | Xplus Technology LLC |
-| Public brand | Delixon Technology |
-| Product | Delixon |
+| Public brand | Delixon Labs |
+| Product | Nexenv |
 
-Delixon Technology is the public brand of Xplus Technology LLC.
+Delixon Labs is the public brand of Xplus Technology LLC.

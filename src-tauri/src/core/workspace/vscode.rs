@@ -3,7 +3,7 @@ use serde_json::json;
 use std::path::Path;
 
 use crate::core::detection::DetectedStack;
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest::ProjectManifest;
 use crate::core::models::project::Project;
 use crate::core::utils::fs::ensure_dir;
@@ -24,7 +24,7 @@ pub fn generate_all(
     project: &Project,
     manifest: &ProjectManifest,
     stack: Option<&DetectedStack>,
-) -> Result<VscodeGenerationResult, DelixonError> {
+) -> Result<VscodeGenerationResult, NexenvError> {
     let project_path = Path::new(&project.path);
     let vscode_dir = project_path.join(".vscode");
     let mut result = VscodeGenerationResult {
@@ -33,7 +33,7 @@ pub fn generate_all(
         warnings: vec![],
     };
 
-    // 1. .code-workspace (siempre sobreescribir — es de Delixon)
+    // 1. .code-workspace (siempre sobreescribir — es de Nexenv)
     let ws_content = generate_workspace_content(project, manifest, stack);
     let ws_name = project
         .name
@@ -86,7 +86,7 @@ pub fn generate_all(
     // 6. Asegurar entradas en .gitignore
     let _ = crate::core::utils::fs::ensure_gitignore_entries(
         project_path,
-        &["*.code-workspace", ".delixon/"],
+        &["*.code-workspace", ".nexenv/"],
     );
 
     Ok(result)
@@ -96,13 +96,13 @@ pub fn generate_all(
 // Backward compat: funciones anteriores que delegan al nuevo sistema
 // ---------------------------------------------------------------------------
 
-pub fn generate_workspace(project: &Project) -> Result<String, DelixonError> {
+pub fn generate_workspace(project: &Project) -> Result<String, NexenvError> {
     let manifest = crate::core::manifest::generate_manifest_from_project(project);
     let content = generate_workspace_content(project, &manifest, None);
     Ok(serde_json::to_string_pretty(&content)?)
 }
 
-pub fn write_workspace(project: &Project) -> Result<(), DelixonError> {
+pub fn write_workspace(project: &Project) -> Result<(), NexenvError> {
     let content = generate_workspace(project)?;
     let ws_name = project
         .name

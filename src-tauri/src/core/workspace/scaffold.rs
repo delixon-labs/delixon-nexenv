@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use crate::core::catalog;
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest::{ManifestEnvVars, ManifestMetadata, ManifestService, ProjectManifest, CURRENT_SCHEMA_VERSION};
 use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::rules;
@@ -58,7 +58,7 @@ pub fn preview_scaffold(config: &ScaffoldConfig) -> ScaffoldPreview {
     }
 }
 
-pub fn generate_project(config: &ScaffoldConfig) -> Result<ScaffoldResult, DelixonError> {
+pub fn generate_project(config: &ScaffoldConfig) -> Result<ScaffoldResult, NexenvError> {
     let validation = rules::validate_stack(&config.technologies);
     let project_path = Path::new(&config.path);
 
@@ -77,12 +77,12 @@ pub fn generate_project(config: &ScaffoldConfig) -> Result<ScaffoldResult, Delix
     }
 
     let manifest = build_manifest(config, &validation);
-    let delixon_dir = project_path.join(".delixon");
-    ensure_dir(&delixon_dir)?;
+    let nexenv_dir = project_path.join(".nexenv");
+    ensure_dir(&nexenv_dir)?;
     let manifest_yaml = serde_yml::to_string(&manifest)
-        .map_err(|e| DelixonError::InvalidConfig(format!("Error serializando manifest: {}", e)))?;
-    std::fs::write(delixon_dir.join("manifest.yaml"), manifest_yaml)?;
-    files_created.push(".delixon/manifest.yaml".to_string());
+        .map_err(|e| NexenvError::InvalidConfig(format!("Error serializando manifest: {}", e)))?;
+    std::fs::write(nexenv_dir.join("manifest.yaml"), manifest_yaml)?;
+    files_created.push(".nexenv/manifest.yaml".to_string());
 
     Ok(ScaffoldResult {
         files_created,
@@ -506,7 +506,7 @@ fn build_manifest(config: &ScaffoldConfig, validation: &rules::ValidationResult)
 pub fn register_scaffolded_project(
     config: &ScaffoldConfig,
     result: &ScaffoldResult,
-) -> Result<Project, DelixonError> {
+) -> Result<Project, NexenvError> {
     let all_techs = catalog::load_all_technologies();
     let now = chrono::Utc::now().to_rfc3339();
 
@@ -584,7 +584,7 @@ mod tests {
         assert!(!result.files_created.is_empty());
         assert!(dir.path().join(".gitignore").exists());
         assert!(dir.path().join("README.md").exists());
-        assert!(dir.path().join(".delixon/manifest.yaml").exists());
+        assert!(dir.path().join(".nexenv/manifest.yaml").exists());
 
         // Cleanup: eliminar proyecto de projects.json
         if let Ok(projects) = crate::core::store::get().list_projects() {

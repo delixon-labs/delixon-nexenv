@@ -1,12 +1,12 @@
-# Delixon
+# Nexenv
 
 > Deja de configurar. Empieza a construir.
 >
 > *Un clic. Proyecto abierto. Entorno correcto.*
 
-Delixon es una aplicación de escritorio local que gestiona el entorno de desarrollo de cada proyecto de forma completamente aislada e independiente.
+Nexenv es una aplicación de escritorio local que gestiona el entorno de desarrollo de cada proyecto de forma completamente aislada e independiente.
 
-## ¿Qué hace Delixon?
+## ¿Qué hace Nexenv?
 
 - **Aísla proyectos** — cada proyecto tiene su propio entorno, variables, historial de terminal y versiones de runtimes
 - **Gestiona dependencias inteligentemente** — detecta lo que ya tienes instalado y lo vincula en lugar de duplicarlo
@@ -30,8 +30,8 @@ Delixon es una aplicación de escritorio local que gestiona el entorno de desarr
 
 ```bash
 # Requisitos: Node 20+, Rust 1.77+
-git clone https://github.com/delixon-technology/delixon.git
-cd delixon
+git clone https://github.com/delixon-labs/delixon-nexenv.git
+cd nexenv
 npm install
 cp .env.example .env.local
 npm run tauri dev
@@ -39,4 +39,4 @@ npm run tauri dev
 
 ---
 
-*delixon-technology · [github.com/delixon-technology/delixon](https://github.com/delixon-technology/delixon)*
+*delixon-labs · [github.com/delixon-labs/delixon-nexenv](https://github.com/delixon-labs/delixon-nexenv)*

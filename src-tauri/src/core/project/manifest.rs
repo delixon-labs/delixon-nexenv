@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::models::project::Project;
 use crate::core::utils::fs::ensure_dir;
 
@@ -87,7 +87,7 @@ pub struct ManifestHealthCheck {
 }
 
 fn manifest_dir(project_path: &str) -> std::path::PathBuf {
-    Path::new(project_path).join(".delixon")
+    Path::new(project_path).join(".nexenv")
 }
 
 fn manifest_file(project_path: &str) -> std::path::PathBuf {
@@ -96,22 +96,22 @@ fn manifest_file(project_path: &str) -> std::path::PathBuf {
 
 /// Valida un manifest antes de guardarlo.
 /// Rechaza manifests con datos invalidos o incompletos.
-pub fn validate_manifest(manifest: &ProjectManifest) -> Result<(), DelixonError> {
+pub fn validate_manifest(manifest: &ProjectManifest) -> Result<(), NexenvError> {
     if manifest.name.trim().is_empty() {
-        return Err(DelixonError::InvalidManifest(
+        return Err(NexenvError::InvalidManifest(
             "El campo 'name' es obligatorio y no puede estar vacio".to_string(),
         ));
     }
 
     if manifest.schema_version == 0 {
-        return Err(DelixonError::InvalidManifest(
+        return Err(NexenvError::InvalidManifest(
             "schema_version debe ser >= 1".to_string(),
         ));
     }
 
     for &port in &manifest.ports {
         if port == 0 {
-            return Err(DelixonError::InvalidManifest(
+            return Err(NexenvError::InvalidManifest(
                 "Puerto invalido: 0 (rango valido: 1-65535)".to_string(),
             ));
         }
@@ -121,7 +121,7 @@ pub fn validate_manifest(manifest: &ProjectManifest) -> Result<(), DelixonError>
     let mut seen_ports = std::collections::HashSet::new();
     for &port in &manifest.ports {
         if !seen_ports.insert(port) {
-            return Err(DelixonError::InvalidManifest(
+            return Err(NexenvError::InvalidManifest(
                 format!("Puerto duplicado: {}", port),
             ));
         }
@@ -130,7 +130,7 @@ pub fn validate_manifest(manifest: &ProjectManifest) -> Result<(), DelixonError>
     // Validar que env vars no contengan valores (solo nombres)
     for key in manifest.env_vars.required.iter().chain(manifest.env_vars.optional.iter()) {
         if key.contains('=') {
-            return Err(DelixonError::InvalidManifest(
+            return Err(NexenvError::InvalidManifest(
                 format!("env_vars debe contener solo nombres de variables, no valores. Encontrado: '{}'", key),
             ));
         }
@@ -162,14 +162,14 @@ fn normalize_manifest(manifest: &mut ProjectManifest) {
     manifest.name = manifest.name.trim().to_string();
 }
 
-pub fn load_manifest(project_path: &str) -> Result<Option<ProjectManifest>, DelixonError> {
+pub fn load_manifest(project_path: &str) -> Result<Option<ProjectManifest>, NexenvError> {
     let path = manifest_file(project_path);
     if !path.exists() {
         return Ok(None);
     }
     let data = std::fs::read_to_string(&path)?;
     let mut manifest: ProjectManifest = serde_yml::from_str(&data)
-        .map_err(|e| DelixonError::InvalidConfig(format!("Error parseando manifest: {}", e)))?;
+        .map_err(|e| NexenvError::InvalidConfig(format!("Error parseando manifest: {}", e)))?;
 
     // Normalizar manifests antiguos al cargar
     normalize_manifest(&mut manifest);
@@ -182,7 +182,7 @@ pub fn load_manifest(project_path: &str) -> Result<Option<ProjectManifest>, Deli
 pub fn save_manifest(
     project_path: &str,
     manifest: &ProjectManifest,
-) -> Result<(), DelixonError> {
+) -> Result<(), NexenvError> {
     let mut normalized = manifest.clone();
     normalize_manifest(&mut normalized);
     validate_manifest(&normalized)?;
@@ -191,12 +191,12 @@ pub fn save_manifest(
     ensure_dir(&dir)?;
     let path = manifest_file(project_path);
     let data = serde_yml::to_string(&normalized)
-        .map_err(|e| DelixonError::InvalidConfig(format!("Error serializando manifest: {}", e)))?;
+        .map_err(|e| NexenvError::InvalidConfig(format!("Error serializando manifest: {}", e)))?;
     std::fs::write(&path, data)?;
 
-    // Asegurar que .delixon/ este en .gitignore del proyecto
+    // Asegurar que .nexenv/ este en .gitignore del proyecto
     let project = std::path::Path::new(project_path);
-    let _ = crate::core::utils::fs::ensure_gitignore_entries(project, &[".delixon/"]);
+    let _ = crate::core::utils::fs::ensure_gitignore_entries(project, &[".nexenv/"]);
 
     Ok(())
 }
@@ -306,7 +306,7 @@ mod tests {
         Project {
             id: "test-manifest".to_string(),
             name: "my-api".to_string(),
-            path: "/tmp/delixon-manifest-test".to_string(),
+            path: "/tmp/nexenv-manifest-test".to_string(),
             description: Some("Test API".to_string()),
             runtimes: vec![RuntimeConfig {
                 runtime: "node".to_string(),

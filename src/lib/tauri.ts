@@ -1,6 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { Project, CreateProjectInput, RuntimeConfig, ProjectStatus } from "@/types/project";
-import type { DelixonConfig } from "@/types/config";
+import type { NexenvConfig } from "@/types/config";
 import { DEFAULT_CONFIG } from "@/types/config";
 import type { HealthReport, DoctorReport, PortConflict, PortInfo } from "@/types/health";
 import type { GitStatus, GitCommit } from "@/types/git";
@@ -58,14 +58,14 @@ const MOCK_ENV_VARS: Record<string, Record<string, string>> = {
 
 function loadMockProjects(): Project[] {
   try {
-    const stored = localStorage.getItem("delixon_mock_projects");
+    const stored = localStorage.getItem("nexenv_mock_projects");
     if (stored) return JSON.parse(stored);
   } catch { /* fallback */ }
   return [...MOCK_PROJECTS];
 }
 
 function saveMockProjects(projects: Project[]) {
-  localStorage.setItem("delixon_mock_projects", JSON.stringify(projects));
+  localStorage.setItem("nexenv_mock_projects", JSON.stringify(projects));
 }
 
 let mockProjects = loadMockProjects();
@@ -450,11 +450,11 @@ export async function scanAndRegister(path: string, name: string): Promise<Proje
 
 // --- Config ---
 
-export async function getConfig(): Promise<DelixonConfig> {
-  return safeInvoke<DelixonConfig>("get_config");
+export async function getConfig(): Promise<NexenvConfig> {
+  return safeInvoke<NexenvConfig>("get_config");
 }
 
-export async function setConfig(config: DelixonConfig): Promise<void> {
+export async function setConfig(config: NexenvConfig): Promise<void> {
   return safeInvoke<void>("set_config", { config });
 }
 

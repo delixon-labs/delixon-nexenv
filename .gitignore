@@ -47,11 +47,11 @@ desktop.ini
 
 # Documentacion del proyecto
 docs/
-.delixonPrivateDocs/
+nexenv.docs/
 
-# Archivos de configuracion de Delixon (los generara la app)
-*.delixon
-*.delixon-team
+# Archivos de configuracion de Nexenv (los generara la app)
+*.nexenv
+*.nexenv-team
 
 # Windows
 Thumbs.db:encryptable
@@ -71,5 +71,5 @@ coverage/
 .cache/
 .temp/
 
-# Delixon (generado automaticamente)
-.delixon/
+# Nexenv (generado automaticamente)
+.nexenv/

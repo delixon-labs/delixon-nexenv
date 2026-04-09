@@ -44,7 +44,7 @@
     "panel": "Panel",
     "general": "General",
     "unlink": "Unlink project",
-    "unlinkDesc": "Remove this project from the Delixon registry. Your files on disk will not be modified and you can re-register it at any time.",
+    "unlinkDesc": "Remove this project from the Nexenv registry. Your files on disk will not be modified and you can re-register it at any time.",
     "unlinkButton": "Unlink",
     "unlinkConfirm": "Are you sure?",
     "unlinkYes": "Yes, unlink",
@@ -166,7 +166,7 @@
   },
   "importModal": {
     "title": "Import project",
-    "file": "File (.delixon)",
+    "file": "File (.nexenv)",
     "browse": "Browse",
     "path": "Target path",
     "import": "Import",
@@ -174,7 +174,7 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Global Delixon settings",
+    "subtitle": "Global Nexenv settings",
     "general": "General",
     "editor": "Code editor",
     "editorDesc": "Command to open the editor when clicking 'Open project'",
@@ -188,15 +188,16 @@
     "fontPack": "Typography",
     "fontPackDesc": "Font pack for the interface",
     "dataDir": "Data directory",
-    "dataDirDesc": "Where Delixon stores project configuration",
+    "dataDirDesc": "Where Nexenv stores project configuration",
     "runtimes": "Detected runtimes",
     "redetect": "Re-detect",
     "detecting": "Detecting...",
     "noRuntimes": "No runtimes detected. Run the app inside Tauri to detect system runtimes.",
     "about": "About",
-    "version": "Delixon v1.0.0",
+    "version": "Nexenv v1.0.0",
     "tagline": "Workspace manager for developers",
-    "motto": "Stop configuring. Start building."
+    "motto": "Stop configuring. Start building.",
+    "aboutProduct": "A product of"
   },
   "scaffold": {
     "title": "Create project",

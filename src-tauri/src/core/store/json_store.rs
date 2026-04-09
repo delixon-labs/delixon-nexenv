@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::history::env::{self as env_snapshots, EnvDiff, EnvSnapshot};
 use crate::core::history::versioning::{self, Snapshot, SnapshotDiff};
 use crate::core::models::project::Project;
-use crate::core::project::config::{self, DelixonConfig};
+use crate::core::project::config::{self, NexenvConfig};
 use crate::core::project::notes::{self, ProjectNote};
 use crate::core::project::storage;
 use crate::core::store::traits::*;
@@ -26,47 +26,47 @@ impl JsonStore {
 }
 
 impl ProjectStore for JsonStore {
-    fn list_projects(&self) -> Result<Vec<Project>, DelixonError> {
+    fn list_projects(&self) -> Result<Vec<Project>, NexenvError> {
         storage::load_projects()
     }
-    fn save_projects(&self, projects: &[Project]) -> Result<(), DelixonError> {
+    fn save_projects(&self, projects: &[Project]) -> Result<(), NexenvError> {
         storage::save_projects(projects)
     }
 }
 
 impl ConfigStore for JsonStore {
-    fn load_config(&self) -> Result<DelixonConfig, DelixonError> {
+    fn load_config(&self) -> Result<NexenvConfig, NexenvError> {
         config::load_config()
     }
-    fn save_config(&self, cfg: &DelixonConfig) -> Result<(), DelixonError> {
+    fn save_config(&self, cfg: &NexenvConfig) -> Result<(), NexenvError> {
         config::save_config(cfg)
     }
 }
 
 impl NoteStore for JsonStore {
-    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, DelixonError> {
+    fn get_notes(&self, project_id: &str) -> Result<Vec<ProjectNote>, NexenvError> {
         notes::get_notes(project_id)
     }
-    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, DelixonError> {
+    fn add_note(&self, project_id: &str, text: &str) -> Result<ProjectNote, NexenvError> {
         notes::add_note(project_id, text)
     }
-    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), DelixonError> {
+    fn delete_note(&self, project_id: &str, note_id: &str) -> Result<(), NexenvError> {
         notes::delete_note(project_id, note_id)
     }
 }
 
 impl EnvVarStore for JsonStore {
-    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, DelixonError> {
+    fn load_env_vars(&self, project_id: &str) -> Result<HashMap<String, String>, NexenvError> {
         storage::load_env_vars(project_id)
     }
     fn save_env_vars(
         &self,
         project_id: &str,
         vars: &HashMap<String, String>,
-    ) -> Result<(), DelixonError> {
+    ) -> Result<(), NexenvError> {
         storage::save_env_vars(project_id, vars)
     }
-    fn delete_env_vars(&self, project_id: &str) -> Result<(), DelixonError> {
+    fn delete_env_vars(&self, project_id: &str) -> Result<(), NexenvError> {
         storage::delete_env_vars(project_id)
     }
 }
@@ -76,10 +76,10 @@ impl SnapshotStore for JsonStore {
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<Snapshot, DelixonError> {
+    ) -> Result<Snapshot, NexenvError> {
         versioning::save_snapshot(project_id, project_path)
     }
-    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, DelixonError> {
+    fn list_snapshots(&self, project_id: &str) -> Result<Vec<Snapshot>, NexenvError> {
         versioning::list_snapshots(project_id)
     }
     fn diff_snapshots(
@@ -87,7 +87,7 @@ impl SnapshotStore for JsonStore {
         project_id: &str,
         v1: u32,
         v2: u32,
-    ) -> Result<SnapshotDiff, DelixonError> {
+    ) -> Result<SnapshotDiff, NexenvError> {
         versioning::diff_snapshots(project_id, v1, v2)
     }
     fn rollback_snapshot(
@@ -95,7 +95,7 @@ impl SnapshotStore for JsonStore {
         project_id: &str,
         project_path: &str,
         version: u32,
-    ) -> Result<(), DelixonError> {
+    ) -> Result<(), NexenvError> {
         versioning::rollback_snapshot(project_id, project_path, version)
     }
 }
@@ -105,17 +105,17 @@ impl EnvSnapshotStore for JsonStore {
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<EnvSnapshot, DelixonError> {
+    ) -> Result<EnvSnapshot, NexenvError> {
         env_snapshots::take_snapshot(project_id, project_path)
     }
-    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, DelixonError> {
+    fn load_env_snapshot(&self, project_id: &str) -> Result<Option<EnvSnapshot>, NexenvError> {
         env_snapshots::load_snapshot(project_id)
     }
     fn diff_env_snapshot(
         &self,
         project_id: &str,
         project_path: &str,
-    ) -> Result<Option<EnvDiff>, DelixonError> {
+    ) -> Result<Option<EnvDiff>, NexenvError> {
         env_snapshots::diff_snapshot(project_id, project_path)
     }
 }

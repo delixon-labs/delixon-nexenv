@@ -1,6 +1,6 @@
 /* ============================================================
-   Paleta de colores de Delixon
-   Sincronizada con delixon-web (landing).
+   Paleta de colores de Nexenv
+   Sincronizada con nexenv-web (landing).
 
    Cada variable se define DOS veces a proposito:
    1. :root        → usable en CSS via var(--accent)
@@ -24,7 +24,7 @@
   --text-light-2: #c0c0d8;
   --text-light-3: #e0e0f0;
 
-  /* Acento — purpura (identidad Delixon) */
+  /* Acento — purpura (identidad Nexenv) */
   --accent-dark-3: #3b1578;
   --accent-dark-2: #5521a6;
   --accent-dark-1: #6d28d9;

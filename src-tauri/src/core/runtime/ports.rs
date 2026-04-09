@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::net::TcpListener;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest;
 use crate::core::models::project::Project;
 
@@ -22,7 +22,7 @@ pub struct PortInfo {
 }
 
 /// Detecta conflictos de puertos entre proyectos activos
-pub fn detect_port_conflicts(projects: &[Project]) -> Result<Vec<PortConflict>, DelixonError> {
+pub fn detect_port_conflicts(projects: &[Project]) -> Result<Vec<PortConflict>, NexenvError> {
     let mut port_map: std::collections::HashMap<u16, Vec<String>> = std::collections::HashMap::new();
 
     for project in projects {
@@ -53,7 +53,7 @@ pub fn detect_port_conflicts(projects: &[Project]) -> Result<Vec<PortConflict>, 
 }
 
 /// Lista todos los puertos usados por proyectos
-pub fn list_project_ports(projects: &[Project]) -> Result<Vec<PortInfo>, DelixonError> {
+pub fn list_project_ports(projects: &[Project]) -> Result<Vec<PortInfo>, NexenvError> {
     let mut ports = Vec::new();
 
     for project in projects {

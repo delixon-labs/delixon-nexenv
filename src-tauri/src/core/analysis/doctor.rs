@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::store;
 use crate::core::utils::platform::get_data_dir;
 
@@ -20,7 +20,7 @@ pub struct DoctorCheck {
     pub message: String,
 }
 
-pub fn run_doctor() -> Result<DoctorReport, DelixonError> {
+pub fn run_doctor() -> Result<DoctorReport, NexenvError> {
     let mut checks = Vec::new();
 
     // --- Grupo: Sistema ---

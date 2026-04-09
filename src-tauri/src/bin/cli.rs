@@ -1,12 +1,12 @@
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use delixon_lib::core::{
+use nexenv_lib::core::{
     catalog, detection, docker, doctor, git, health, manifest,
     portable, ports, recipes, rules, scaffold, scripts, snapshots, store, templates, versioning,
 };
 
 #[derive(Parser)]
-#[command(name = "delixon", version = "1.0.0", about = "Workspace manager for developers")]
+#[command(name = "nexenv", version = "1.0.0", about = "Workspace manager for developers")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -52,18 +52,18 @@ enum Commands {
         action: EnvAction,
     },
 
-    /// Exporta un proyecto como archivo .delixon
+    /// Exporta un proyecto como archivo .nexenv
     Export {
         /// Nombre del proyecto
         project: String,
-        /// Archivo de salida (default: {nombre}.delixon)
+        /// Archivo de salida (default: {nombre}.nexenv)
         #[arg(long, short)]
         output: Option<String>,
     },
 
-    /// Importa un proyecto desde archivo .delixon
+    /// Importa un proyecto desde archivo .nexenv
     Import {
-        /// Archivo .delixon a importar
+        /// Archivo .nexenv a importar
         file: String,
         /// Ruta donde registrar el proyecto
         #[arg(long)]
@@ -173,7 +173,7 @@ enum Commands {
         project: Option<String>,
     },
 
-    /// Desvincula un proyecto de Delixon (no borra archivos)
+    /// Desvincula un proyecto de Nexenv (no borra archivos)
     Unlink {
         /// Nombre del proyecto (busqueda parcial)
         name: String,
@@ -252,7 +252,7 @@ enum EnvAction {
 
 fn main() {
     // Inicializar store global: SQLite con fallback a JSON
-    delixon_lib::core::store::init(init_store());
+    nexenv_lib::core::store::init(init_store());
 
     let cli = Cli::parse();
 
@@ -311,9 +311,9 @@ fn cmd_list() -> Result<(), String> {
     for p in &projects {
         let runtimes: Vec<String> = p.runtimes.iter().map(|r| r.runtime.clone()).collect();
         let status = match &p.status {
-            delixon_lib::core::models::project::ProjectStatus::Active => "activo".green(),
-            delixon_lib::core::models::project::ProjectStatus::Idle => "inactivo".yellow(),
-            delixon_lib::core::models::project::ProjectStatus::Archived => "archivado".dimmed(),
+            nexenv_lib::core::models::project::ProjectStatus::Active => "activo".green(),
+            nexenv_lib::core::models::project::ProjectStatus::Idle => "inactivo".yellow(),
+            nexenv_lib::core::models::project::ProjectStatus::Archived => "archivado".dimmed(),
         };
         println!(
             "{:<30} {:<10} {:<20} {}",
@@ -340,7 +340,7 @@ fn cmd_open(name: &str) -> Result<(), String> {
         editor
     );
 
-    delixon_lib::core::utils::editor::open_in_editor(&project.path, editor)
+    nexenv_lib::core::utils::editor::open_in_editor(&project.path, editor)
 }
 
 fn cmd_unlink(name: &str) -> Result<(), String> {
@@ -392,13 +392,13 @@ fn cmd_create(name: &str, path: &str, template: Option<&str>) -> Result<(), Stri
         }
 
         let now = chrono::Utc::now().to_rfc3339();
-        let project = delixon_lib::core::models::project::Project {
+        let project = nexenv_lib::core::models::project::Project {
             id: uuid::Uuid::new_v4().to_string(),
             name: name.to_string(),
             path: path.to_string(),
             description: None,
             runtimes: vec![],
-            status: delixon_lib::core::models::project::ProjectStatus::Active,
+            status: nexenv_lib::core::models::project::ProjectStatus::Active,
             created_at: now.clone(),
             last_opened_at: Some(now),
             template_id: None,
@@ -503,7 +503,7 @@ fn cmd_scan(path: &str) -> Result<(), String> {
 }
 
 fn cmd_doctor() -> Result<(), String> {
-    println!("{}", "Delixon Doctor".bold());
+    println!("{}", "Nexenv Doctor".bold());
     println!("{}", "=".repeat(40));
 
     let report = doctor::run_doctor().map_err(|e| e.to_string())?;
@@ -567,7 +567,7 @@ fn cmd_export(project_name: &str, output: Option<&str>) -> Result<(), String> {
     let json = portable::export_project(&project.id).map_err(|e| e.to_string())?;
     let filename = output
         .map(|s| s.to_string())
-        .unwrap_or_else(|| format!("{}.delixon", project.name));
+        .unwrap_or_else(|| format!("{}.nexenv", project.name));
 
     std::fs::write(&filename, &json).map_err(|e| format!("Error escribiendo archivo: {}", e))?;
     println!("{} Exportado a {}", "ok".green().bold(), filename);
@@ -651,7 +651,7 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
             println!("{}", "No se encontro manifest. Generando...".yellow());
             let m = manifest::generate_manifest_from_project(project);
             manifest::save_manifest(&project.path, &m).map_err(|e| e.to_string())?;
-            println!("{} Manifest generado en {}/.delixon/manifest.yaml", "ok".green().bold(), project.path);
+            println!("{} Manifest generado en {}/.nexenv/manifest.yaml", "ok".green().bold(), project.path);
         }
     }
     Ok(())
@@ -779,7 +779,7 @@ fn cmd_validate(techs: &[String]) -> Result<(), String> {
     Ok(())
 }
 
-fn find_project(name: &str) -> Result<delixon_lib::core::models::project::Project, String> {
+fn find_project(name: &str) -> Result<nexenv_lib::core::models::project::Project, String> {
     let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let lower = name.to_lowercase();
     projects
@@ -881,7 +881,7 @@ fn cmd_add(recipe_id: &str, project_name: Option<&str>, preview_only: bool) -> R
 
 fn cmd_recipes() -> Result<(), String> {
     let recipes = recipes::list_recipes();
-    println!("{} ({} disponibles)", "Recipes Delixon".bold(), recipes.len());
+    println!("{} ({} disponibles)", "Recipes Nexenv".bold(), recipes.len());
     println!("{}", "=".repeat(50));
     for r in &recipes {
         println!("  {:<20} {} [{}]", r.id.green(), r.description, r.category.dimmed());
@@ -1118,7 +1118,7 @@ fn cmd_note(project_name: &str, text: Option<&str>) -> Result<(), String> {
 fn cmd_ps(project_name: Option<&str>) -> Result<(), String> {
     if let Some(name) = project_name {
         let project = find_project(name)?;
-        let procs = delixon_lib::core::processes::list_processes_on_ports(&project.path).map_err(|e| e.to_string())?;
+        let procs = nexenv_lib::core::processes::list_processes_on_ports(&project.path).map_err(|e| e.to_string())?;
         if procs.is_empty() {
             println!("{}", "No hay procesos en los puertos del proyecto".dimmed());
         } else {
@@ -1128,7 +1128,7 @@ fn cmd_ps(project_name: Option<&str>) -> Result<(), String> {
             }
         }
     } else {
-        println!("{}", "Especifica un proyecto: delixon ps <nombre>".dimmed());
+        println!("{}", "Especifica un proyecto: nexenv ps <nombre>".dimmed());
     }
     Ok(())
 }
@@ -1174,7 +1174,7 @@ fn cmd_catalog(id: Option<&str>) -> Result<(), String> {
             println!("\nTags: {}", tech.tags.join(", ").dimmed());
         }
     } else {
-        println!("{} ({} tecnologias)", "Catalogo Delixon".bold(), techs.len());
+        println!("{} ({} tecnologias)", "Catalogo Nexenv".bold(), techs.len());
         println!("{}", "=".repeat(60));
 
         let categories = catalog::all_categories();
@@ -1199,25 +1199,25 @@ fn cmd_catalog(id: Option<&str>) -> Result<(), String> {
     Ok(())
 }
 
-fn init_store() -> std::sync::Arc<dyn delixon_lib::core::store::Store> {
-    use delixon_lib::core::store::{json_store::JsonStore, migration, sqlite_store::SqliteStore};
-    use delixon_lib::core::project::storage;
+fn init_store() -> std::sync::Arc<dyn nexenv_lib::core::store::Store> {
+    use nexenv_lib::core::store::{json_store::JsonStore, migration, sqlite_store::SqliteStore};
+    use nexenv_lib::core::project::storage;
 
     if let Some(path) = migration::db_path() {
         let _ = storage::init_data_dir();
 
-        match SqliteStore::new(path.to_str().unwrap_or("delixon.db")) {
+        match SqliteStore::new(path.to_str().unwrap_or("nexenv.db")) {
             Ok(sqlite) => {
                 if migration::json_data_exists() {
                     match migration::migrate_json_to_sqlite(&sqlite) {
                         Ok(result) => {
                             eprintln!(
-                                "[delixon] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
+                                "[nexenv] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
                                 result.projects, result.env_vars, result.notes
                             );
                         }
                         Err(e) => {
-                            eprintln!("[delixon] Error migrando: {}. Usando JSON.", e);
+                            eprintln!("[nexenv] Error migrando: {}. Usando JSON.", e);
                             return std::sync::Arc::new(JsonStore::new());
                         }
                     }
@@ -1225,7 +1225,7 @@ fn init_store() -> std::sync::Arc<dyn delixon_lib::core::store::Store> {
                 return std::sync::Arc::new(sqlite);
             }
             Err(e) => {
-                eprintln!("[delixon] Error SQLite: {}. Usando JSON.", e);
+                eprintln!("[nexenv] Error SQLite: {}. Usando JSON.", e);
             }
         }
     }

@@ -4,6 +4,13 @@ import { useSettingsStore } from "@/stores/settings";
 import * as api from "@/lib/tauri";
 import type { DetectedRuntime, InstalledEditor } from "@/lib/tauri";
 
+function defaultDataDir(): string {
+  const p = navigator.platform?.toLowerCase() || "";
+  if (p.includes("win")) return "$LOCALAPPDATA/nexenv";
+  if (p.includes("mac")) return "~/Library/Application Support/nexenv";
+  return "~/.local/share/nexenv";
+}
+
 export default function Settings() {
   const { t } = useTranslation();
   const { config, setConfig } = useSettingsStore();
@@ -139,7 +146,7 @@ export default function Settings() {
           >
             <input
               type="text"
-              value={config.dataDir || "~/.local/share/delixon"}
+              value={config.dataDir || defaultDataDir()}
               onChange={(e) => setConfig({ dataDir: e.target.value })}
               className="w-full max-w-sm px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-hidden focus:border-primary-500/50"
             />
@@ -199,14 +206,51 @@ export default function Settings() {
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
           {t("settings.about")}
         </h2>
-        <div className="rounded-xl bg-gray-900 border border-gray-800 px-4 py-4">
-          <p className="text-sm text-white font-medium">{t("settings.version")}</p>
-          <p className="text-xs text-gray-500 mt-1">
+        <div className="rounded-xl bg-gray-900 border border-gray-800 px-4 py-5">
+          <p className="text-sm text-white font-semibold">{t("settings.version")}</p>
+          <p className="text-xs text-gray-400 mt-1">
             {t("settings.tagline")}
           </p>
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-xs text-gray-500 mt-0.5 italic">
             {t("settings.motto")}
           </p>
+
+          <div className="mt-4 pt-3 border-t border-gray-800" style={{ fontFamily: "var(--font-heading, 'Inter', system-ui, sans-serif)" }}>
+            <p className="text-[11px]">
+              <span style={{ color: "#7a7a9a" }}>{t("settings.aboutProduct")}{" "}</span>
+              <a
+                href="https://delixon.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:brightness-125"
+                style={{ color: "#8b5cf6", fontFamily: "'Courier New', Courier, monospace" }}
+              >
+                Delixon Labs
+              </a>
+              <span style={{ color: "#8b5cf6" }}>{" · "}</span>
+              <a
+                href="https://delixon.dev/nexenv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:brightness-125"
+                style={{ color: "#8b5cf6", fontFamily: "'Courier New', Courier, monospace" }}
+              >
+                delixon.dev/nexenv
+              </a>
+            </p>
+            <p className="text-[11px] mt-1.5">
+              <span style={{ color: "#7a7a9a" }}>{"© 2026 "}</span>
+              <a
+                href="https://xplustechnologies.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:brightness-125"
+                style={{ color: "#2563eb", fontFamily: "'Courier New', Courier, monospace" }}
+              >
+                XPlus Technologies LLC
+              </a>
+            </p>
+          </div>
         </div>
       </section>
     </div>

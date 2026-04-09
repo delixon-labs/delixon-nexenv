@@ -36,7 +36,7 @@ export default function Sidebar() {
       <div className="flex items-center justify-between px-4 h-14 border-b border-gray-800">
         {!sidebarCollapsed && (
           <span className="text-lg font-bold text-primary-500 tracking-tight">
-            Delixon
+            Nexenv
           </span>
         )}
         <button
@@ -107,7 +107,7 @@ export default function Sidebar() {
       {/* Footer */}
       {!sidebarCollapsed && (
         <div className="px-4 py-3 border-t border-gray-800">
-          <p className="text-xs text-gray-600">Delixon v1.0.0</p>
+          <p className="text-xs text-gray-600">Nexenv v1.0.0</p>
         </div>
       )}
     </aside>

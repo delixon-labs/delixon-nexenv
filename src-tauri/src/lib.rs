@@ -100,7 +100,7 @@ pub fn run() {
             notes::delete_note,
         ])
         .run(tauri::generate_context!())
-        .expect("Error al iniciar Delixon");
+        .expect("Error al iniciar Nexenv");
 }
 
 #[cfg(feature = "tauri-app")]
@@ -112,19 +112,19 @@ fn init_store() -> std::sync::Arc<dyn core::store::Store> {
         // Crear data dir si no existe
         let _ = core::project::storage::init_data_dir();
 
-        match SqliteStore::new(path.to_str().unwrap_or("delixon.db")) {
+        match SqliteStore::new(path.to_str().unwrap_or("nexenv.db")) {
             Ok(sqlite) => {
                 // Migrar JSON si existen datos legacy
                 if migration::json_data_exists() {
                     match migration::migrate_json_to_sqlite(&sqlite) {
                         Ok(result) => {
                             eprintln!(
-                                "[delixon] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
+                                "[nexenv] Migrados {} proyectos, {} env vars, {} notas de JSON a SQLite",
                                 result.projects, result.env_vars, result.notes
                             );
                         }
                         Err(e) => {
-                            eprintln!("[delixon] Error migrando JSON a SQLite: {}. Usando JSON.", e);
+                            eprintln!("[nexenv] Error migrando JSON a SQLite: {}. Usando JSON.", e);
                             return std::sync::Arc::new(JsonStore::new());
                         }
                     }
@@ -132,7 +132,7 @@ fn init_store() -> std::sync::Arc<dyn core::store::Store> {
                 return std::sync::Arc::new(sqlite);
             }
             Err(e) => {
-                eprintln!("[delixon] Error inicializando SQLite: {}. Usando JSON.", e);
+                eprintln!("[nexenv] Error inicializando SQLite: {}. Usando JSON.", e);
             }
         }
     }

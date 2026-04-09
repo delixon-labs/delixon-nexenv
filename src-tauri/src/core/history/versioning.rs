@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest::{self, ProjectManifest};
 use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
@@ -26,18 +26,18 @@ pub struct SnapshotDiff {
     pub editor_changed: Option<(Option<String>, Option<String>)>,
 }
 
-fn snapshots_dir(project_id: &str) -> Result<PathBuf, DelixonError> {
+fn snapshots_dir(project_id: &str) -> Result<PathBuf, NexenvError> {
     let base = get_data_dir().ok_or_else(|| {
-        DelixonError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
+        NexenvError::InvalidConfig("No se pudo determinar directorio de datos".to_string())
     })?;
     let dir = base.join("snapshots").join(project_id);
     ensure_dir(&dir)?;
     Ok(dir)
 }
 
-pub fn save_snapshot(project_id: &str, project_path: &str) -> Result<Snapshot, DelixonError> {
+pub fn save_snapshot(project_id: &str, project_path: &str) -> Result<Snapshot, NexenvError> {
     let m = manifest::load_manifest(project_path)?
-        .ok_or_else(|| DelixonError::InvalidConfig("No hay manifest".to_string()))?;
+        .ok_or_else(|| NexenvError::InvalidConfig("No hay manifest".to_string()))?;
 
     let dir = snapshots_dir(project_id)?;
     let existing = list_snapshots(project_id)?;
@@ -56,7 +56,7 @@ pub fn save_snapshot(project_id: &str, project_path: &str) -> Result<Snapshot, D
     Ok(snapshot)
 }
 
-pub fn list_snapshots(project_id: &str) -> Result<Vec<Snapshot>, DelixonError> {
+pub fn list_snapshots(project_id: &str) -> Result<Vec<Snapshot>, NexenvError> {
     let dir = snapshots_dir(project_id)?;
     let mut snapshots = Vec::new();
 
@@ -77,13 +77,13 @@ pub fn list_snapshots(project_id: &str) -> Result<Vec<Snapshot>, DelixonError> {
     Ok(snapshots)
 }
 
-pub fn diff_snapshots(project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff, DelixonError> {
+pub fn diff_snapshots(project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff, NexenvError> {
     let snapshots = list_snapshots(project_id)?;
     let s1 = snapshots.iter().find(|s| s.version == v1).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Snapshot v{} no encontrado", v1))
+        NexenvError::InvalidConfig(format!("Snapshot v{} no encontrado", v1))
     })?;
     let s2 = snapshots.iter().find(|s| s.version == v2).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Snapshot v{} no encontrado", v2))
+        NexenvError::InvalidConfig(format!("Snapshot v{} no encontrado", v2))
     })?;
 
     let added_techs: Vec<String> = s2
@@ -133,10 +133,10 @@ pub fn diff_snapshots(project_id: &str, v1: u32, v2: u32) -> Result<SnapshotDiff
     })
 }
 
-pub fn rollback_snapshot(project_id: &str, project_path: &str, version: u32) -> Result<(), DelixonError> {
+pub fn rollback_snapshot(project_id: &str, project_path: &str, version: u32) -> Result<(), NexenvError> {
     let snapshots = list_snapshots(project_id)?;
     let snapshot = snapshots.iter().find(|s| s.version == version).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Snapshot v{} no encontrado", version))
+        NexenvError::InvalidConfig(format!("Snapshot v{} no encontrado", version))
     })?;
 
     manifest::save_manifest(project_path, &snapshot.manifest)?;

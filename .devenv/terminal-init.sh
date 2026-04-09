@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Delixon — Inicialización de terminal Git Bash
+# Nexenv — Inicialización de terminal Git Bash
 # Esta configuración es EXCLUSIVA de este proyecto.
 # No modifica el .bashrc global.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -9,9 +9,9 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT" || exit
 
 # ─── Variables de entorno del proyecto ───────────────────────────────────────
-export DELIXON_ENV="development"
-export DELIXON_LOG_LEVEL="debug"
-export DELIXON_DATA_DIR="$PROJECT_ROOT/dev-data"
+export NEXENV_ENV="development"
+export NEXENV_LOG_LEVEL="debug"
+export NEXENV_DATA_DIR="$PROJECT_ROOT/dev-data"
 
 [ -f "$PROJECT_ROOT/.env.local" ] && set -a && source "$PROJECT_ROOT/.env.local" && set +a
 
@@ -45,7 +45,7 @@ CYAN='\033[0;36m'; YELLOW='\033[0;33m'; GREEN='\033[0;32m'
 MAGENTA='\033[0;35m'; GRAY='\033[0;90m'; RESET='\033[0m'
 
 echo ""
-echo -e "${CYAN} Delixon ${RESET}${GRAY} workspace listo${RESET}"
+echo -e "${CYAN} Nexenv ${RESET}${GRAY} workspace listo${RESET}"
 echo ""
 
 branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -57,7 +57,7 @@ node_v=$(node --version 2>/dev/null)
 rust_v=$(rustc --version 2>/dev/null | awk '{print $2}')
 [ -n "$rust_v" ] && echo -e "${MAGENTA}  rust     : $rust_v${RESET}"
 
-echo -e "${GRAY}  entorno  : $DELIXON_ENV${RESET}"
+echo -e "${GRAY}  entorno  : $NEXENV_ENV${RESET}"
 echo ""
 echo -e "${GRAY}  dev    → npm run tauri dev${RESET}"
 echo -e "${GRAY}  test   → npm run test${RESET}"

@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::process::Command;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest;
 
 #[derive(Debug, Serialize, Clone)]
@@ -14,7 +14,7 @@ pub struct ScriptResult {
     pub stderr: String,
 }
 
-pub fn list_scripts(project_path: &str) -> Result<Vec<(String, String)>, DelixonError> {
+pub fn list_scripts(project_path: &str) -> Result<Vec<(String, String)>, NexenvError> {
     let m = manifest::load_manifest(project_path)?;
     match m {
         Some(manifest) => {
@@ -26,12 +26,12 @@ pub fn list_scripts(project_path: &str) -> Result<Vec<(String, String)>, Delixon
     }
 }
 
-pub fn run_script(project_path: &str, script_name: &str) -> Result<ScriptResult, DelixonError> {
+pub fn run_script(project_path: &str, script_name: &str) -> Result<ScriptResult, NexenvError> {
     let m = manifest::load_manifest(project_path)?
-        .ok_or_else(|| DelixonError::InvalidConfig("No hay manifest".to_string()))?;
+        .ok_or_else(|| NexenvError::InvalidConfig("No hay manifest".to_string()))?;
 
     let command = m.commands.get(script_name).ok_or_else(|| {
-        DelixonError::InvalidConfig(format!("Script no encontrado: {}", script_name))
+        NexenvError::InvalidConfig(format!("Script no encontrado: {}", script_name))
     })?;
 
     validate_script_command(command)?;
@@ -83,15 +83,15 @@ const ALLOWED_EXECUTABLES: &[&str] = &[
 /// Shell metacaracteres que permiten encadenar comandos arbitrarios.
 const DANGEROUS_CHARS: &[char] = &['|', '`', '$', '(', ')', ';', '&', '<', '>'];
 
-fn validate_script_command(command: &str) -> Result<(), DelixonError> {
+fn validate_script_command(command: &str) -> Result<(), NexenvError> {
     if command.len() > 500 {
-        return Err(DelixonError::InvalidConfig(
+        return Err(NexenvError::InvalidConfig(
             "Comando demasiado largo (max 500 caracteres)".to_string(),
         ));
     }
 
     if command.trim().is_empty() {
-        return Err(DelixonError::InvalidConfig(
+        return Err(NexenvError::InvalidConfig(
             "Comando vacio".to_string(),
         ));
     }
@@ -99,7 +99,7 @@ fn validate_script_command(command: &str) -> Result<(), DelixonError> {
     // Rechazar metacaracteres de shell que permiten inyección
     for ch in DANGEROUS_CHARS {
         if command.contains(*ch) {
-            return Err(DelixonError::InvalidConfig(format!(
+            return Err(NexenvError::InvalidConfig(format!(
                 "Comando contiene caracter no permitido: '{}'. Solo se permiten comandos simples sin pipes ni encadenamiento",
                 ch
             )));
@@ -111,7 +111,7 @@ fn validate_script_command(command: &str) -> Result<(), DelixonError> {
     let exe_lower = executable.to_lowercase();
 
     if !ALLOWED_EXECUTABLES.iter().any(|allowed| exe_lower == *allowed) {
-        return Err(DelixonError::InvalidConfig(format!(
+        return Err(NexenvError::InvalidConfig(format!(
             "Ejecutable '{}' no esta en la lista de permitidos. Permitidos: {}",
             executable,
             ALLOWED_EXECUTABLES.join(", ")

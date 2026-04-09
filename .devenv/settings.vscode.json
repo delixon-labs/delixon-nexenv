@@ -27,14 +27,14 @@
 
   "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font",
   "terminal.integrated.fontSize": 13,
-  "terminal.integrated.defaultProfile.windows": "PowerShell (Delixon)",
+  "terminal.integrated.defaultProfile.windows": "PowerShell (Nexenv)",
   "terminal.integrated.profiles.windows": {
-    "PowerShell (Delixon)": {
+    "PowerShell (Nexenv)": {
       "source": "PowerShell",
       "args": ["-NoExit", "-File", "${workspaceFolder}/.devenv/terminal-init.ps1"],
       "icon": "terminal-powershell"
     },
-    "Git Bash (Delixon)": {
+    "Git Bash (Nexenv)": {
       "path": "C:\\Program Files\\Git\\bin\\bash.exe",
       "args": ["--init-file", "${workspaceFolder}/.devenv/terminal-init.sh"],
       "icon": "terminal-bash"

@@ -1,15 +1,15 @@
 import { create } from "zustand";
-import type { DelixonConfig } from "@/types/config";
+import type { NexenvConfig } from "@/types/config";
 import { DEFAULT_CONFIG } from "@/types/config";
 import * as api from "@/lib/tauri";
 
 interface SettingsState {
-  config: DelixonConfig;
+  config: NexenvConfig;
   sidebarCollapsed: boolean;
   isLoaded: boolean;
 
   loadConfig: () => Promise<void>;
-  setConfig: (updates: Partial<DelixonConfig>) => void;
+  setConfig: (updates: Partial<NexenvConfig>) => void;
   toggleSidebar: () => void;
 }
 
@@ -29,7 +29,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
     }
   },
 
-  setConfig: (updates: Partial<DelixonConfig>) => {
+  setConfig: (updates: Partial<NexenvConfig>) => {
     set((state) => {
       const newConfig = { ...state.config, ...updates };
 

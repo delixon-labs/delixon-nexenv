@@ -27,7 +27,7 @@ jobs:
         working-directory: npm/cli
         run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
 
-      - name: Publish @delixon/cli
+      - name: Publish nexenv
         working-directory: npm/cli
         run: npm publish --access public
         env:

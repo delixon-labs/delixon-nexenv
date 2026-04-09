@@ -44,7 +44,7 @@
     "panel": "Panel",
     "general": "General",
     "unlink": "Desvincular proyecto",
-    "unlinkDesc": "Quita este proyecto del registro de Delixon. Los archivos en disco no se modifican y puedes volver a registrarlo en cualquier momento.",
+    "unlinkDesc": "Quita este proyecto del registro de Nexenv. Los archivos en disco no se modifican y puedes volver a registrarlo en cualquier momento.",
     "unlinkButton": "Desvincular",
     "unlinkConfirm": "Estas seguro?",
     "unlinkYes": "Si, desvincular",
@@ -166,7 +166,7 @@
   },
   "importModal": {
     "title": "Importar proyecto",
-    "file": "Archivo (.delixon)",
+    "file": "Archivo (.nexenv)",
     "browse": "Explorar",
     "path": "Ruta destino",
     "import": "Importar",
@@ -174,7 +174,7 @@
   },
   "settings": {
     "title": "Configuracion",
-    "subtitle": "Ajustes globales de Delixon",
+    "subtitle": "Ajustes globales de Nexenv",
     "general": "General",
     "editor": "Editor de codigo",
     "editorDesc": "Comando para abrir el editor al hacer clic en 'Abrir proyecto'",
@@ -188,15 +188,16 @@
     "fontPack": "Tipografia",
     "fontPackDesc": "Pack de fuentes para la interfaz",
     "dataDir": "Directorio de datos",
-    "dataDirDesc": "Donde Delixon almacena la configuracion de proyectos",
+    "dataDirDesc": "Donde Nexenv almacena la configuracion de proyectos",
     "runtimes": "Runtimes detectados",
     "redetect": "Redetectar",
     "detecting": "Detectando...",
     "noRuntimes": "No se detectaron runtimes. Ejecuta la app dentro de Tauri para detectar los runtimes del sistema.",
     "about": "Acerca de",
-    "version": "Delixon v1.0.0",
+    "version": "Nexenv v1.0.0",
     "tagline": "Gestor de workspaces para desarrolladores",
-    "motto": "Deja de configurar. Empieza a construir."
+    "motto": "Deja de configurar. Empieza a construir.",
+    "aboutProduct": "Un producto de"
   },
   "scaffold": {
     "title": "Crear proyecto",

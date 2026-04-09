@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::path::Path;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest;
 use crate::core::models::project::Project;
 use crate::core::store;
@@ -33,7 +33,7 @@ pub struct HealthCheck {
     pub fix_suggestion: String,
 }
 
-pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonError> {
+pub fn check_project_health(project: &Project) -> Result<HealthReport, NexenvError> {
     let mut checks = Vec::new();
     let project_path = Path::new(&project.path);
 
@@ -134,7 +134,7 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
                         .collect::<Vec<_>>()
                         .join(", ")
                 ),
-                fix_suggestion: "Configurar las variables desde la UI o CLI: delixon env <project> set <key> <value>".to_string(),
+                fix_suggestion: "Configurar las variables desde la UI o CLI: nexenv env <project> set <key> <value>".to_string(),
             });
         }
     }
@@ -216,7 +216,7 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
             name: "Testing".to_string(),
             status: HealthStatus::Warning,
             message: "No se detecto configuracion de tests".to_string(),
-            fix_suggestion: "Agregar testing: delixon add testing (futuro)".to_string(),
+            fix_suggestion: "Agregar testing: nexenv add testing (futuro)".to_string(),
         });
     }
 
@@ -225,7 +225,7 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
         checks.push(HealthCheck {
             name: "Manifest".to_string(),
             status: HealthStatus::Ok,
-            message: ".delixon/manifest.yaml presente".to_string(),
+            message: ".nexenv/manifest.yaml presente".to_string(),
             fix_suggestion: String::new(),
         });
     } else {
@@ -233,7 +233,7 @@ pub fn check_project_health(project: &Project) -> Result<HealthReport, DelixonEr
             name: "Manifest".to_string(),
             status: HealthStatus::Warning,
             message: "No hay manifest — informacion limitada del proyecto".to_string(),
-            fix_suggestion: "Generar: delixon manifest <project>".to_string(),
+            fix_suggestion: "Generar: nexenv manifest <project>".to_string(),
         });
     }
 

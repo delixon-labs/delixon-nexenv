@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::process::Command;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::manifest;
 
 #[derive(Debug, Serialize, Clone)]
@@ -12,7 +12,7 @@ pub struct ProjectProcess {
     pub port: Option<u16>,
 }
 
-pub fn list_processes_on_ports(project_path: &str) -> Result<Vec<ProjectProcess>, DelixonError> {
+pub fn list_processes_on_ports(project_path: &str) -> Result<Vec<ProjectProcess>, NexenvError> {
     let manifest = manifest::load_manifest(project_path)?;
     let ports = match manifest {
         Some(m) => m.ports,
@@ -28,7 +28,7 @@ pub fn list_processes_on_ports(project_path: &str) -> Result<Vec<ProjectProcess>
     Ok(processes)
 }
 
-pub fn kill_process(pid: u32) -> Result<(), DelixonError> {
+pub fn kill_process(pid: u32) -> Result<(), NexenvError> {
     #[cfg(unix)]
     {
         Command::new("kill")

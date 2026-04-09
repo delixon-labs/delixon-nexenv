@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Reportar un error en Delixon
+about: Reportar un error en Nexenv
 title: "[BUG] "
 labels: bug
 assignees: ''
@@ -27,4 +27,4 @@ Si aplica, añadir capturas para explicar el problema.
 ## Entorno
 
 - SO: [ej. Windows 11]
-- Versión de Delixon: [ej. 1.0.0]
+- Versión de Nexenv: [ej. 1.0.0]

@@ -1,35 +1,35 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::core::error::DelixonError;
+use crate::core::error::NexenvError;
 use crate::core::models::project::Project;
 use crate::core::utils::fs::{ensure_dir, write_private};
 use crate::core::utils::platform::get_data_dir;
 
-fn data_dir() -> Result<PathBuf, DelixonError> {
+fn data_dir() -> Result<PathBuf, NexenvError> {
     get_data_dir().ok_or_else(|| {
-        DelixonError::InvalidConfig("No se pudo determinar el directorio de datos".to_string())
+        NexenvError::InvalidConfig("No se pudo determinar el directorio de datos".to_string())
     })
 }
 
-fn projects_file() -> Result<PathBuf, DelixonError> {
+fn projects_file() -> Result<PathBuf, NexenvError> {
     Ok(data_dir()?.join("projects.json"))
 }
 
-fn envs_dir() -> Result<PathBuf, DelixonError> {
+fn envs_dir() -> Result<PathBuf, NexenvError> {
     Ok(data_dir()?.join("envs"))
 }
 
-pub fn history_dir() -> Result<PathBuf, DelixonError> {
+pub fn history_dir() -> Result<PathBuf, NexenvError> {
     Ok(data_dir()?.join("history"))
 }
 
-pub fn get_history_path(project_id: &str) -> Result<PathBuf, DelixonError> {
+pub fn get_history_path(project_id: &str) -> Result<PathBuf, NexenvError> {
     Ok(history_dir()?.join(format!("{}.txt", project_id)))
 }
 
 /// Inicializa el directorio de datos si no existe
-pub fn init_data_dir() -> Result<(), DelixonError> {
+pub fn init_data_dir() -> Result<(), NexenvError> {
     let dir = data_dir()?;
     ensure_dir(&dir)?;
     ensure_dir(&dir.join("envs"))?;
@@ -39,7 +39,7 @@ pub fn init_data_dir() -> Result<(), DelixonError> {
 
 // --- Proyectos ---
 
-pub fn load_projects() -> Result<Vec<Project>, DelixonError> {
+pub fn load_projects() -> Result<Vec<Project>, NexenvError> {
     let path = projects_file()?;
     if !path.exists() {
         return Ok(vec![]);
@@ -49,7 +49,7 @@ pub fn load_projects() -> Result<Vec<Project>, DelixonError> {
     Ok(projects)
 }
 
-pub fn save_projects(projects: &[Project]) -> Result<(), DelixonError> {
+pub fn save_projects(projects: &[Project]) -> Result<(), NexenvError> {
     init_data_dir()?;
     let path = projects_file()?;
     let data = serde_json::to_string_pretty(projects)?;
@@ -59,7 +59,7 @@ pub fn save_projects(projects: &[Project]) -> Result<(), DelixonError> {
 
 // --- Variables de entorno por proyecto ---
 
-pub fn load_env_vars(project_id: &str) -> Result<HashMap<String, String>, DelixonError> {
+pub fn load_env_vars(project_id: &str) -> Result<HashMap<String, String>, NexenvError> {
     let path = envs_dir()?.join(format!("{}.json", project_id));
     if !path.exists() {
         return Ok(HashMap::new());
@@ -72,7 +72,7 @@ pub fn load_env_vars(project_id: &str) -> Result<HashMap<String, String>, Delixo
 pub fn save_env_vars(
     project_id: &str,
     vars: &HashMap<String, String>,
-) -> Result<(), DelixonError> {
+) -> Result<(), NexenvError> {
     init_data_dir()?;
     let path = envs_dir()?.join(format!("{}.json", project_id));
     let data = serde_json::to_string_pretty(vars)?;
@@ -80,7 +80,7 @@ pub fn save_env_vars(
     Ok(())
 }
 
-pub fn delete_env_vars(project_id: &str) -> Result<(), DelixonError> {
+pub fn delete_env_vars(project_id: &str) -> Result<(), NexenvError> {
     let path = envs_dir()?.join(format!("{}.json", project_id));
     if path.exists() {
         std::fs::remove_file(&path)?;
@@ -98,7 +98,7 @@ mod tests {
         Project {
             id: format!("test-storage-{}", suffix),
             name: format!("Test Project {}", suffix),
-            path: format!("/tmp/delixon-test-{}", suffix),
+            path: format!("/tmp/nexenv-test-{}", suffix),
             description: Some("test project".to_string()),
             runtimes: vec![RuntimeConfig {
                 runtime: "node".to_string(),

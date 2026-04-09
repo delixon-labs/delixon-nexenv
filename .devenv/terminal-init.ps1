@@ -1,5 +1,5 @@
 # ==============================================================================
-# Delixon -- Terminal PowerShell (configuracion exclusiva de este proyecto)
+# Nexenv -- Terminal PowerShell (configuracion exclusiva de este proyecto)
 # No modifica el perfil global. Solo afecta esta ventana de terminal.
 # ==============================================================================
 
@@ -7,9 +7,9 @@ $PROJECT_ROOT = Split-Path $MyInvocation.MyCommand.Path | Split-Path
 Set-Location $PROJECT_ROOT
 
 # --- Variables de entorno del proyecto ---------------------------------------
-$env:DELIXON_ENV       = "development"
-$env:DELIXON_LOG_LEVEL = "debug"
-$env:DELIXON_DATA_DIR  = Join-Path $PROJECT_ROOT "dev-data"
+$env:NEXENV_ENV       = "development"
+$env:NEXENV_LOG_LEVEL = "debug"
+$env:NEXENV_DATA_DIR  = Join-Path $PROJECT_ROOT "dev-data"
 
 $envLocal = Join-Path $PROJECT_ROOT ".env.local"
 if (Test-Path $envLocal) {
@@ -49,7 +49,7 @@ function lint  { npm run lint }
 
 # --- Banner de bienvenida ----------------------------------------------------
 Write-Host ""
-Write-Host " Delixon " -BackgroundColor DarkCyan -ForegroundColor White -NoNewline
+Write-Host " Nexenv " -BackgroundColor DarkCyan -ForegroundColor White -NoNewline
 Write-Host " workspace listo" -ForegroundColor DarkGray
 Write-Host ""
 
@@ -66,7 +66,7 @@ if (Get-Command rustc -ErrorAction SilentlyContinue) {
     Write-Host "  rust     : no instalado  ->  winget install Rustlang.Rustup" -ForegroundColor Red
 }
 
-Write-Host "  entorno  : $($env:DELIXON_ENV)" -ForegroundColor DarkGray
+Write-Host "  entorno  : $($env:NEXENV_ENV)" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  dev   -> npm run tauri dev"   -ForegroundColor DarkGray
 Write-Host "  test  -> npm run test"         -ForegroundColor DarkGray

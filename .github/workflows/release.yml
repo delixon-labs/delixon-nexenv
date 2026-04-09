@@ -82,7 +82,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
 
       - name: Build CLI binary
-        run: cargo build --manifest-path src-tauri/Cargo.toml --bin delixon-cli --no-default-features --release
+        run: cargo build --manifest-path src-tauri/Cargo.toml --bin nexenv-cli --no-default-features --release
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
@@ -91,4 +91,4 @@ jobs:
           files: |
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/appimage/*.AppImage
-            src-tauri/target/release/delixon-cli
+            src-tauri/target/release/nexenv-cli

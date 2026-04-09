@@ -26,7 +26,7 @@ pub fn ensure_gitignore_entries(project_path: &Path, entries: &[&str]) -> std::i
         content.push('\n');
     }
     if !content.is_empty() {
-        content.push_str("\n# Delixon (generado automaticamente)\n");
+        content.push_str("\n# Nexenv (generado automaticamente)\n");
     }
     for entry in &to_add {
         content.push_str(entry);

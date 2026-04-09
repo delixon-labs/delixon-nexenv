@@ -6,7 +6,7 @@ vi.mock("@tauri-apps/api/core", () => ({
   isTauri: () => false,
 }));
 
-describe("Delixon", () => {
+describe("Nexenv", () => {
   it("should load without errors", () => {
     expect(true).toBe(true);
   });
