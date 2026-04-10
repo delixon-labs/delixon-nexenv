@@ -1,0 +1,36 @@
+name: Enforce branch flow
+
+# Flow: desarrollo → develop (PR) → main (PR)
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  check-source-branch:
+    name: Verify branch flow
+    runs-on: ubuntu-latest
+    steps:
+      - name: PRs to main only from develop
+        if: github.base_ref == 'main'
+        run: |
+          if [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "ERROR: PRs to main must come ONLY from 'develop'."
+            echo "Source branch: ${{ github.head_ref }}"
+            echo "Correct flow: desarrollo -> develop (PR) -> main (PR)"
+            exit 1
+          fi
+          echo "OK: PR to main comes from develop."
+
+      - name: PRs to develop only from desarrollo
+        if: github.base_ref == 'develop'
+        run: |
+          if [ "${{ github.head_ref }}" != "desarrollo" ]; then
+            echo "ERROR: PRs to develop must come ONLY from 'desarrollo'."
+            echo "Source branch: ${{ github.head_ref }}"
+            echo "Correct flow: desarrollo -> develop (PR) -> main (PR)"
+            exit 1
+          fi
+          echo "OK: PR to develop comes from desarrollo."
