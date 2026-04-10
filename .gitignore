@@ -49,6 +49,9 @@ desktop.ini
 docs/
 nexenv.docs/
 
+# Reportes internos generados por agentes
+.github/reports/
+
 # Archivos de configuracion de Nexenv (los generara la app)
 *.nexenv
 *.nexenv-team
