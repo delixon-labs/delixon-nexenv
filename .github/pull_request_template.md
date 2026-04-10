@@ -1,21 +1,35 @@
-## ¿Qué hace este PR?
+## Summary
 
-Descripción breve del cambio.
+Brief description of the change.
 
-## Tipo de cambio
+## Type
 
 - [ ] Bug fix
-- [ ] Nueva funcionalidad
+- [ ] New feature
 - [ ] Refactor
-- [ ] Documentación
-- [ ] Otro
+- [ ] Performance
+- [ ] Documentation
+- [ ] CI/CD
+- [ ] Other
 
-## Testing realizado
+## Changes
 
-- [ ] Tests unitarios pasan
-- [ ] Probado manualmente en Windows
-- [ ] Sin regresiones en funcionalidades existentes
+- 
 
-## Capturas / Demo
+## Testing
 
-Si hay cambios visuales, incluir antes/después.
+- [ ] Unit tests pass (`npm run test`)
+- [ ] Lint passes (`npm run lint`)
+- [ ] Rust check passes (`cargo check`)
+- [ ] Tested manually on Windows
+- [ ] Tested manually on macOS
+- [ ] Tested manually on Linux
+- [ ] No regressions in existing functionality
+
+## Screenshots
+
+If there are visual changes, include before/after.
+
+## Related issues
+
+Closes #

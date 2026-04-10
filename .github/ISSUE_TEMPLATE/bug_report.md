@@ -1,30 +1,47 @@
 ---
-name: Bug report
-about: Reportar un error en Nexenv
+name: Bug Report
+about: Report a bug or unexpected behavior in Nexenv
 title: "[BUG] "
 labels: bug
 assignees: ''
 ---
 
-## Descripción del bug
+## Description
 
-Descripción clara y concisa del error.
+A clear and concise description of the bug.
 
-## Pasos para reproducirlo
+## Steps to reproduce
 
-1. Ir a '...'
-2. Hacer clic en '...'
-3. Ver el error
+1. Go to '...'
+2. Click on '...'
+3. See error
 
-## Comportamiento esperado
+## Expected behavior
 
-Qué debería ocurrir.
+What should have happened instead.
 
-## Capturas de pantalla
+## Screenshots
 
-Si aplica, añadir capturas para explicar el problema.
+If applicable, add screenshots to help explain the problem.
 
-## Entorno
+## Environment
 
-- SO: [ej. Windows 11]
-- Versión de Nexenv: [ej. 1.0.0]
+- **OS:** [e.g. Windows 11, macOS 14, Ubuntu 24.04]
+- **Nexenv version:** [e.g. 1.0.0]
+- **Installation method:** [Desktop installer / npm]
+- **Node version (if CLI):** [e.g. 22.x]
+
+## Logs
+
+<details>
+<summary>Console output (if applicable)</summary>
+
+```
+Paste any error logs here
+```
+
+</details>
+
+## Additional context
+
+Any other relevant information about the problem.

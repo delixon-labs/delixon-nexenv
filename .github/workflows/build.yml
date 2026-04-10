@@ -2,7 +2,7 @@ name: Build & Test
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, desarrollo]
 
 concurrency:
   group: build-${{ github.ref }}
@@ -11,15 +11,16 @@ concurrency:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Linux deps
+      - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -28,18 +29,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: node_modules
-          key: npm-${{ matrix.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Node dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+          node-version: 22
+          cache: npm
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -49,10 +40,13 @@ jobs:
         with:
           workspaces: "./src-tauri -> target"
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Lint
         run: npm run lint
 
-      - name: Run frontend tests
+      - name: Frontend tests
         run: npm run test -- --run
 
       - name: Build frontend
@@ -61,8 +55,8 @@ jobs:
       - name: Rust check
         run: cargo check --manifest-path src-tauri/Cargo.toml
 
-      - name: Run Rust tests
+      - name: Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
 
-      - name: Check CLI builds independently
+      - name: CLI check
         run: cargo check --manifest-path src-tauri/Cargo.toml --bin nexenv-cli --no-default-features

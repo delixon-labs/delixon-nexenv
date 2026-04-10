@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, desarrollo]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,15 +11,16 @@ concurrency:
 jobs:
   lint-and-test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Linux deps
+      - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -28,7 +29,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -37,20 +38,21 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Run tests
+      - name: Frontend tests
         run: npm run test -- --run
 
   rust-check:
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Linux deps
+      - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -69,8 +71,8 @@ jobs:
       - name: Clippy
         run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 
-      - name: Run Rust tests
+      - name: Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
 
-      - name: Check CLI builds independently
+      - name: CLI check
         run: cargo check --manifest-path src-tauri/Cargo.toml --bin nexenv-cli --no-default-features

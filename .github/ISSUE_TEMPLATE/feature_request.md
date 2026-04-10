@@ -1,23 +1,27 @@
 ---
-name: Feature request
-about: Sugerir una nueva funcionalidad para Nexenv
+name: Feature Request
+about: Suggest a new feature or improvement for Nexenv
 title: "[FEAT] "
 labels: enhancement
 assignees: ''
 ---
 
-## ¿Qué problema resuelve esta funcionalidad?
+## Problem
 
-Descripción clara del problema o necesidad.
+A clear description of the problem or need this feature would address.
 
-## Solución propuesta
+## Proposed solution
 
-Descripción de cómo te gustaría que funcionara.
+Describe how you would like it to work.
 
-## Alternativas consideradas
+## Alternatives considered
 
-¿Has pensado en otras formas de resolverlo?
+Have you thought of other ways to solve this?
 
-## Contexto adicional
+## Use case
 
-Cualquier información adicional relevante.
+Who benefits from this and in what scenario?
+
+## Additional context
+
+Any mockups, references or related issues.

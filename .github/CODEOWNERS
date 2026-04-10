@@ -1,20 +1,20 @@
-# Delixon — Code Owners
-# Cada PR requiere aprobación de al menos un code owner
+# Nexenv — Code Owners
+# Every PR requires approval from at least one code owner
 
-# Owner global — todo el repo
+# Global — entire repo
 * @rrestevez-dell @mundowise
 
-# Backend Rust / Tauri
+# Rust backend / Tauri
 /src-tauri/ @rrestevez-dell @mundowise
 
-# Frontend React
+# React frontend
 /src/ @rrestevez-dell @mundowise
 
-# Plantillas
-/templates/ @rrestevez-dell @mundowise
+# npm distribution
+/npm/ @rrestevez-dell @mundowise
 
-# CI/CD y configuración del repo
+# CI/CD and repo configuration
 /.github/ @rrestevez-dell @mundowise
 
-# Documentación
+# Documentation
 /docs/ @rrestevez-dell @mundowise
