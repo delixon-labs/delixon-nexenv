@@ -4,6 +4,7 @@ import * as api from "@/lib/tauri";
 import type { DetectedStack } from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
 import { Spinner } from "@/components/ui/Spinner";
+import { toast } from "@/components/ui/Toast";
 
 interface Props {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
     setError(null);
     try {
       await api.scanAndRegister(path.trim(), name.trim());
+      toast.success(`Proyecto "${name.trim()}" registrado`);
       onSuccess();
       handleClose();
     } catch (err) {

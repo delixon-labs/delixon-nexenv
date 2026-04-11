@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import * as api from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
 import { Spinner } from "@/components/ui/Spinner";
+import { toast } from "@/components/ui/Toast";
 
 interface UseTemplateModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export default function UseTemplateModal({
     setIsSubmitting(true);
     try {
       const project = await api.createFromTemplate(templateId, path.trim(), name.trim());
+      toast.success(`Proyecto "${name.trim()}" creado desde plantilla`);
       onClose();
       navigate(`/project/${project.id}`);
     } catch (err) {

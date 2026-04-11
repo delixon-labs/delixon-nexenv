@@ -4,6 +4,7 @@ import { useProjectsStore } from "@/stores/projects";
 import * as api from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
 import { Spinner } from "@/components/ui/Spinner";
+import { toast } from "@/components/ui/Toast";
 
 const AVAILABLE_RUNTIMES: { value: Runtime; label: string }[] = [
   { value: "node", label: "Node.js" },
@@ -96,6 +97,7 @@ export default function CreateProjectModal({
       };
 
       await addProject(input);
+      toast.success(`Proyecto "${name.trim()}" creado`);
       resetForm();
       onClose();
     } catch (err) {
