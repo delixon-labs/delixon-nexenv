@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/stores/settings";
 import * as api from "@/lib/tauri";
 import type { DetectedRuntime, InstalledEditor } from "@/lib/tauri";
+import { Spinner } from "@/components/ui/Spinner";
+import PathInput from "@/components/ui/PathInput";
 
 function defaultDataDir(): string {
   const p = navigator.platform?.toLowerCase() || "";
@@ -58,44 +60,36 @@ export default function Settings() {
             label={t("settings.editor")}
             description={t("settings.editorDesc")}
           >
-            <select
-              value={config.defaultEditor}
-              onChange={(e) => setConfig({ defaultEditor: e.target.value })}
-              className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500"
-            >
-              {installedEditors.length > 0 ? (
-                installedEditors.map((ed) => (
-                  <option key={ed.cmd} value={ed.cmd}>{ed.label}</option>
-                ))
+            <div className="relative w-52">
+              {installedEditors.length === 0 ? (
+                <div className="flex items-center justify-center w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <Spinner size="sm" className="text-gray-500" />
+                </div>
               ) : (
-                <option value={config.defaultEditor}>{config.defaultEditor}</option>
+                <select
+                  value={config.defaultEditor}
+                  onChange={(e) => setConfig({ defaultEditor: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-hidden focus:border-primary-500"
+                >
+                  {installedEditors.map((ed) => (
+                    <option key={ed.cmd} value={ed.cmd}>{ed.label}</option>
+                  ))}
+                </select>
               )}
-            </select>
+            </div>
           </SettingRow>
 
-          {/* Tema */}
+          {/* Tema — solo dark por ahora, light/system deshabilitados */}
           <SettingRow
             label={t("settings.theme")}
             description={t("settings.themeDesc")}
           >
             <div className="flex gap-2">
-              {(["dark", "light", "system"] as const).map((theme) => (
-                <button
-                  key={theme}
-                  onClick={() => setConfig({ theme })}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    config.theme === theme
-                      ? "bg-primary-500/10 text-primary-500 border-primary-500/30"
-                      : "bg-gray-800 text-gray-500 border-gray-700 hover:text-gray-300"
-                  }`}
-                >
-                  {theme === "dark"
-                    ? t("settings.themeDark")
-                    : theme === "light"
-                      ? t("settings.themeLight")
-                      : t("settings.themeSystem")}
-                </button>
-              ))}
+              <button
+                className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors bg-primary-500/10 text-primary-500 border-primary-500/30"
+              >
+                {t("settings.themeDark")}
+              </button>
             </div>
           </SettingRow>
 
@@ -144,12 +138,13 @@ export default function Settings() {
             label={t("settings.dataDir")}
             description={t("settings.dataDirDesc")}
           >
-            <input
-              type="text"
-              value={config.dataDir || defaultDataDir()}
-              onChange={(e) => setConfig({ dataDir: e.target.value })}
-              className="w-full max-w-sm px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm font-mono text-gray-300 focus:outline-hidden focus:border-primary-500/50"
-            />
+            <div className="max-w-sm">
+              <PathInput
+                value={config.dataDir || defaultDataDir()}
+                onChange={(v) => setConfig({ dataDir: v })}
+                placeholder="$LOCALAPPDATA/nexenv"
+              />
+            </div>
           </SettingRow>
         </div>
       </section>
@@ -163,8 +158,9 @@ export default function Settings() {
           <button
             onClick={loadRuntimes}
             disabled={loadingRuntimes}
-            className="px-3 py-1 rounded-md text-xs text-dlx-text-light-1 bg-dlx-light-2/50 hover:bg-dlx-light-3/50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs text-dlx-text-light-1 bg-dlx-light-2/50 hover:bg-dlx-light-3/50 transition-colors disabled:opacity-50"
           >
+            {loadingRuntimes && <Spinner size="sm" className="text-dlx-text-light-1" />}
             {loadingRuntimes ? t("settings.detecting") : t("settings.redetect")}
           </button>
         </div>

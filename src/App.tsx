@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import Catalog from "./pages/Catalog";
 import Scaffold from "./pages/Scaffold";
 import { useSettingsStore } from "./stores/settings";
+import { BlockProgress } from "./components/ui/Spinner";
 
 function App() {
   const { i18n } = useTranslation();
@@ -17,10 +18,17 @@ function App() {
   const isLoaded = useSettingsStore((s) => s.isLoaded);
   const language = useSettingsStore((s) => s.config.language);
   const fontPack = useSettingsStore((s) => s.config.fontPack);
+  const theme = useSettingsStore((s) => s.config.theme);
 
   useEffect(() => {
     if (!isLoaded) loadConfig();
   }, [isLoaded, loadConfig]);
+
+  // Sync theme with data-theme attribute
+  // Solo dark habilitado por ahora — light/system forzados a dark
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }, [theme]);
 
   // Sync i18n language with config
   useEffect(() => {
@@ -33,6 +41,17 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute("data-font-pack", fontPack || "system");
   }, [fontPack]);
+
+  if (!isLoaded) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#12121e" }}>
+        <Titlebar />
+        <div className="flex-1 flex items-center justify-center">
+          <BlockProgress />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>

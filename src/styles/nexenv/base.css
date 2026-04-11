@@ -18,3 +18,17 @@ html, body, #root {
   width: 0;
   height: 0;
 }
+
+/* --- Block progress animation ---
+   Cuadrados que pulsan en secuencia para loading de pagina.
+*/
+@keyframes block-pulse {
+  0%, 60%, 100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
