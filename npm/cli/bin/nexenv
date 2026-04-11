@@ -14,6 +14,6 @@ try {
     process.exit(error.status);
   }
   console.error("Nexenv: no se pudo ejecutar el binario.");
-  console.error("Intenta reinstalar: npm install -g @delixon/cli");
+  console.error("Intenta reinstalar: npm install -g @delixon/nexenv");
   process.exit(1);
 }

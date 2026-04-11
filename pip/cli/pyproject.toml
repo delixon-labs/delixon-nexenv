@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexenv"
+version = "0.0.1"
+description = "Workspace manager for developers"
+readme = "README.md"
+license = {text = "FSL-1.1-ALv2"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Delixon Labs", email = "hello@delixon.dev"}
+]
+keywords = ["nexenv", "developer-tools", "workspace-manager", "devtools"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[project.urls]
+Homepage = "https://delixon.dev/nexenv"
+Repository = "https://github.com/delixon-labs/delixon-nexenv"
+
+[project.scripts]
+nexenv = "nexenv.cli:main"
