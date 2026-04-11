@@ -87,6 +87,7 @@ Output: `src-tauri/target/release/bundle/`
 
 Source-available under [FSL-1.1-ALv2](LICENSE). Each version converts to Apache 2.0 two years after release. See [LICENSE-FAQ.md](LICENSE-FAQ.md) for details.
 
+
 You can use, study, modify and redistribute the code for any purpose **except** building a competing commercial product or service.
 
 ---
