@@ -52,6 +52,26 @@
   --info: #3b82f6;
   --info-light: #60a5fa;
   --info-dark: #2563eb;
+
+  /* Semanticos de layout — dark por defecto */
+  --app-bg: var(--bg-light-1);
+  --sidebar-bg: var(--bg-light-2);
+  --surface: var(--bg-light-3);
+  --border: #2a2a44;
+  --text-primary: var(--text-light-3);
+  --text-secondary: var(--text-light-1);
+  --text-muted: var(--text-dark-1);
+}
+
+/* Light mode (deshabilitado en GUI por ahora) */
+[data-theme="light"] {
+  --app-bg: #c0c0d8;
+  --sidebar-bg: #5a5a7a;
+  --surface: #b0b0c8;
+  --border: #9a9ab8;
+  --text-primary: #12121e;
+  --text-secondary: #2a2a44;
+  --text-muted: #5a5a7a;
 }
 
 /* Puente → Tailwind utilities
@@ -96,6 +116,15 @@
   --color-info: var(--info);
   --color-info-light: var(--info-light);
   --color-info-dark: var(--info-dark);
+
+  /* Layout semantico (responde al tema) */
+  --color-app-bg: var(--app-bg);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-surface: var(--surface);
+  --color-app-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
 
   /* Primary — colores originales de la app (azul).
      Cuando quieras migrar a purpura, cambia estos a var(--accent-*). */

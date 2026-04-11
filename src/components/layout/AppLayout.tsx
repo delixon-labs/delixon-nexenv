@@ -30,7 +30,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   }, [fetchProjects]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-950 text-gray-100 font-sans">
+    <div className="flex flex-1 min-h-0 overflow-hidden bg-app-bg text-text-primary font-sans">
       <Sidebar />
       <main className="flex-1 overflow-hidden">{children}</main>
     </div>

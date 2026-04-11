@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import * as api from "@/lib/tauri";
 import type { DetectedStack } from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface Props {
   isOpen: boolean;
@@ -208,9 +209,9 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
             <button
               onClick={handleScan}
               disabled={scanning || !path.trim()}
-              className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 min-w-28 px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
             >
-              {scanning ? t("register.scanning") : t("register.scan")}
+              {scanning ? <Spinner size="sm" className="text-success-light" /> : t("register.scan")}
             </button>
           )}
           {step === "confirm" && (
@@ -225,9 +226,9 @@ export default function RegisterProjectModal({ isOpen, onClose, onSuccess }: Pro
               <button
                 onClick={handleRegister}
                 disabled={registering || !name.trim()}
-                className="px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 min-w-28 px-4 py-2 rounded-lg bg-success/10 text-success-light text-sm font-medium hover:bg-success/20 disabled:opacity-50 transition-colors"
               >
-                {registering ? t("register.registering") : t("register.register")}
+                {registering ? <Spinner size="sm" className="text-success-light" /> : t("register.register")}
               </button>
             </>
           )}

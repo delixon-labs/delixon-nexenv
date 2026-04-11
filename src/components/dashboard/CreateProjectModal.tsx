@@ -3,6 +3,7 @@ import type { CreateProjectInput, Runtime, RuntimeConfig } from "@/types/project
 import { useProjectsStore } from "@/stores/projects";
 import * as api from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
+import { Spinner } from "@/components/ui/Spinner";
 
 const AVAILABLE_RUNTIMES: { value: Runtime; label: string }[] = [
   { value: "node", label: "Node.js" },
@@ -180,7 +181,10 @@ export default function CreateProjectModal({
                 onBlur={handlePathBlur}
               />
               {isDetecting && (
-                <p className="text-xs text-primary-500 mt-1">Detectando stack...</p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Spinner size="sm" className="text-primary-500" />
+                  <span className="text-xs text-primary-500">Detectando stack...</span>
+                </div>
               )}
             </div>
 
@@ -250,9 +254,9 @@ export default function CreateProjectModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-success/10 text-success-light hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center justify-center min-w-36 px-4 py-2 rounded-lg text-sm font-medium bg-success/10 text-success-light hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? "Creando..." : "Crear proyecto"}
+              {isSubmitting ? <Spinner size="sm" className="text-success-light" /> : "Crear proyecto"}
             </button>
           </div>
         </form>
