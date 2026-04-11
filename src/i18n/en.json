@@ -19,7 +19,9 @@
     "templates": "Templates",
     "catalog": "Catalog",
     "settings": "Settings",
-    "recent": "Recent"
+    "recent": "Recent",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "dashboard": {
     "title": "Projects",

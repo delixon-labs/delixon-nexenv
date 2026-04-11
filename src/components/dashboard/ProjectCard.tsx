@@ -3,6 +3,7 @@ import type { Project } from "@/types/project";
 import { useProjectsStore } from "@/stores/projects";
 import * as api from "@/lib/tauri";
 import { techBrandClass } from "@/lib/tech-meta";
+import Tooltip from "@/components/ui/Tooltip";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: "Activo", color: "bg-green-500" },
@@ -48,10 +49,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       {/* Header */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 ${status.color}`}
-            title={status.label}
-          />
+          <Tooltip text={status.label} position="right">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${status.color}`} />
+          </Tooltip>
           <h3 className="text-base font-semibold text-white truncate group-hover:text-primary-500 transition-colors">
             {project.name}
           </h3>
@@ -96,32 +96,36 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-800/50">
-        <span className="text-xs text-gray-600 truncate" title={project.path}>
-          {project.path}
-        </span>
+        <Tooltip text={project.path} position="top">
+          <span className="text-xs text-gray-600 truncate">
+            {project.path}
+          </span>
+        </Tooltip>
         <span className="text-xs text-gray-600 shrink-0">{timeAgo}</span>
       </div>
 
       {/* Actions (visible on hover) */}
       <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={handleOpen}
-          className="p-1.5 rounded-md bg-info/10 text-info-light hover:bg-info/20 transition-colors"
-          title="Abrir en VSCode"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-          </svg>
-        </button>
-        <button
-          onClick={handleTerminal}
-          className="p-1.5 rounded-md bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-          title="Abrir terminal"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
-          </svg>
-        </button>
+        <Tooltip text="Abrir en VSCode" position="bottom">
+          <button
+            onClick={handleOpen}
+            className="p-1.5 rounded-md bg-info/10 text-info-light hover:bg-info/20 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </button>
+        </Tooltip>
+        <Tooltip text="Abrir terminal" position="bottom">
+          <button
+            onClick={handleTerminal}
+            className="p-1.5 rounded-md bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

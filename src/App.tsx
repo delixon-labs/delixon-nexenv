@@ -11,6 +11,7 @@ import Catalog from "./pages/Catalog";
 import Scaffold from "./pages/Scaffold";
 import { useSettingsStore } from "./stores/settings";
 import { BlockProgress } from "./components/ui/Spinner";
+import { ToastContainer } from "./components/ui/Toast";
 
 function App() {
   const { i18n } = useTranslation();
@@ -66,6 +67,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </AppLayout>
+    <ToastContainer />
     </div>
   );
 }

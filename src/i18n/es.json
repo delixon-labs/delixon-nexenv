@@ -19,7 +19,9 @@
     "templates": "Plantillas",
     "catalog": "Catalogo",
     "settings": "Configuracion",
-    "recent": "Recientes"
+    "recent": "Recientes",
+    "expand": "Expandir",
+    "collapse": "Colapsar"
   },
   "dashboard": {
     "title": "Proyectos",

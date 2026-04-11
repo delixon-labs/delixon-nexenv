@@ -2,6 +2,7 @@ import { useState } from "react";
 import * as api from "@/lib/tauri";
 import PathInput from "@/components/ui/PathInput";
 import { Spinner } from "@/components/ui/Spinner";
+import { toast } from "@/components/ui/Toast";
 
 interface ImportProjectModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export default function ImportProjectModal({
     setIsSubmitting(true);
     try {
       await api.importProject(fileContent, path.trim());
+      toast.success("Proyecto importado correctamente");
       setPath("");
       onSuccess();
       onClose();

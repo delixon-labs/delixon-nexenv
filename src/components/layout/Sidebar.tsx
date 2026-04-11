@@ -4,6 +4,7 @@ import { useProjectsStore } from "@/stores/projects";
 import { useSettingsStore } from "@/stores/settings";
 import { clsx } from "clsx";
 import logo from "@/assets/logos/Log-bt.png";
+import Tooltip from "@/components/ui/Tooltip";
 
 const navItems = [
   { to: "/", labelKey: "sidebar.projects", icon: IconGrid },
@@ -41,29 +42,31 @@ export default function Sidebar() {
       {/* Header */}
       <div className="flex items-center h-14 border-b border-app-border shrink-0">
         {sidebarCollapsed ? (
-          <button
-            onClick={toggleSidebar}
-            className="mx-auto p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
-            title="Expandir"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
-          </button>
+          <Tooltip text={t("sidebar.expand")} position="right">
+            <button
+              onClick={toggleSidebar}
+              className="mx-auto p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </Tooltip>
         ) : (
           <div className="flex items-center justify-between w-full px-4">
             <span className="text-lg font-bold text-primary-500 tracking-tight">
               Nexenv
             </span>
-            <button
-              onClick={toggleSidebar}
-              className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
-              title="Colapsar"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-            </button>
+            <Tooltip text={t("sidebar.collapse")} position="bottom">
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            </Tooltip>
           </div>
         )}
       </div>
@@ -84,7 +87,13 @@ export default function Sidebar() {
               )
             }
           >
-            <Icon className="w-5 h-5 shrink-0" />
+            {sidebarCollapsed ? (
+              <Tooltip text={t(labelKey)} position="right">
+                <Icon className="w-5 h-5 shrink-0" />
+              </Tooltip>
+            ) : (
+              <Icon className="w-5 h-5 shrink-0" />
+            )}
             <span className={textCls}>{t(labelKey)}</span>
           </NavLink>
         ))}
