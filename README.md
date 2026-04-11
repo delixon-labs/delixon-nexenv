@@ -40,7 +40,7 @@ One click. Project open. Environment ready.
 | Backend | Rust · Tauri 2 |
 | Data | SQLite (local) · JSON fallback |
 | Platforms | Windows · macOS · Linux |
-| Distribution | npm (`nexenv`) · NSIS · MSI |
+| Distribution | npm (`@delixon/nexenv`) · NSIS · MSI |
 
 ## Install
 
@@ -51,7 +51,7 @@ Download the latest installer from [Releases](https://github.com/delixon-labs/de
 ### CLI via npm
 
 ```bash
-npm install -g nexenv
+npm install -g @delixon/nexenv
 nexenv --version
 ```
 
