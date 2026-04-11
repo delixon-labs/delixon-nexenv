@@ -4,10 +4,10 @@ const { existsSync, copyFileSync, chmodSync } = require("fs");
 const { join } = require("path");
 
 const PLATFORM_MAP = {
-  "win32-x64": "nexenv-win32-x64",
-  "linux-x64": "nexenv-linux-x64",
-  "darwin-arm64": "nexenv-darwin-arm64",
-  "darwin-x64": "nexenv-darwin-x64",
+  "win32-x64": "@delixon/nexenv-win32-x64",
+  "linux-x64": "@delixon/nexenv-linux-x64",
+  "darwin-arm64": "@delixon/nexenv-darwin-arm64",
+  "darwin-x64": "@delixon/nexenv-darwin-x64",
 };
 
 const key = `${platform}-${arch}`;

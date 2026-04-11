@@ -1,4 +1,4 @@
-# nexenv
+# @delixon/nexenv
 
 Workspace manager for developers. GUI + CLI.
 
@@ -7,7 +7,7 @@ Stop configuring. Start building.
 ## Install
 
 ```bash
-npm install -g nexenv
+npm install -g @delixon/nexenv
 ```
 
 ## Usage

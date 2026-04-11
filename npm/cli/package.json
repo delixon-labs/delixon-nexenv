@@ -1,7 +1,7 @@
 {
-  "name": "nexenv",
+  "name": "@delixon/nexenv",
   "version": "0.0.1",
-  "description": "Nexenv — Project management for developers",
+  "description": "Workspace manager for developers — GUI + CLI",
   "license": "FSL-1.1-ALv2",
   "author": "Delixon Labs <hello@delixon.dev> (https://delixon.dev)",
   "repository": {
@@ -14,7 +14,8 @@
     "cli",
     "devtools",
     "project-management",
-    "developer-tools"
+    "developer-tools",
+    "workspace-manager"
   ],
   "bin": {
     "nexenv": "bin/nexenv"
@@ -32,12 +33,12 @@
     "arm64"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "optionalDependencies": {
-    "nexenv-win32-x64": "0.0.1",
-    "nexenv-linux-x64": "0.0.1",
-    "nexenv-darwin-arm64": "0.0.1",
-    "nexenv-darwin-x64": "0.0.1"
+    "@delixon/nexenv-win32-x64": "0.0.1",
+    "@delixon/nexenv-linux-x64": "0.0.1",
+    "@delixon/nexenv-darwin-arm64": "0.0.1",
+    "@delixon/nexenv-darwin-x64": "0.0.1"
   }
 }
