@@ -76,3 +76,6 @@ coverage/
 
 # Nexenv (generado automaticamente)
 .nexenv/
+
+# Python build artifacts
+*.egg-info/
