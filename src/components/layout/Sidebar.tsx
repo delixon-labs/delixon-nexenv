@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useProjectsStore } from "@/stores/projects";
 import { useSettingsStore } from "@/stores/settings";
 import { clsx } from "clsx";
+import logo from "@/assets/logos/Log-bt.png";
 
 const navItems = [
   { to: "/", labelKey: "sidebar.projects", icon: IconGrid },
@@ -25,39 +26,50 @@ export default function Sidebar() {
     })
     .slice(0, 5);
 
+  const textCls = clsx(
+    "whitespace-nowrap transition-opacity duration-200",
+    sidebarCollapsed ? "opacity-0" : "opacity-100"
+  );
+
   return (
     <aside
       className={clsx(
-        "flex flex-col h-screen bg-gray-900 border-r border-gray-800 transition-all duration-200",
+        "flex flex-col h-full bg-sidebar-bg border-r border-app-border transition-all duration-200 overflow-hidden",
         sidebarCollapsed ? "w-16" : "w-64"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-gray-800">
-        {!sidebarCollapsed && (
-          <span className="text-lg font-bold text-primary-500 tracking-tight">
-            Nexenv
-          </span>
-        )}
-        <button
-          onClick={toggleSidebar}
-          className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          title={sidebarCollapsed ? "Expandir" : "Colapsar"}
-        >
-          <svg
-            className={clsx("w-4 h-4 transition-transform", sidebarCollapsed && "rotate-180")}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+      <div className="flex items-center h-14 border-b border-app-border shrink-0">
+        {sidebarCollapsed ? (
+          <button
+            onClick={toggleSidebar}
+            className="mx-auto p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
+            title="Expandir"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-          </svg>
-        </button>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+        ) : (
+          <div className="flex items-center justify-between w-full px-4">
+            <span className="text-lg font-bold text-primary-500 tracking-tight">
+              Nexenv
+            </span>
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-surface transition-colors"
+              title="Colapsar"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+      <nav className="min-h-0 flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {navItems.map(({ to, labelKey, icon: Icon }) => (
           <NavLink
             key={to}
@@ -68,19 +80,19 @@ export default function Sidebar() {
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary-500/10 text-primary-500"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+                  : "text-text-muted hover:text-text-primary hover:bg-surface"
               )
             }
           >
             <Icon className="w-5 h-5 shrink-0" />
-            {!sidebarCollapsed && <span>{t(labelKey)}</span>}
+            <span className={textCls}>{t(labelKey)}</span>
           </NavLink>
         ))}
 
         {/* Recent Projects */}
-        {!sidebarCollapsed && recentProjects.length > 0 && (
-          <div className="pt-6">
-            <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        {recentProjects.length > 0 && (
+          <div className={clsx("pt-6", textCls)}>
+            <p className="px-3 mb-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
               {t("sidebar.recent")}
             </p>
             {recentProjects.map((project) => (
@@ -91,8 +103,8 @@ export default function Sidebar() {
                   clsx(
                     "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors",
                     isActive
-                      ? "bg-gray-800 text-white"
-                      : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
+                      ? "bg-surface text-text-primary"
+                      : "text-text-muted hover:text-text-secondary hover:bg-surface/50"
                   )
                 }
               >
@@ -105,11 +117,17 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      {!sidebarCollapsed && (
-        <div className="px-4 py-3 border-t border-gray-800">
-          <p className="text-xs text-gray-600">Nexenv v1.0.0</p>
-        </div>
-      )}
+      <div className="shrink-0">
+        {sidebarCollapsed ? (
+          <div className="flex justify-center py-3">
+            <img src={logo} alt="Nexenv" className="w-5 h-5 rounded-sm" draggable={false} />
+          </div>
+        ) : (
+          <div className="px-4 py-3">
+            <p className="text-xs text-text-muted whitespace-nowrap">Nexenv v{__APP_VERSION__}</p>
+          </div>
+        )}
+      </div>
     </aside>
   );
 }
