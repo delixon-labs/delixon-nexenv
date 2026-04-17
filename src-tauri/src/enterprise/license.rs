@@ -1,10 +1,15 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::RwLock;
 use std::time::Duration;
 
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::Deserialize;
+
+// Cache del resultado de is_enterprise(). None = sin consultar aun,
+// Some(v) = ultimo resultado conocido. Se invalida en activate/deactivate.
+static ENTERPRISE_STATUS: RwLock<Option<bool>> = RwLock::new(None);
 
 const VALIDATION_URL: &str = "https://app.delixon.dev/api/store/license/validate/";
 
@@ -73,22 +78,36 @@ pub async fn validate_license(key: &str) -> Result<LicenseInfo, LicenseError> {
     Ok(info)
 }
 
-pub fn is_enterprise() -> bool {
+pub fn invalidate_enterprise_cache() {
+    if let Ok(mut guard) = ENTERPRISE_STATUS.write() {
+        *guard = None;
+    }
+}
+
+fn set_enterprise_cache(value: bool) {
+    if let Ok(mut guard) = ENTERPRISE_STATUS.write() {
+        *guard = Some(value);
+    }
+}
+
+pub async fn is_enterprise() -> bool {
+    // Cache hit: una sola pasada por la red; subsiguientes llamadas la
+    // reutilizan hasta que activate/deactivate invalide.
+    if let Some(cached) = ENTERPRISE_STATUS.read().ok().and_then(|g| *g) {
+        return cached;
+    }
+
     let key = match read_license_key() {
         Some(k) if !k.is_empty() => k,
-        _ => return false,
-    };
-
-    let rt = tokio::runtime::Handle::try_current();
-    let result = match rt {
-        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(validate_license(&key))),
-        Err(_) => {
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(validate_license(&key))
+        _ => {
+            set_enterprise_cache(false);
+            return false;
         }
     };
 
-    matches!(result, Ok(info) if info.valid)
+    let valid = matches!(validate_license(&key).await, Ok(info) if info.valid);
+    set_enterprise_cache(valid);
+    valid
 }
 
 pub fn activate_license(key: &str) -> Result<(), String> {
@@ -98,6 +117,7 @@ pub fn activate_license(key: &str) -> Result<(), String> {
         fs::create_dir_all(parent).map_err(|e| format!("Error creando directorio: {}", e))?;
     }
     fs::write(&path, key).map_err(|e| format!("Error guardando licencia: {}", e))?;
+    invalidate_enterprise_cache();
     Ok(())
 }
 
@@ -106,6 +126,7 @@ pub fn deactivate_license() -> Result<(), String> {
     if path.exists() {
         fs::remove_file(&path).map_err(|e| format!("Error eliminando licencia: {}", e))?;
     }
+    invalidate_enterprise_cache();
     Ok(())
 }
 
@@ -174,5 +195,13 @@ mod tests {
     fn activate_license_rejects_invalid_format() {
         assert!(activate_license("bad key!").is_err());
         assert!(activate_license("").is_err());
+    }
+
+    #[test]
+    fn invalidate_cache_resets_status() {
+        set_enterprise_cache(true);
+        assert_eq!(*ENTERPRISE_STATUS.read().unwrap(), Some(true));
+        invalidate_enterprise_cache();
+        assert_eq!(*ENTERPRISE_STATUS.read().unwrap(), None);
     }
 }
