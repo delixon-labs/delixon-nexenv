@@ -5,6 +5,6 @@ pub mod license;
 pub use license::is_enterprise;
 
 #[cfg(not(feature = "enterprise"))]
-pub fn is_enterprise() -> bool {
+pub async fn is_enterprise() -> bool {
     false
 }
