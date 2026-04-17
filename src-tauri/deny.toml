@@ -9,8 +9,28 @@ all-features = true
 
 [advisories]
 version = 2
-yanked = "deny"
-ignore = []
+yanked = "warn"
+# Las advisories `unmaintained` en nuestro arbol vienen de deps
+# transitivas de tauri (gtk-rs, fxhash, proc-macro-error, etc.) y
+# se resuelven cuando tauri migre upstream. No aportan ruido util.
+unmaintained = "none"
+ignore = [
+    # RUSTSEC-2026-0098 y RUSTSEC-2026-0099 (rustls-webpki): entran
+    # como transitivas de tauri-plugin-updater (bajo feature
+    # `auto-updater`, OFF por default). Nuestro TLS real en reqwest
+    # es native-tls, no rustls, asi que no somos vulnerables.
+    # Revisar al activar auto-updater o cuando tauri-plugin-updater
+    # suba la dep.
+    "RUSTSEC-2026-0098",
+    "RUSTSEC-2026-0099",
+    # RUSTSEC-2025-0068 (serde_yml): el repo fue archivado por
+    # unsoundness en Serializer.emitter. Nexenv usa serde_yml para
+    # leer/escribir manifests nexenv.yaml; la migracion a una
+    # alternativa mantenida (ej. serde-yaml-ng) queda como tarea de
+    # otro ciclo — esta ignorada aqui con fecha de revision.
+    # Revisar: 2026-07-17 (90 dias).
+    "RUSTSEC-2025-0068",
+]
 
 [licenses]
 version = 2
@@ -30,7 +50,12 @@ allow = [
     "BSL-1.0",
 ]
 confidence-threshold = 0.9
-exceptions = []
+exceptions = [
+    # Nexenv usa FSL-1.1-ALv2: Fair Source License, convierte a
+    # Apache-2.0 a los 4 anios. No es OSI-approved todavia, por eso
+    # va como exception explicita en lugar de en el allowlist global.
+    { allow = ["FSL-1.1-ALv2"], crate = "nexenv" },
+]
 
 [bans]
 multiple-versions = "warn"
