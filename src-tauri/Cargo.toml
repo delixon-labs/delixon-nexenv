@@ -31,7 +31,13 @@ tauri-app = [
     "dep:tauri-plugin-dialog",
     "dep:tauri-build",
 ]
-enterprise = ["dep:reqwest"]
+enterprise = ["dep:reqwest", "dep:regex", "dep:once_cell"]
+# Activar el auto-updater del installer firmado. Requiere:
+# - Keypair generado con `tauri signer generate`.
+# - Secret TAURI_SIGNING_PRIVATE_KEY en GitHub Actions.
+# - pubkey completada en tauri.conf.json.
+# - Endpoint del update manifest desplegado en delixon-platform.
+auto-updater = ["dep:tauri-plugin-updater"]
 
 [build-dependencies]
 tauri-build = { version = "=2.5.6", features = [], optional = true }
@@ -42,6 +48,7 @@ tauri-plugin-shell = { version = "=2.3.5", optional = true }
 tauri-plugin-fs = { version = "=2.5.0", optional = true }
 tauri-plugin-process = { version = "=2.3.1", optional = true }
 tauri-plugin-dialog = { version = "=2.7.0", optional = true }
+tauri-plugin-updater = { version = "=2.10.1", optional = true }
 serde = { version = "=1.0.228", features = ["derive"] }
 serde_json = "=1.0.149"
 tokio = { version = "=1.50.0", features = ["full"] }
@@ -55,6 +62,8 @@ colored = "=3.0.0"
 serde_yml = "=0.0.12"
 rusqlite = { version = "=0.39.0", features = ["bundled"] }
 reqwest = { version = "=0.12.18", features = ["json"], optional = true }
+regex = { version = "=1.12.3", optional = true }
+once_cell = { version = "=1.21.4", optional = true }
 
 [dev-dependencies]
 tempfile = "=3.20.0"

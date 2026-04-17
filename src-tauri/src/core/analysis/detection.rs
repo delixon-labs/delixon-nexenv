@@ -83,10 +83,10 @@ pub fn detect_stack(project_path: &str) -> Result<DetectedStack, NexenvError> {
                     if let Some(obj) = dep_obj.as_object() {
                         for key in obj.keys() {
                             match key.as_str() {
-                                "react" | "react-dom" => {
-                                    if !detected_tags.contains(&"react".to_string()) {
-                                        detected_tags.push("react".to_string());
-                                    }
+                                "react" | "react-dom"
+                                    if !detected_tags.contains(&"react".to_string()) =>
+                                {
+                                    detected_tags.push("react".to_string());
                                 }
                                 "next" => detected_tags.push("nextjs".to_string()),
                                 "vue" => detected_tags.push("vue".to_string()),

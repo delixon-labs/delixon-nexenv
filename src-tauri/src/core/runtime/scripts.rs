@@ -77,11 +77,17 @@ const ALLOWED_EXECUTABLES: &[&str] = &[
     // Version managers
     "nvm", "fnm", "pyenv", "rustup",
     // Generic dev
-    "echo", "cat", "ls", "pwd", "env", "printenv", "which", "true",
+    "echo", "cat", "ls", "pwd", "which", "true",
 ];
 
 /// Shell metacaracteres que permiten encadenar comandos arbitrarios.
 const DANGEROUS_CHARS: &[char] = &['|', '`', '$', '(', ')', ';', '&', '<', '>'];
+
+/// Chars Unicode de formato bidireccional que permiten ofuscar comandos visualmente.
+/// U+202A..U+202E (embeddings/overrides) y U+2066..U+2069 (isolates).
+fn is_bidi_format_char(c: char) -> bool {
+    matches!(c as u32, 0x202A..=0x202E | 0x2066..=0x2069)
+}
 
 fn validate_script_command(command: &str) -> Result<(), NexenvError> {
     if command.len() > 500 {
@@ -94,6 +100,16 @@ fn validate_script_command(command: &str) -> Result<(), NexenvError> {
         return Err(NexenvError::InvalidConfig(
             "Comando vacio".to_string(),
         ));
+    }
+
+    // Rechazar control chars (newline, tab, null, BEL, ESC, etc.) y bidi overrides.
+    for ch in command.chars() {
+        if ch.is_control() || is_bidi_format_char(ch) {
+            return Err(NexenvError::InvalidConfig(format!(
+                "Comando contiene caracter de control no permitido: {:?}",
+                ch
+            )));
+        }
     }
 
     // Rechazar metacaracteres de shell que permiten inyección
@@ -235,5 +251,29 @@ mod tests {
     fn test_validate_script_command_empty() {
         assert!(validate_script_command("").is_err());
         assert!(validate_script_command("  ").is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_rejects_control_chars() {
+        assert!(validate_script_command("npm run dev\nrm -rf /").is_err());
+        assert!(validate_script_command("npm run dev\r\nevil").is_err());
+        assert!(validate_script_command("npm run\tdev").is_err());
+        assert!(validate_script_command("npm run dev\0evil").is_err());
+        assert!(validate_script_command("npm run dev\x07").is_err());
+        assert!(validate_script_command("npm run dev\x1b[31m").is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_rejects_bidi_override() {
+        assert!(validate_script_command("npm run \u{202E}dev").is_err());
+        assert!(validate_script_command("npm run \u{202D}dev").is_err());
+        assert!(validate_script_command("npm run \u{2066}dev").is_err());
+    }
+
+    #[test]
+    fn test_validate_script_command_blocks_env_printenv() {
+        assert!(validate_script_command("env").is_err());
+        assert!(validate_script_command("env FOO=bar").is_err());
+        assert!(validate_script_command("printenv PATH").is_err());
     }
 }
