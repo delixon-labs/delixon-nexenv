@@ -15,12 +15,21 @@ yanked = "warn"
 # se resuelven cuando tauri migre upstream. No aportan ruido util.
 unmaintained = "none"
 ignore = [
-    # RUSTSEC-2026-0098 (rustls-webpki): entra como transitiva de
-    # tauri-plugin-updater (bajo feature `auto-updater`, off por
-    # default). Nuestro TLS real en reqwest es native-tls, no rustls,
-    # asi que no somos vulnerables. Revisar al activar auto-updater
-    # o cuando tauri-plugin-updater suba la dep.
+    # RUSTSEC-2026-0098 y RUSTSEC-2026-0099 (rustls-webpki): entran
+    # como transitivas de tauri-plugin-updater (bajo feature
+    # `auto-updater`, OFF por default). Nuestro TLS real en reqwest
+    # es native-tls, no rustls, asi que no somos vulnerables.
+    # Revisar al activar auto-updater o cuando tauri-plugin-updater
+    # suba la dep.
     "RUSTSEC-2026-0098",
+    "RUSTSEC-2026-0099",
+    # RUSTSEC-2025-0068 (serde_yml): el repo fue archivado por
+    # unsoundness en Serializer.emitter. Nexenv usa serde_yml para
+    # leer/escribir manifests nexenv.yaml; la migracion a una
+    # alternativa mantenida (ej. serde-yaml-ng) queda como tarea de
+    # otro ciclo — esta ignorada aqui con fecha de revision.
+    # Revisar: 2026-07-17 (90 dias).
+    "RUSTSEC-2025-0068",
 ]
 
 [licenses]
