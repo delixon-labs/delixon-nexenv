@@ -47,6 +47,10 @@ export default [
       ],
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      // Regla nueva en react-hooks 7.x; flaggea patrones legitimos
+      // (ej. set state en useEffect tras fetch) — deshabilitada hasta
+      // que haya ciclo de refactor dedicado.
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   {
