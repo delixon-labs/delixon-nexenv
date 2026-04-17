@@ -9,6 +9,10 @@ use crate::core::models::project::{Project, ProjectStatus, RuntimeConfig};
 use crate::core::rules;
 use crate::core::store;
 use crate::core::utils::fs::ensure_dir;
+use crate::core::workspace::scaffold_constants::{
+    ACTIONS_CHECKOUT_SHA, ACTIONS_CHECKOUT_VERSION, ACTIONS_SETUP_NODE_SHA,
+    ACTIONS_SETUP_NODE_VERSION, ACTIONS_SETUP_PYTHON_SHA, ACTIONS_SETUP_PYTHON_VERSION,
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -383,8 +387,8 @@ fn generate_ci_workflow(config: &ScaffoldConfig) -> String {
             "  build:".to_string(),
             "    runs-on: ubuntu-latest".to_string(),
             "    steps:".to_string(),
-            "      - uses: actions/checkout@v4".to_string(),
-            "      - uses: actions/setup-node@v4".to_string(),
+            format!("      - uses: actions/checkout@{ACTIONS_CHECKOUT_SHA} # {ACTIONS_CHECKOUT_VERSION}"),
+            format!("      - uses: actions/setup-node@{ACTIONS_SETUP_NODE_SHA} # {ACTIONS_SETUP_NODE_VERSION}"),
             "        with:".to_string(),
             "          node-version: 20".to_string(),
             "          cache: npm".to_string(),
@@ -403,8 +407,8 @@ fn generate_ci_workflow(config: &ScaffoldConfig) -> String {
             "  test:".to_string(),
             "    runs-on: ubuntu-latest".to_string(),
             "    steps:".to_string(),
-            "      - uses: actions/checkout@v4".to_string(),
-            "      - uses: actions/setup-python@v5".to_string(),
+            format!("      - uses: actions/checkout@{ACTIONS_CHECKOUT_SHA} # {ACTIONS_CHECKOUT_VERSION}"),
+            format!("      - uses: actions/setup-python@{ACTIONS_SETUP_PYTHON_SHA} # {ACTIONS_SETUP_PYTHON_VERSION}"),
             "        with:".to_string(),
             "          python-version: '3.12'".to_string(),
             "      - run: pip install -r requirements.txt".to_string(),
