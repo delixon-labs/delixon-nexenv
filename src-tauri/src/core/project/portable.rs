@@ -1,3 +1,5 @@
+use std::path::{Component, Path, PathBuf};
+
 use serde::{Deserialize, Serialize};
 
 use crate::core::error::NexenvError;
@@ -59,8 +61,57 @@ pub fn export_project(project_id: &str) -> Result<String, NexenvError> {
     Ok(json)
 }
 
+/// Valida el target_path de un import contra path traversal, control chars
+/// y paths relativos. Devuelve el path normalizado.
+///
+/// No canonicaliza (el path puede no existir todavia), pero rechaza:
+/// - Strings vacios.
+/// - Paths relativos (debe ser absoluto).
+/// - Control chars (\n, \r, \0, etc.) que pueden romper parsers downstream.
+/// - Cualquier componente `..` (ParentDir) — corta traversal explicito.
+pub fn validate_target_path(target: &str) -> Result<PathBuf, NexenvError> {
+    if target.trim().is_empty() {
+        return Err(NexenvError::InvalidPath(
+            "El path de destino no puede estar vacio".to_string(),
+        ));
+    }
+
+    if target.chars().any(|c| c.is_control()) {
+        return Err(NexenvError::InvalidPath(
+            "El path contiene caracteres de control".to_string(),
+        ));
+    }
+
+    let path = PathBuf::from(target);
+
+    if !path.is_absolute() {
+        return Err(NexenvError::InvalidPath(format!(
+            "El path debe ser absoluto: {}",
+            target
+        )));
+    }
+
+    if path.components().any(|c| matches!(c, Component::ParentDir)) {
+        return Err(NexenvError::InvalidPath(format!(
+            "El path contiene traversal ('..'): {}",
+            target
+        )));
+    }
+
+    // Si el path existe, canonicalizar para resolver symlinks y comparar
+    // contra cualquier constraint futuro. Si no existe (caso normal en
+    // un import a carpeta nueva), devolvemos el path tal cual.
+    match Path::new(&path).canonicalize() {
+        Ok(resolved) => Ok(resolved),
+        Err(_) => Ok(path),
+    }
+}
+
 /// Importa un proyecto desde JSON portable (.nexenv)
 pub fn import_project(json: &str, target_path: &str) -> Result<Project, NexenvError> {
+    let validated = validate_target_path(target_path)?;
+    let target_path = validated.to_string_lossy().to_string();
+
     let export: NexenvExport = serde_json::from_str(json)?;
 
     let now = chrono::Utc::now().to_rfc3339();
@@ -102,7 +153,7 @@ pub fn import_project(json: &str, target_path: &str) -> Result<Project, NexenvEr
 
     // Restaurar manifest si viene en el export
     if let Some(m) = export.manifest {
-        let _ = manifest::save_manifest(target_path, &m);
+        let _ = manifest::save_manifest(&target_path, &m);
     }
 
     Ok(project)
@@ -115,11 +166,18 @@ mod tests {
     use crate::core::store;
     use serial_test::serial;
 
+    fn temp_path(suffix: &str) -> String {
+        std::env::temp_dir()
+            .join(format!("nexenv-portable-test-{}", suffix))
+            .to_string_lossy()
+            .to_string()
+    }
+
     fn make_test_project(suffix: &str) -> Project {
         Project {
             id: format!("test-portable-{}", suffix),
             name: format!("Portable Test {}", suffix),
-            path: format!("/tmp/nexenv-portable-test-{}", suffix),
+            path: temp_path(suffix),
             description: Some("portable test".to_string()),
             runtimes: vec![RuntimeConfig {
                 runtime: "node".to_string(),
@@ -173,19 +231,19 @@ mod tests {
         let json = export_project(&proj.id).expect("export should succeed");
 
         // Import at a different path
-        let import_path = "/tmp/nexenv-portable-import-roundtrip";
-        cleanup_by_path(import_path);
-        let imported = import_project(&json, import_path).expect("import should succeed");
+        let import_path = temp_path("import-roundtrip");
+        cleanup_by_path(&import_path);
+        let imported = import_project(&json, &import_path).expect("import should succeed");
 
         assert_eq!(imported.name, proj.name);
-        assert_eq!(imported.path, import_path);
+        assert!(imported.path.ends_with("nexenv-portable-test-import-roundtrip"));
         assert_eq!(imported.tags, proj.tags);
         assert_ne!(imported.id, proj.id, "imported project should get a new id");
 
         // Cleanup
         cleanup_project(&proj_id);
         cleanup_project(&imported.id);
-        cleanup_by_path(import_path);
+        cleanup_by_path(&import_path);
     }
 
     #[test]
@@ -199,8 +257,80 @@ mod tests {
     #[test]
     fn test_import_invalid_json() {
         crate::core::store::init_test_store();
-        let result = import_project("this is not json", "/tmp/nexenv-invalid");
+        let path = temp_path("invalid");
+        let result = import_project("this is not json", &path);
         assert!(result.is_err(), "importing invalid JSON should error");
+    }
+
+    #[test]
+    fn test_validate_target_path_rejects_empty() {
+        assert!(matches!(
+            validate_target_path(""),
+            Err(NexenvError::InvalidPath(_))
+        ));
+        assert!(matches!(
+            validate_target_path("   "),
+            Err(NexenvError::InvalidPath(_))
+        ));
+    }
+
+    #[test]
+    fn test_validate_target_path_rejects_control_chars() {
+        assert!(matches!(
+            validate_target_path("/tmp/evil\n/etc/passwd"),
+            Err(NexenvError::InvalidPath(_))
+        ));
+        assert!(matches!(
+            validate_target_path("/tmp/evil\0null"),
+            Err(NexenvError::InvalidPath(_))
+        ));
+    }
+
+    #[test]
+    fn test_validate_target_path_rejects_relative() {
+        assert!(matches!(
+            validate_target_path("relative/path"),
+            Err(NexenvError::InvalidPath(_))
+        ));
+        assert!(matches!(
+            validate_target_path("./foo"),
+            Err(NexenvError::InvalidPath(_))
+        ));
+    }
+
+    #[test]
+    fn test_validate_target_path_rejects_traversal() {
+        #[cfg(unix)]
+        let evil = "/tmp/../etc/passwd";
+        #[cfg(windows)]
+        let evil = r"C:\tmp\..\Windows\System32";
+        assert!(matches!(
+            validate_target_path(evil),
+            Err(NexenvError::InvalidPath(_))
+        ));
+    }
+
+    #[test]
+    fn test_validate_target_path_accepts_valid() {
+        let valid = temp_path("valid-path-check");
+        assert!(validate_target_path(&valid).is_ok());
+    }
+
+    #[test]
+    fn test_import_rejects_invalid_path() {
+        crate::core::store::init_test_store();
+        let bogus_json = serde_json::json!({
+            "version": "1",
+            "exportedAt": "2026-01-01T00:00:00Z",
+            "project": {
+                "name": "x", "runtimes": [], "tags": [], "envKeys": []
+            }
+        })
+        .to_string();
+        // relative path
+        assert!(import_project(&bogus_json, "relative/path").is_err());
+        // control char
+        assert!(import_project(&bogus_json, "/tmp/evil\nname").is_err());
     }
 
     #[test]
