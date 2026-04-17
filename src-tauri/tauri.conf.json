@@ -37,6 +37,17 @@
       "icons/128x128@2x.png",
       "icons/icon.ico",
       "icons/icon.png"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "active": false,
+      "dialog": false,
+      "endpoints": [
+        "https://app.delixon.dev/api/nexenv/update/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "pubkey": "REEMPLAZAR_CON_LA_PUBLIC_KEY_GENERADA_POR_TAURI_SIGNER"
+    }
   }
 }
