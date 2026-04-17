@@ -2208,6 +2208,8 @@ dependencies = [
  "clap",
  "colored",
  "dirs",
+ "once_cell",
+ "regex",
  "reqwest 0.12.18",
  "rusqlite",
  "serde",

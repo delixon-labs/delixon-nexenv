@@ -31,7 +31,7 @@ tauri-app = [
     "dep:tauri-plugin-dialog",
     "dep:tauri-build",
 ]
-enterprise = ["dep:reqwest"]
+enterprise = ["dep:reqwest", "dep:regex", "dep:once_cell"]
 
 [build-dependencies]
 tauri-build = { version = "=2.5.6", features = [], optional = true }
@@ -55,6 +55,8 @@ colored = "=3.0.0"
 serde_yml = "=0.0.12"
 rusqlite = { version = "=0.39.0", features = ["bundled"] }
 reqwest = { version = "=0.12.18", features = ["json"], optional = true }
+regex = { version = "=1.12.3", optional = true }
+once_cell = { version = "=1.21.4", optional = true }
 
 [dev-dependencies]
 tempfile = "=3.20.0"
