@@ -3,6 +3,15 @@ use crate::core::store;
 use std::process::Command;
 use tauri::command;
 
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+/// Rechaza paths con control chars que podrian romper parsers downstream
+/// (CMD, PowerShell, shells POSIX) o permitir inyectar args adicionales.
+fn path_has_control_chars(path: &str) -> bool {
+    path.chars().any(|c| c.is_control())
+}
+
 /// Abre una terminal en la carpeta del proyecto con el entorno correcto cargado
 #[command]
 pub async fn open_terminal(project_id: String) -> Result<(), String> {
@@ -11,6 +20,10 @@ pub async fn open_terminal(project_id: String) -> Result<(), String> {
         .iter()
         .find(|p| p.id == project_id)
         .ok_or_else(|| format!("Proyecto no encontrado: {}", project_id))?;
+
+    if path_has_control_chars(&project.path) {
+        return Err("Ruta del proyecto invalida: contiene caracteres de control".to_string());
+    }
 
     let path = std::path::Path::new(&project.path);
     if !path.exists() || !path.is_dir() {
@@ -63,22 +76,26 @@ pub async fn open_terminal(project_id: String) -> Result<(), String> {
 // --- Windows terminals ---
 
 fn try_windows_terminal(project_path: &str, env_vars: &std::collections::HashMap<String, String>) -> bool {
-    // Windows Terminal (wt.exe)
-    if which::which("wt").is_ok() {
-        let mut cmd = Command::new("wt");
-        cmd.arg("-d").arg(project_path);
-        for (k, v) in env_vars {
-            cmd.env(k, v);
-        }
-        if cmd.spawn().is_ok() {
-            return true;
-        }
+    if path_has_control_chars(project_path) || which::which("wt").is_err() {
+        return false;
     }
-    false
+    let mut cmd = Command::new("wt");
+    cmd.arg("-d").arg(project_path);
+    for (k, v) in env_vars {
+        cmd.env(k, v);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd.spawn().is_ok()
 }
 
 fn try_powershell(project_path: &str, env_vars: &std::collections::HashMap<String, String>) -> bool {
-    // PowerShell
+    if path_has_control_chars(project_path) {
+        return false;
+    }
     let ps = if which::which("pwsh").is_ok() {
         "pwsh"
     } else if which::which("powershell").is_ok() {
@@ -87,23 +104,49 @@ fn try_powershell(project_path: &str, env_vars: &std::collections::HashMap<Strin
         return false;
     };
 
-    let safe_path = project_path.replace('\'', "''");
+    // Usamos `start /D <path>` para que la nueva ventana de PowerShell
+    // arranque en el directorio correcto sin pasar el path dentro de un
+    // comando -Command (evita cualquier riesgo de inyeccion via el path).
     let mut cmd = Command::new("cmd");
-    cmd.arg("/c").arg("start").arg(ps).arg("-NoExit").arg("-Command")
-        .arg(format!("Set-Location '{}'", safe_path));
+    cmd.arg("/c")
+        .arg("start")
+        .arg("")
+        .arg("/D")
+        .arg(project_path)
+        .arg(ps)
+        .arg("-NoExit");
     for (k, v) in env_vars {
         cmd.env(k, v);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(CREATE_NO_WINDOW);
     }
     cmd.spawn().is_ok()
 }
 
 fn try_cmd(project_path: &str, env_vars: &std::collections::HashMap<String, String>) -> bool {
-    let safe_path = project_path.replace('"', "");
+    if path_has_control_chars(project_path) {
+        return false;
+    }
+    // `start /D <path> cmd /K` abre una ventana nueva de cmd en el dir
+    // sin pasar el path por una cadena concatenada.
     let mut cmd = Command::new("cmd");
-    cmd.arg("/c").arg("start").arg("cmd").arg("/k")
-        .arg(format!("cd /d \"{}\"", safe_path));
+    cmd.arg("/c")
+        .arg("start")
+        .arg("")
+        .arg("/D")
+        .arg(project_path)
+        .arg("cmd")
+        .arg("/K");
     for (k, v) in env_vars {
         cmd.env(k, v);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(CREATE_NO_WINDOW);
     }
     cmd.spawn().is_ok()
 }
@@ -208,12 +251,12 @@ fn try_linux_terminals(project_path: &str, env_vars: &std::collections::HashMap<
         }
     }
 
-    // xterm fallback
+    // xterm fallback: xterm no tiene --working-directory, pero hereda el
+    // cwd del proceso padre — seteamos cwd via Command::current_dir para
+    // evitar concatenar el path en un string de shell.
     if which::which("xterm").is_ok() {
-        let safe_path = project_path.replace('\'', "'\\''");
-        let shell_cmd = format!("cd '{}' && exec $SHELL", safe_path);
         let mut cmd = Command::new("xterm");
-        cmd.arg("-e").arg("sh").arg("-c").arg(&shell_cmd);
+        cmd.current_dir(project_path);
         for (k, v) in env_vars {
             cmd.env(k, v);
         }
