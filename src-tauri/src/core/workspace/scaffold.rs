@@ -600,7 +600,7 @@ mod tests {
             ..basic_config()
         };
         let all_techs = catalog::load_all_technologies();
-        let compose = generate_docker_compose(&config, &all_techs);
+        let compose = generate_docker_compose(&config, all_techs);
         assert!(compose.contains("postgresql"));
         assert!(compose.contains("services:"));
     }
@@ -609,7 +609,7 @@ mod tests {
     fn test_generate_docker_compose_no_db() {
         let config = basic_config();
         let all_techs = catalog::load_all_technologies();
-        let compose = generate_docker_compose(&config, &all_techs);
+        let compose = generate_docker_compose(&config, all_techs);
         assert!(compose.is_empty());
     }
 

@@ -470,7 +470,7 @@ mod tests {
         let proj = make_project("crud");
 
         // Save
-        store.save_projects(&[proj.clone()]).unwrap();
+        store.save_projects(std::slice::from_ref(&proj)).unwrap();
 
         // List
         let projects = store.list_projects().unwrap();
@@ -483,7 +483,7 @@ mod tests {
         // Update (save all)
         let mut updated = proj.clone();
         updated.name = "Updated".to_string();
-        store.save_projects(&[updated.clone()]).unwrap();
+        store.save_projects(std::slice::from_ref(&updated)).unwrap();
         let projects = store.list_projects().unwrap();
         assert_eq!(projects[0].name, "Updated");
 
@@ -515,7 +515,7 @@ mod tests {
     fn test_notes_crud() {
         let store = make_store();
         let proj = make_project("notes");
-        store.save_projects(&[proj.clone()]).unwrap();
+        store.save_projects(std::slice::from_ref(&proj)).unwrap();
 
         // Add
         let note = store.add_note(&proj.id, "Test note").unwrap();
@@ -536,7 +536,7 @@ mod tests {
     fn test_env_vars_crud() {
         let store = make_store();
         let proj = make_project("env");
-        store.save_projects(&[proj.clone()]).unwrap();
+        store.save_projects(std::slice::from_ref(&proj)).unwrap();
 
         let mut vars = HashMap::new();
         vars.insert("API_KEY".to_string(), "secret".to_string());
@@ -556,7 +556,7 @@ mod tests {
     fn test_cascade_delete() {
         let store = make_store();
         let proj = make_project("cascade");
-        store.save_projects(&[proj.clone()]).unwrap();
+        store.save_projects(std::slice::from_ref(&proj)).unwrap();
 
         // Add env vars and notes
         let mut vars = HashMap::new();
