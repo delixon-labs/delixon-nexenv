@@ -29,7 +29,7 @@ export default function Settings() {
   const [orphansLoading, setOrphansLoading] = useState(false);
   const [orphansCleaning, setOrphansCleaning] = useState(false);
   const [orphansModalOpen, setOrphansModalOpen] = useState(false);
-  const reloadProjects = useProjectsStore((s) => s.loadProjects);
+  const reloadProjects = useProjectsStore((s) => s.fetchProjects);
 
   useEffect(() => {
     if (!isLoaded) loadConfig();
