@@ -56,6 +56,16 @@ pub fn create_from_template(
         std::fs::write(&file_path, content)?;
     }
 
+    // Canonicalizar el path para guardarlo absoluto en la BD. Evita que paths
+    // relativos como "." colisionen con la constraint UNIQUE de projects.path
+    // cuando el usuario crea varios proyectos en cwd distintos pasando ".".
+    let canonical_path = std::fs::canonicalize(base)
+        .map(|p| p.to_string_lossy().into_owned())
+        .or_else(|_| -> Result<String, NexenvError> {
+            let cwd = std::env::current_dir().map_err(NexenvError::Io)?;
+            Ok(cwd.join(project_path).to_string_lossy().into_owned())
+        })?;
+
     let runtimes: Vec<RuntimeConfig> = template
         .runtimes
         .iter()
@@ -71,7 +81,7 @@ pub fn create_from_template(
     let project = Project {
         id: uuid::Uuid::new_v4().to_string(),
         name: project_name.to_string(),
-        path: project_path.to_string(),
+        path: canonical_path,
         description: Some(format!("Creado desde plantilla: {}", template.name)),
         runtimes,
         status: ProjectStatus::Active,
