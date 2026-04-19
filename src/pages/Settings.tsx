@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "@/stores/settings";
+import { useProjectsStore } from "@/stores/projects";
 import * as api from "@/lib/tauri";
 import type { DetectedRuntime, InstalledEditor } from "@/lib/tauri";
+import type { Project } from "@/types/project";
 import { Spinner } from "@/components/ui/Spinner";
+import { toast } from "@/components/ui/Toast";
 import PathInput from "@/components/ui/PathInput";
+import PreviewConfirmModal, { type PreviewSection } from "@/components/ui/PreviewConfirmModal";
 
 function defaultDataDir(): string {
   const p = navigator.platform?.toLowerCase() || "";
@@ -21,12 +25,44 @@ export default function Settings() {
   const [runtimes, setRuntimes] = useState<DetectedRuntime[]>([]);
   const [loadingRuntimes, setLoadingRuntimes] = useState(false);
   const [installedEditors, setInstalledEditors] = useState<InstalledEditor[]>([]);
+  const [orphans, setOrphans] = useState<Project[]>([]);
+  const [orphansLoading, setOrphansLoading] = useState(false);
+  const [orphansCleaning, setOrphansCleaning] = useState(false);
+  const [orphansModalOpen, setOrphansModalOpen] = useState(false);
+  const reloadProjects = useProjectsStore((s) => s.loadProjects);
 
   useEffect(() => {
     if (!isLoaded) loadConfig();
     loadRuntimes();
     api.listInstalledEditors().then(setInstalledEditors).catch(() => {});
+    loadOrphans();
   }, [isLoaded, loadConfig]);
+
+  async function loadOrphans() {
+    setOrphansLoading(true);
+    try {
+      const list = await api.listOrphanProjects();
+      setOrphans(list);
+    } catch {
+      // No-op en dev browser
+    } finally {
+      setOrphansLoading(false);
+    }
+  }
+
+  async function applyCleanup() {
+    setOrphansCleaning(true);
+    try {
+      const removed = await api.cleanupOrphanProjects();
+      toast.success(`${removed} proyecto(s) huerfanos eliminados`);
+      setOrphans([]);
+      setOrphansModalOpen(false);
+      await reloadProjects?.();
+    } catch (err) {
+      toast.error(err);
+      setOrphansCleaning(false);
+    }
+  }
 
   async function loadRuntimes() {
     setLoadingRuntimes(true);
@@ -249,6 +285,52 @@ export default function Settings() {
           </div>
         </div>
       </section>
+
+      {/* Mantenimiento */}
+      <section className="mb-8">
+        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+          Mantenimiento
+        </h2>
+        <div className="space-y-4">
+          <SettingRow
+            label="Proyectos huerfanos"
+            description={
+              orphansLoading
+                ? "Buscando..."
+                : orphans.length === 0
+                  ? "No hay proyectos registrados cuya carpeta haya desaparecido."
+                  : `${orphans.length} proyecto(s) registrados apuntan a rutas que ya no existen en disco.`
+            }
+          >
+            <button
+              type="button"
+              onClick={() => setOrphansModalOpen(true)}
+              disabled={orphans.length === 0 || orphansLoading}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-warning/10 text-warning-light border border-warning/30 hover:bg-warning/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            >
+              Limpiar {orphans.length > 0 ? `(${orphans.length})` : ""}
+            </button>
+          </SettingRow>
+        </div>
+      </section>
+
+      <PreviewConfirmModal
+        open={orphansModalOpen}
+        title={`Limpiar ${orphans.length} proyecto(s) huerfanos`}
+        subtitle="Se eliminan solo del registro de Nexenv. No se toca ningun archivo en disco (ya no existen)."
+        sections={[
+          {
+            label: "Proyectos a desregistrar",
+            items: orphans.map((p) => `${p.name} — ${p.path}`),
+            tone: "removed",
+          } as PreviewSection,
+        ]}
+        confirmLabel="Eliminar todos"
+        destructive
+        busy={orphansCleaning}
+        onConfirm={applyCleanup}
+        onCancel={() => setOrphansModalOpen(false)}
+      />
     </div>
   );
 }
