@@ -6,7 +6,7 @@ use nexenv_lib::core::{
 };
 
 #[derive(Parser)]
-#[command(name = "nexenv", version = "1.0.0", about = "Workspace manager for developers")]
+#[command(name = "nexenv", version = env!("CARGO_PKG_VERSION"), about = "Workspace manager for developers")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

@@ -529,10 +529,19 @@ pub fn register_scaffolded_project(
         })
         .collect();
 
+    // Canonicalizar el path para guardarlo absoluto. Evita que paths relativos
+    // como "." colisionen con la constraint UNIQUE de projects.path.
+    let canonical_path = std::fs::canonicalize(&config.path)
+        .map(|p| p.to_string_lossy().into_owned())
+        .or_else(|_| -> Result<String, NexenvError> {
+            let cwd = std::env::current_dir().map_err(NexenvError::Io)?;
+            Ok(cwd.join(&config.path).to_string_lossy().into_owned())
+        })?;
+
     let project = Project {
         id: uuid::Uuid::new_v4().to_string(),
         name: config.name.clone(),
-        path: config.path.clone(),
+        path: canonical_path,
         description: None,
         runtimes,
         status: ProjectStatus::Active,
