@@ -96,6 +96,7 @@ mod tests {
     use super::*;
     use crate::core::store;
     use serial_test::serial;
+    use std::path::PathBuf;
 
     /// Elimina un proyecto del projects.json por su path
     fn cleanup_by_path(path: &str) {
@@ -108,62 +109,195 @@ mod tests {
         }
     }
 
+    /// Helper de smoke test por template. Comprueba:
+    /// 1. `create_from_template` devuelve Ok
+    /// 2. Todos los archivos esperados existen
+    /// 3. El manifest Nexenv se genero (es prerequisito para que open/recipes funcionen)
+    /// 4. La sustitucion de {{project_name}} ocurrio (si el template lo usa)
+    fn run_template_smoke(template_id: &str, name: &str, expected: &[&str]) -> PathBuf {
+        crate::core::store::init_test_store();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join(name);
+        let path_str = path.to_str().unwrap().to_string();
+
+        let result = create_from_template(template_id, &path_str, name);
+        assert!(
+            result.is_ok(),
+            "create_from_template({}) fallo: {:?}",
+            template_id,
+            result.err()
+        );
+
+        for f in expected {
+            assert!(
+                path.join(f).exists(),
+                "falta archivo '{}' en template '{}'",
+                f,
+                template_id
+            );
+        }
+
+        let manifest = crate::core::manifest::load_manifest(&path_str)
+            .expect("load_manifest no debe fallar")
+            .unwrap_or_else(|| panic!("manifest Nexenv no generado para '{}'", template_id));
+        assert_eq!(manifest.name, name, "manifest.name debe coincidir con el nombre");
+
+        // Mantener tempdir vivo retornando su path (el dir se borra al salir del scope).
+        let kept = dir.keep();
+        let owned_path = kept.join(name);
+        cleanup_by_path(&path_str);
+        owned_path
+    }
+
     #[test]
     fn test_all_templates_exist() {
         let templates = all_templates();
         assert_eq!(templates.len(), 7);
     }
 
+    // --- 7 smoke tests por template ---
+
     #[test]
     #[serial(disk)]
     fn test_node_express_template_generates_files() {
-        crate::core::store::init_test_store();
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("test-project");
-        let path_str = path.to_str().unwrap();
-        let result = create_from_template("node-express", path_str, "test-project");
-        assert!(result.is_ok());
-        assert!(path.join("package.json").exists());
-        assert!(path.join(".gitignore").exists());
-        assert!(path.join("README.md").exists());
-        assert!(path.join("src/index.js").exists());
-
+        let path = run_template_smoke(
+            "node-express",
+            "test-project",
+            &["package.json", ".gitignore", "README.md", "src/index.js"],
+        );
         let pkg = std::fs::read_to_string(path.join("package.json")).unwrap();
-        assert!(pkg.contains("test-project"));
-
-        cleanup_by_path(path_str);
+        let parsed: serde_json::Value = serde_json::from_str(&pkg)
+            .expect("package.json debe ser JSON valido");
+        assert_eq!(parsed.get("name").and_then(|v| v.as_str()), Some("test-project"));
+        assert!(parsed.get("scripts").is_some(), "package.json debe tener 'scripts'");
     }
 
     #[test]
     #[serial(disk)]
     fn test_react_vite_template_generates_files() {
-        crate::core::store::init_test_store();
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("my-react-app");
-        let path_str = path.to_str().unwrap();
-        let result = create_from_template("react-vite", path_str, "my-react-app");
-        assert!(result.is_ok(), "Failed: {:?}", result.err());
-        assert!(path.join("package.json").exists());
-        assert!(path.join("src/main.tsx").exists());
-        assert!(path.join("src/App.tsx").exists());
-        assert!(path.join("vite.config.ts").exists());
-
-        cleanup_by_path(path_str);
+        let path = run_template_smoke(
+            "react-vite",
+            "my-react-app",
+            &["package.json", "src/main.tsx", "src/App.tsx", "vite.config.ts"],
+        );
+        let pkg = std::fs::read_to_string(path.join("package.json")).unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&pkg)
+            .expect("package.json debe ser JSON valido");
+        let deps = parsed.get("dependencies").or_else(|| parsed.get("devDependencies"))
+            .expect("package.json debe declarar dependencies o devDependencies");
+        assert!(deps.is_object());
     }
 
     #[test]
     #[serial(disk)]
     fn test_python_fastapi_template() {
-        crate::core::store::init_test_store();
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("my-api");
-        let path_str = path.to_str().unwrap();
-        let result = create_from_template("python-fastapi", path_str, "my-api");
-        assert!(result.is_ok());
-        assert!(path.join("requirements.txt").exists());
-        assert!(path.join("app/main.py").exists());
+        let path = run_template_smoke(
+            "python-fastapi",
+            "my-api",
+            &["requirements.txt", "app/main.py"],
+        );
+        let reqs = std::fs::read_to_string(path.join("requirements.txt")).unwrap();
+        assert!(!reqs.trim().is_empty(), "requirements.txt no puede estar vacio");
+        assert!(reqs.to_lowercase().contains("fastapi"),
+            "requirements.txt de FastAPI debe declarar fastapi: {}", reqs);
+    }
 
-        cleanup_by_path(path_str);
+    #[test]
+    #[serial(disk)]
+    fn test_python_django_template() {
+        let path = run_template_smoke(
+            "python-django",
+            "my-django",
+            &["requirements.txt", "manage.py", ".gitignore", "README.md"],
+        );
+        let reqs = std::fs::read_to_string(path.join("requirements.txt")).unwrap();
+        assert!(reqs.to_lowercase().contains("django"),
+            "requirements.txt de Django debe declarar django: {}", reqs);
+        let manage = std::fs::read_to_string(path.join("manage.py")).unwrap();
+        assert!(manage.contains("DJANGO_SETTINGS_MODULE") || manage.contains("django"),
+            "manage.py debe ser un launcher Django");
+    }
+
+    #[test]
+    #[serial(disk)]
+    fn test_fullstack_react_python_template() {
+        let path = run_template_smoke(
+            "fullstack-react-python",
+            "my-fullstack",
+            &[
+                "frontend/package.json",
+                "frontend/src/App.tsx",
+                "backend/requirements.txt",
+                "backend/app/main.py",
+            ],
+        );
+        let frontend_pkg = std::fs::read_to_string(path.join("frontend/package.json")).unwrap();
+        let _: serde_json::Value = serde_json::from_str(&frontend_pkg)
+            .expect("frontend/package.json debe ser JSON valido");
+        let backend_reqs = std::fs::read_to_string(path.join("backend/requirements.txt")).unwrap();
+        assert!(!backend_reqs.trim().is_empty(), "backend/requirements.txt no puede estar vacio");
+    }
+
+    #[test]
+    #[serial(disk)]
+    fn test_rust_cli_template() {
+        let path = run_template_smoke(
+            "rust-cli",
+            "my-rust-cli",
+            &["Cargo.toml", "src/main.rs", ".gitignore", "README.md"],
+        );
+        let cargo = std::fs::read_to_string(path.join("Cargo.toml")).unwrap();
+        assert!(cargo.contains("[package]"), "Cargo.toml debe tener seccion [package]");
+        assert!(cargo.contains("name ="), "Cargo.toml debe declarar 'name ='");
+        let main_rs = std::fs::read_to_string(path.join("src/main.rs")).unwrap();
+        assert!(main_rs.contains("fn main"), "src/main.rs debe tener fn main");
+    }
+
+    #[test]
+    #[serial(disk)]
+    fn test_docker_compose_template() {
+        let path = run_template_smoke(
+            "docker-compose",
+            "my-stack",
+            &["docker-compose.yml", ".gitignore", "README.md", ".env.example"],
+        );
+        let compose = std::fs::read_to_string(path.join("docker-compose.yml")).unwrap();
+        let parsed: serde_yml::Value = serde_yml::from_str(&compose)
+            .expect("docker-compose.yml debe ser YAML valido");
+        assert!(parsed.get("services").is_some(),
+            "docker-compose.yml debe tener clave 'services'");
+    }
+
+    // --- Parametrizado: cobertura de TODOS los templates en una sola pasada ---
+
+    #[test]
+    #[serial(disk)]
+    fn test_every_template_generates_a_valid_nexenv_manifest() {
+        for tmpl in all_templates() {
+            crate::core::store::init_test_store();
+            let dir = tempfile::tempdir().unwrap();
+            let name = format!("smoke-{}", tmpl.id);
+            let path = dir.path().join(&name);
+            let path_str = path.to_str().unwrap().to_string();
+
+            let result = create_from_template(tmpl.id, &path_str, &name);
+            assert!(
+                result.is_ok(),
+                "template '{}' fallo en generacion: {:?}",
+                tmpl.id,
+                result.err()
+            );
+
+            let manifest = crate::core::manifest::load_manifest(&path_str)
+                .expect("load_manifest no debe fallar");
+            assert!(
+                manifest.is_some(),
+                "template '{}' no genero manifest Nexenv",
+                tmpl.id
+            );
+
+            cleanup_by_path(&path_str);
+        }
     }
 
     #[test]
