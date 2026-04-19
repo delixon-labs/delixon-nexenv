@@ -1,4 +1,4 @@
-use crate::core::versioning::{self, Snapshot, SnapshotDiff};
+use crate::core::versioning::{self, RollbackPreview, Snapshot, SnapshotDiff};
 use crate::core::store;
 use tauri::command;
 
@@ -24,12 +24,60 @@ pub async fn diff_snapshots(project_id: String, v1: u32, v2: u32) -> Result<Snap
 }
 
 #[command]
-pub async fn rollback_snapshot(project_id: String, version: u32) -> Result<(), String> {
-    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
+pub async fn preview_rollback(
+    project_id: String,
+    version: u32,
+) -> Result<RollbackPreview, crate::core::errors::UiError> {
+    use crate::core::errors::UiError;
+    let projects = store::get().list_projects().map_err(|e| {
+        UiError::new(format!("preview rollback v{}", version))
+            .detecto("no se pudo leer el listado de proyectos")
+            .fallo(e.to_string())
+            .hacer("verifica los permisos del data dir de Nexenv")
+    })?;
     let project = projects
         .iter()
         .find(|p| p.id == project_id)
-        .ok_or_else(|| format!("Proyecto no encontrado: {}", project_id))?;
+        .ok_or_else(|| {
+            UiError::new(format!("preview rollback v{}", version))
+                .detecto(format!("no existe el proyecto con id '{}'", project_id))
+                .fallo("Project not found")
+                .hacer("vuelve al dashboard y selecciona un proyecto valido")
+        })?;
+    versioning::preview_rollback(&project_id, &project.path, version).map_err(|e| {
+        UiError::new(format!("preview rollback v{}", version))
+            .detecto(format!("proyecto: '{}'", project.name))
+            .fallo(e.to_string())
+            .hacer("verifica que el snapshot existe y que el manifest sea legible")
+    })
+}
 
-    versioning::rollback_snapshot(&project_id, &project.path, version).map_err(|e| e.to_string())
+#[command]
+pub async fn rollback_snapshot(
+    project_id: String,
+    version: u32,
+) -> Result<(), crate::core::errors::UiError> {
+    use crate::core::errors::UiError;
+    let projects = store::get().list_projects().map_err(|e| {
+        UiError::new(format!("rollback al snapshot v{}", version))
+            .detecto("no se pudo leer el listado de proyectos")
+            .fallo(e.to_string())
+            .hacer("verifica los permisos del data dir de Nexenv")
+    })?;
+    let project = projects
+        .iter()
+        .find(|p| p.id == project_id)
+        .ok_or_else(|| {
+            UiError::new(format!("rollback al snapshot v{}", version))
+                .detecto(format!("no existe el proyecto con id '{}'", project_id))
+                .fallo("Project not found")
+                .hacer("vuelve al dashboard y selecciona un proyecto valido")
+        })?;
+
+    versioning::rollback_snapshot(&project_id, &project.path, version).map_err(|e| {
+        UiError::new(format!("rollback al snapshot v{}", version))
+            .detecto(format!("proyecto: '{}' (v{})", project.name, version))
+            .fallo(e.to_string())
+            .hacer("verifica que el snapshot existe y que la carpeta del proyecto es escribible")
+    })
 }

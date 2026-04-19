@@ -1,13 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import * as api from "@/lib/tauri";
-import type { Snapshot, SnapshotDiff } from "@/types/versioning";
+import type { Snapshot, SnapshotDiff, RollbackPreview } from "@/types/versioning";
+import PreviewConfirmModal, { type PreviewSection } from "@/components/ui/PreviewConfirmModal";
+import { toast } from "@/components/ui/Toast";
+
+interface RollbackState {
+  version: number;
+  preview: RollbackPreview | null;
+  loading: boolean;
+  applying: boolean;
+}
 
 export default function VersioningTab({ projectId }: { projectId: string; projectPath: string }) {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [diff, setDiff] = useState<SnapshotDiff | null>(null);
-  const [confirmRollback, setConfirmRollback] = useState<number | null>(null);
+  const [rollback, setRollback] = useState<RollbackState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -45,14 +54,42 @@ export default function VersioningTab({ projectId }: { projectId: string; projec
     }
   }
 
-  async function handleRollback(version: number) {
+  async function openRollbackPreview(version: number) {
+    setRollback({ version, preview: null, loading: true, applying: false });
     try {
-      await api.rollbackSnapshot(projectId, version);
-      setConfirmRollback(null);
+      const preview = await api.previewRollback(projectId, version);
+      setRollback({ version, preview, loading: false, applying: false });
+    } catch (err) {
+      toast.error(err);
+      setRollback(null);
+    }
+  }
+
+  async function applyRollback() {
+    if (!rollback) return;
+    setRollback({ ...rollback, applying: true });
+    try {
+      await api.rollbackSnapshot(projectId, rollback.version);
+      toast.success(`Rollback a v${rollback.version} aplicado`);
+      setRollback(null);
       await load();
     } catch (err) {
-      setError(String(err));
+      toast.error(err);
+      setRollback({ ...rollback, applying: false });
     }
+  }
+
+  function rollbackSections(p: RollbackPreview): PreviewSection[] {
+    const out: PreviewSection[] = [];
+    if (p.addedTechs.length) out.push({ label: "Tecnologias que se anaden", items: p.addedTechs, tone: "added" });
+    if (p.removedTechs.length) out.push({ label: "Tecnologias que se quitan", items: p.removedTechs, tone: "removed" });
+    if (p.addedRecipes.length) out.push({ label: "Recipes que se anaden", items: p.addedRecipes, tone: "added" });
+    if (p.removedRecipes.length) out.push({ label: "Recipes que se quitan", items: p.removedRecipes, tone: "removed" });
+    if (p.profileChanged) out.push({ label: "Profile", items: [`${p.profileChanged[0]} → ${p.profileChanged[1]}`], tone: "changed" });
+    if (p.editorChanged) out.push({ label: "Editor", items: [`${p.editorChanged[0] ?? "(ninguno)"} → ${p.editorChanged[1] ?? "(ninguno)"}`], tone: "changed" });
+    if (p.nameChanged) out.push({ label: "Nombre", items: [`${p.nameChanged[0]} → ${p.nameChanged[1]}`], tone: "changed" });
+    if (p.runtimeChanged) out.push({ label: "Runtime", items: [`${p.runtimeChanged[0]} → ${p.runtimeChanged[1]}`], tone: "changed" });
+    return out;
   }
 
   if (loading) return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin" /></div>;
@@ -96,26 +133,41 @@ export default function VersioningTab({ projectId }: { projectId: string; projec
                       Diff vs v{prevSnap.version}
                     </button>
                   )}
-                  {confirmRollback === snap.version ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-warning-light">Restaurar?</span>
-                      <button onClick={() => handleRollback(snap.version)} className="px-2 py-0.5 rounded bg-warning text-black text-xs">Si</button>
-                      <button onClick={() => setConfirmRollback(null)} className="px-2 py-0.5 rounded bg-gray-700 text-gray-300 text-xs">No</button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmRollback(snap.version)}
-                      className="px-2 py-1 rounded bg-warning/10 text-warning-light text-xs hover:bg-warning/20 transition-colors"
-                    >
-                      Restaurar
-                    </button>
-                  )}
+                  <button
+                    onClick={() => openRollbackPreview(snap.version)}
+                    className="px-2 py-1 rounded bg-warning/10 text-warning-light text-xs hover:bg-warning/20 transition-colors"
+                  >
+                    Restaurar
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      <PreviewConfirmModal
+        open={!!rollback}
+        title={`Rollback a snapshot v${rollback?.version ?? ""}`}
+        subtitle={
+          rollback?.preview
+            ? `Tomado el ${new Date(rollback.preview.targetTimestamp).toLocaleString("es")}. Sobrescribe el manifest actual.`
+            : rollback?.loading
+              ? "Calculando cambios..."
+              : ""
+        }
+        sections={rollback?.preview ? rollbackSections(rollback.preview) : []}
+        warning={
+          rollback?.preview && !rollback.preview.currentManifestExists
+            ? "El proyecto no tiene manifest actualmente. El rollback creara uno nuevo desde el snapshot."
+            : undefined
+        }
+        confirmLabel={`Restaurar v${rollback?.version ?? ""}`}
+        destructive
+        busy={!!rollback?.applying || !!rollback?.loading}
+        onConfirm={applyRollback}
+        onCancel={() => setRollback(null)}
+      />
 
       {diff && (
         <div className="rounded-xl bg-gray-900 border border-gray-800 p-4">

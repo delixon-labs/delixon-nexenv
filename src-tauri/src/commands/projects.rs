@@ -73,29 +73,45 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
 /// Activa los runtimes declarados en el manifest (nvm/fnm/pyenv/rustup) anteponiendo
 /// sus directorios bin al PATH del proceso hijo.
 #[command]
-pub async fn open_project(id: String) -> Result<(), String> {
+pub async fn open_project(id: String) -> Result<(), crate::core::errors::UiError> {
+    use crate::core::errors::UiError;
     let total = std::time::Instant::now();
-    let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
+    let mut projects = store::get().list_projects().map_err(|e| {
+        UiError::new("abrir proyecto")
+            .detecto("no se pudo leer el listado de proyectos")
+            .fallo(e.to_string())
+            .hacer("verifica los permisos del data dir de Nexenv y reinicia la app")
+    })?;
 
     let project = projects
         .iter_mut()
         .find(|p| p.id == id)
-        .ok_or_else(|| format!("Proyecto no encontrado: {}", id))?;
+        .ok_or_else(|| {
+            UiError::new("abrir proyecto")
+                .detecto(format!("no existe el proyecto con id '{}'", id))
+                .fallo("Project not found")
+                .hacer("vuelve al dashboard y selecciona un proyecto valido")
+        })?;
 
     let project_path = project.path.clone();
     let path = std::path::Path::new(&project_path);
     if !path.exists() || !path.is_dir() {
-        return Err(format!(
-            "La carpeta del proyecto no existe: {}",
-            project_path
-        ));
+        return Err(UiError::new("abrir proyecto")
+            .detecto(format!("la carpeta del proyecto no existe en disco: {}", project_path))
+            .fallo("path inexistente o no es directorio")
+            .hacer("revisa si moviste o eliminaste la carpeta; actualiza la ruta en el proyecto"));
     }
 
     let runtimes = project.runtimes.clone();
 
     project.last_opened_at = Some(chrono::Utc::now().to_rfc3339());
     project.status = ProjectStatus::Active;
-    store::get().save_projects(&projects).map_err(|e| e.to_string())?;
+    store::get().save_projects(&projects).map_err(|e| {
+        UiError::new("abrir proyecto")
+            .detecto("no se pudo guardar el estado del proyecto")
+            .fallo(e.to_string())
+            .hacer("verifica los permisos del data dir de Nexenv")
+    })?;
 
     let editor = store::get()
         .load_config()
@@ -109,7 +125,13 @@ pub async fn open_project(id: String) -> Result<(), String> {
         env.insert("PATH".to_string(), activation.prefix_path(&current));
     }
 
-    crate::core::utils::editor::open_in_editor_with_env(&project_path, &editor, &env)?;
+    crate::core::utils::editor::open_in_editor_with_env(&project_path, &editor, &env)
+        .map_err(|e| {
+            UiError::new("abrir proyecto en el editor")
+                .detecto(format!("editor configurado: '{}'", editor))
+                .fallo(e)
+                .hacer(format!("instala '{}' o cambia el editor por defecto en Settings", editor))
+        })?;
 
     let total_ms = total.elapsed().as_millis();
     println!(

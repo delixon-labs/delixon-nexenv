@@ -201,6 +201,21 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     case "import_project":
       return Promise.resolve({ id: `mock-import-${Date.now()}`, name: "imported", path: "/tmp/imported", runtimes: [], status: "active", createdAt: new Date().toISOString(), tags: [] } as T);
 
+    case "preview_import":
+      return Promise.resolve({
+        name: "imported",
+        description: "Mock preview en navegador",
+        runtimes: [{ runtime: "node", version: "22.16.0" }],
+        tags: ["mock"],
+        templateId: null,
+        envKeys: ["DATABASE_URL", "API_KEY"],
+        hasManifest: true,
+        targetPath: (args?.targetPath as string) ?? "/tmp/imported",
+        targetExists: false,
+        targetHasFiles: false,
+        conflictWithExisting: false,
+      } as T);
+
     case "generate_vscode_workspace":
       return Promise.resolve({ filesCreated: ["proyecto.code-workspace", ".vscode/tasks.json", ".vscode/launch.json", ".vscode/extensions.json"], filesSkipped: [], warnings: [] } as T);
 
@@ -299,6 +314,21 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
 
     case "rollback_snapshot":
       return Promise.resolve(undefined as T);
+
+    case "preview_rollback":
+      return Promise.resolve({
+        targetVersion: (args?.version as number) ?? 1,
+        targetTimestamp: new Date().toISOString(),
+        currentManifestExists: true,
+        addedTechs: ["react"],
+        removedTechs: ["vue"],
+        addedRecipes: ["testing-vitest"],
+        removedRecipes: [],
+        profileChanged: ["production", "rapid"],
+        editorChanged: null,
+        nameChanged: null,
+        runtimeChanged: null,
+      } as T);
 
     case "take_env_snapshot":
       return Promise.resolve({ timestamp: new Date().toISOString(), runtimes: [], depsHash: "" } as T);
@@ -466,6 +496,10 @@ export async function exportProject(projectId: string): Promise<string> {
 
 export async function importProject(json: string, targetPath: string): Promise<Project> {
   return safeInvoke<Project>("import_project", { json, targetPath });
+}
+
+export async function previewImport(json: string, targetPath: string): Promise<import("@/types/portable").ImportPreview> {
+  return safeInvoke<import("@/types/portable").ImportPreview>("preview_import", { json, targetPath });
 }
 
 // --- VSCode Workspace ---
@@ -640,6 +674,10 @@ export async function diffSnapshots(projectId: string, v1: number, v2: number): 
 
 export async function rollbackSnapshot(projectId: string, version: number): Promise<void> {
   return safeInvoke<void>("rollback_snapshot", { projectId, version });
+}
+
+export async function previewRollback(projectId: string, version: number): Promise<import("@/types/versioning").RollbackPreview> {
+  return safeInvoke<import("@/types/versioning").RollbackPreview>("preview_rollback", { projectId, version });
 }
 
 // --- Env Snapshots ---

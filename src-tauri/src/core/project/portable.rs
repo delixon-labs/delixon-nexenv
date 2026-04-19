@@ -107,6 +107,57 @@ pub fn validate_target_path(target: &str) -> Result<PathBuf, NexenvError> {
     }
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportPreview {
+    pub name: String,
+    pub description: Option<String>,
+    pub runtimes: Vec<RuntimeConfig>,
+    pub tags: Vec<String>,
+    pub template_id: Option<String>,
+    pub env_keys: Vec<String>,
+    pub has_manifest: bool,
+    pub target_path: String,
+    pub target_exists: bool,
+    pub target_has_files: bool,
+    pub conflict_with_existing: bool,
+}
+
+/// Devuelve un resumen de lo que haria un import sin tocar nada en disco ni en el store.
+pub fn preview_import(json: &str, target_path: &str) -> Result<ImportPreview, NexenvError> {
+    let validated = validate_target_path(target_path)?;
+    let target = validated.to_string_lossy().to_string();
+
+    let export: NexenvExport = serde_json::from_str(json)?;
+
+    let target_path_obj = Path::new(&target);
+    let target_exists = target_path_obj.exists();
+    let target_has_files = if target_exists && target_path_obj.is_dir() {
+        std::fs::read_dir(target_path_obj)
+            .map(|mut d| d.next().is_some())
+            .unwrap_or(false)
+    } else {
+        false
+    };
+
+    let projects = store::get().list_projects()?;
+    let conflict_with_existing = projects.iter().any(|p| p.path == target);
+
+    Ok(ImportPreview {
+        name: export.project.name,
+        description: export.project.description,
+        runtimes: export.project.runtimes,
+        tags: export.project.tags,
+        template_id: export.project.template_id,
+        env_keys: export.project.env_keys,
+        has_manifest: export.manifest.is_some(),
+        target_path: target,
+        target_exists,
+        target_has_files,
+        conflict_with_existing,
+    })
+}
+
 /// Importa un proyecto desde JSON portable (.nexenv)
 pub fn import_project(json: &str, target_path: &str) -> Result<Project, NexenvError> {
     let validated = validate_target_path(target_path)?;

@@ -53,6 +53,7 @@ pub fn run() {
             templates::create_from_template,
             // Portable
             portable::export_project,
+            portable::preview_import,
             portable::import_project,
             // VSCode
             vscode::generate_vscode_workspace,
@@ -95,6 +96,7 @@ pub fn run() {
             versioning::save_snapshot,
             versioning::list_snapshots,
             versioning::diff_snapshots,
+            versioning::preview_rollback,
             versioning::rollback_snapshot,
             // Snapshots
             snapshots::take_env_snapshot,

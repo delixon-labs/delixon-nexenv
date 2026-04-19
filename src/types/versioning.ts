@@ -35,3 +35,17 @@ export interface EnvDiff {
   changedRuntimes: RuntimeChange[];
   depsChanged: boolean;
 }
+
+export interface RollbackPreview {
+  targetVersion: number;
+  targetTimestamp: string;
+  currentManifestExists: boolean;
+  addedTechs: string[];
+  removedTechs: string[];
+  addedRecipes: string[];
+  removedRecipes: string[];
+  profileChanged: [string, string] | null;
+  editorChanged: [string | null, string | null] | null;
+  nameChanged: [string, string] | null;
+  runtimeChanged: [string, string] | null;
+}
