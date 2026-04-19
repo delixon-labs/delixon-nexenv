@@ -7,7 +7,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-__version__ = "1.0.0-beta.1"
+__version__ = "1.0.0-beta.2"
 
 PLATFORM_MAP = {
     ("Windows", "AMD64"): "nexenv-cli-win32-x64.exe",
