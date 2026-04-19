@@ -34,8 +34,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # MSI no acepta pre-release identifiers no-numericos (ej. "beta.1").
+      # Deteccion por forma del tag: si contiene "-" es prerelease (solo NSIS),
+      # si no tiene "-" es release estable (todos los bundles incluyendo MSI).
+      - name: Detect bundle targets
+        id: bundles
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ "$TAG" == *-* ]]; then
+            echo "args=-- --bundles nsis" >> $GITHUB_OUTPUT
+            echo "Prerelease $TAG: NSIS only (MSI excluido por incompatibilidad con pre-release identifiers)"
+          else
+            echo "args=" >> $GITHUB_OUTPUT
+            echo "Stable $TAG: all bundles (NSIS + MSI)"
+          fi
+
       - name: Build Tauri installer
-        run: npm run tauri build
+        run: npm run tauri build ${{ steps.bundles.outputs.args }}
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
 
