@@ -4,12 +4,28 @@ import { useProjectsStore } from "@/stores/projects";
 import * as api from "@/lib/tauri";
 import { techBrandClass } from "@/lib/tech-meta";
 import Tooltip from "@/components/ui/Tooltip";
+import { toast } from "@/components/ui/Toast";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: "Activo", color: "bg-green-500" },
   idle: { label: "Inactivo", color: "bg-yellow-500" },
   archived: { label: "Archivado", color: "bg-gray-500" },
 };
+
+/**
+ * Quita el prefijo \\?\ de Windows extended-length paths.
+ * Rust std::fs::canonicalize lo devuelve cuando la ruta >= MAX_PATH.
+ * Tecnicamente correcto pero ruidoso para el usuario.
+ */
+function prettyPath(path: string): string {
+  if (path.startsWith("\\\\?\\UNC\\")) {
+    return "\\\\" + path.slice(8);
+  }
+  if (path.startsWith("\\\\?\\")) {
+    return path.slice(4);
+  }
+  return path;
+}
 
 interface ProjectCardProps {
   project: Project;
@@ -38,6 +54,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       await api.openTerminal(project.id);
     } catch (err) {
       console.error("Error abriendo terminal:", err);
+    }
+  }
+
+  async function handleCopyPath(e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(prettyPath(project.path));
+      toast.success("Ruta copiada");
+    } catch {
+      toast.error("No se pudo copiar");
     }
   }
 
@@ -95,11 +121,23 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-800/50">
-        <Tooltip text={project.path} position="top">
-          <span className="text-xs text-gray-600 truncate">
-            {project.path}
+      <div className="flex items-center gap-2 pt-2 border-t border-gray-800/50 min-w-0">
+        <Tooltip text={prettyPath(project.path)} position="top">
+          <span className="text-xs text-gray-600 truncate block min-w-0 flex-1">
+            {prettyPath(project.path)}
           </span>
+        </Tooltip>
+        <Tooltip text="Copiar ruta" position="top">
+          <button
+            type="button"
+            onClick={handleCopyPath}
+            className="shrink-0 p-1 rounded text-gray-600 hover:text-gray-300 hover:bg-gray-800 transition-colors"
+            aria-label="Copiar ruta del proyecto"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+            </svg>
+          </button>
         </Tooltip>
         <span className="text-xs text-gray-600 shrink-0">{timeAgo}</span>
       </div>

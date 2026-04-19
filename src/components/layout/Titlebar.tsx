@@ -32,7 +32,7 @@ export default function Titlebar() {
   const isMac = os === "mac";
 
   return (
-    <div className="titlebar" data-tauri-drag-region>
+    <div className={`titlebar ${isMac ? "titlebar--macos" : ""}`} data-tauri-drag-region>
       {/* Center: logo + title */}
       <div className="titlebar__center" data-tauri-drag-region>
         <img src={logo} alt="Nexenv" className="titlebar__logo" draggable={false} />

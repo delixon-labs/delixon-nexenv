@@ -85,6 +85,12 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     case "list_projects":
       return Promise.resolve(mockProjects as T);
 
+    case "list_orphan_projects":
+      return Promise.resolve([] as T);
+
+    case "cleanup_orphan_projects":
+      return Promise.resolve(0 as T);
+
     case "get_project": {
       const p = mockProjects.find((p) => p.id === args?.id);
       return p ? Promise.resolve(p as T) : Promise.reject("Proyecto no encontrado");
@@ -345,6 +351,14 @@ function mockInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
 
 export async function listProjects(): Promise<Project[]> {
   return safeInvoke<Project[]>("list_projects");
+}
+
+export async function listOrphanProjects(): Promise<Project[]> {
+  return safeInvoke<Project[]>("list_orphan_projects");
+}
+
+export async function cleanupOrphanProjects(): Promise<number> {
+  return safeInvoke<number>("cleanup_orphan_projects");
 }
 
 export async function getProject(id: string): Promise<Project> {
