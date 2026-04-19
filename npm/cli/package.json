@@ -34,11 +34,5 @@
   ],
   "engines": {
     "node": ">=22"
-  },
-  "optionalDependencies": {
-    "@delixon/nexenv-win32-x64": "0.0.1",
-    "@delixon/nexenv-linux-x64": "0.0.1",
-    "@delixon/nexenv-darwin-arm64": "0.0.1",
-    "@delixon/nexenv-darwin-x64": "0.0.1"
   }
 }
