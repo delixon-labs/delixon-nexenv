@@ -11,6 +11,12 @@
   -webkit-user-select: none;
 }
 
+/* macOS: reserva espacio para los 3 traffic lights (rojo/amarillo/verde) que
+   Tauri pinta en la esquina superior izquierda con titleBarStyle: Overlay. */
+.titlebar--macos {
+  padding-left: 80px;
+}
+
 .titlebar__center {
   display: flex;
   align-items: center;

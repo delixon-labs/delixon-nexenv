@@ -29,6 +29,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             // Projects
             projects::list_projects,
+            projects::list_orphan_projects,
+            projects::cleanup_orphan_projects,
             projects::get_project,
             projects::create_project,
             projects::open_project,

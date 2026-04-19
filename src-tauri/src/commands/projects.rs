@@ -9,6 +9,35 @@ pub async fn list_projects() -> Result<Vec<Project>, String> {
     store::get().list_projects().map_err(|e| e.to_string())
 }
 
+/// Devuelve los proyectos registrados cuya carpeta en disco ya no existe.
+/// Util para el flujo 'Limpiar huerfanos' en Settings.
+#[command]
+pub async fn list_orphan_projects() -> Result<Vec<Project>, String> {
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
+    Ok(projects
+        .into_iter()
+        .filter(|p| !std::path::Path::new(&p.path).exists())
+        .collect())
+}
+
+/// Borra en bulk todos los proyectos cuyas rutas ya no existen en disco.
+/// No toca archivos (no hay archivos que tocar — ya no existen). Solo limpia
+/// el registro en la BD. Devuelve la cantidad de proyectos eliminados.
+#[command]
+pub async fn cleanup_orphan_projects() -> Result<usize, String> {
+    let projects = store::get().list_projects().map_err(|e| e.to_string())?;
+    let (orphans, keep): (Vec<_>, Vec<_>) = projects
+        .into_iter()
+        .partition(|p| !std::path::Path::new(&p.path).exists());
+
+    for p in &orphans {
+        let _ = store::get().delete_env_vars(&p.id);
+    }
+
+    store::get().save_projects(&keep).map_err(|e| e.to_string())?;
+    Ok(orphans.len())
+}
+
 /// Devuelve un proyecto por su ID
 #[command]
 pub async fn get_project(id: String) -> Result<Project, String> {
