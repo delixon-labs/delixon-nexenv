@@ -320,7 +320,7 @@ fn cmd_list() -> Result<(), String> {
             p.name,
             status,
             runtimes.join(", "),
-            p.path.dimmed()
+            nexenv_lib::core::utils::fs::pretty_path(&p.path).dimmed()
         );
     }
 
@@ -361,7 +361,7 @@ fn cmd_unlink(name: &str) -> Result<(), String> {
         "{} {} desvinculado (los archivos en {} no se han borrado)",
         "Ok".green().bold(),
         project.name.bold(),
-        project.path
+        nexenv_lib::core::utils::fs::pretty_path(&project.path)
     );
 
     Ok(())
@@ -377,7 +377,7 @@ fn cmd_create(name: &str, path: &str, template: Option<&str>) -> Result<(), Stri
         );
         let project = templates::create_from_template(tpl_id, path, name)
             .map_err(|e| e.to_string())?;
-        println!("{} Proyecto creado: {}", "ok".green().bold(), project.path);
+        println!("{} Proyecto creado: {}", "ok".green().bold(), nexenv_lib::core::utils::fs::pretty_path(&project.path));
     } else {
         println!(
             "{} proyecto '{}'...",
@@ -582,7 +582,7 @@ fn cmd_import(file: &str, path: &str) -> Result<(), String> {
         "{} Proyecto '{}' importado en {}",
         "ok".green().bold(),
         project.name,
-        project.path
+        nexenv_lib::core::utils::fs::pretty_path(&project.path)
     );
     Ok(())
 }
@@ -651,7 +651,7 @@ fn cmd_manifest(project_name: &str) -> Result<(), String> {
             println!("{}", "No se encontro manifest. Generando...".yellow());
             let m = manifest::generate_manifest_from_project(project);
             manifest::save_manifest(&project.path, &m).map_err(|e| e.to_string())?;
-            println!("{} Manifest generado en {}/.nexenv/manifest.yaml", "ok".green().bold(), project.path);
+            println!("{} Manifest generado en {}/.nexenv/manifest.yaml", "ok".green().bold(), nexenv_lib::core::utils::fs::pretty_path(&project.path));
         }
     }
     Ok(())

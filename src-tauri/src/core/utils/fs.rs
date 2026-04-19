@@ -5,6 +5,18 @@ pub fn ensure_dir(path: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(path)
 }
 
+/// Quita el prefijo `\\?\` de Windows extended-length paths para mostrar al usuario.
+/// `std::fs::canonicalize` lo agrega cuando la ruta excede MAX_PATH.
+pub fn pretty_path(path: &str) -> String {
+    if let Some(rest) = path.strip_prefix(r"\\?\UNC\") {
+        return format!(r"\\{}", rest);
+    }
+    if let Some(rest) = path.strip_prefix(r"\\?\") {
+        return rest.to_string();
+    }
+    path.to_string()
+}
+
 /// Asegura que ciertas entradas existan en el .gitignore del proyecto.
 /// Si el archivo no existe, lo crea. Si ya contiene la entrada, la ignora.
 pub fn ensure_gitignore_entries(project_path: &Path, entries: &[&str]) -> std::io::Result<()> {
