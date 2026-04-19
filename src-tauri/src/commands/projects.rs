@@ -69,9 +69,12 @@ pub async fn create_project(input: CreateProjectInput) -> Result<Project, String
     Ok(project)
 }
 
-/// Abre un proyecto en el editor configurado (por defecto VSCode)
+/// Abre un proyecto en el editor configurado (por defecto VSCode).
+/// Activa los runtimes declarados en el manifest (nvm/fnm/pyenv/rustup) anteponiendo
+/// sus directorios bin al PATH del proceso hijo.
 #[command]
 pub async fn open_project(id: String) -> Result<(), String> {
+    let total = std::time::Instant::now();
     let mut projects = store::get().list_projects().map_err(|e| e.to_string())?;
 
     let project = projects
@@ -79,7 +82,6 @@ pub async fn open_project(id: String) -> Result<(), String> {
         .find(|p| p.id == id)
         .ok_or_else(|| format!("Proyecto no encontrado: {}", id))?;
 
-    // Verificar que la carpeta exista
     let project_path = project.path.clone();
     let path = std::path::Path::new(&project_path);
     if !path.exists() || !path.is_dir() {
@@ -89,18 +91,34 @@ pub async fn open_project(id: String) -> Result<(), String> {
         ));
     }
 
-    // Actualizar last_opened_at
+    let runtimes = project.runtimes.clone();
+
     project.last_opened_at = Some(chrono::Utc::now().to_rfc3339());
     project.status = ProjectStatus::Active;
     store::get().save_projects(&projects).map_err(|e| e.to_string())?;
 
-    // Abrir en editor configurado
     let editor = store::get()
         .load_config()
         .map(|c| c.default_editor)
         .unwrap_or_else(|_| "code".to_string());
 
-    crate::core::utils::editor::open_in_editor(&project_path, &editor)?;
+    let activation = crate::core::runtime::activate::activate(&runtimes);
+    let mut env = std::collections::HashMap::new();
+    if !activation.bin_paths.is_empty() {
+        let current = std::env::var("PATH").unwrap_or_default();
+        env.insert("PATH".to_string(), activation.prefix_path(&current));
+    }
+
+    crate::core::utils::editor::open_in_editor_with_env(&project_path, &editor, &env)?;
+
+    let total_ms = total.elapsed().as_millis();
+    println!(
+        "[nexenv] open_project id={} runtimes={} activation_ms={} total_ms={}",
+        id,
+        runtimes.len(),
+        activation.elapsed_ms,
+        total_ms
+    );
 
     Ok(())
 }
