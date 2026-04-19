@@ -2,7 +2,7 @@
   "name": "@delixon/nexenv",
   "version": "1.0.0-beta.1",
   "description": "Workspace manager for developers — GUI + CLI",
-  "license": "FSL-1.1-ALv2",
+  "license": "SEE LICENSE IN LICENSE",
   "author": "Delixon Labs <hello@delixon.dev> (https://delixon.dev)",
   "repository": {
     "type": "git",
