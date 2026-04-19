@@ -143,6 +143,80 @@ pub fn rollback_snapshot(project_id: &str, project_path: &str, version: u32) -> 
     Ok(())
 }
 
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RollbackPreview {
+    pub target_version: u32,
+    pub target_timestamp: String,
+    pub current_manifest_exists: bool,
+    pub added_techs: Vec<String>,
+    pub removed_techs: Vec<String>,
+    pub added_recipes: Vec<String>,
+    pub removed_recipes: Vec<String>,
+    pub profile_changed: Option<(String, String)>,
+    pub editor_changed: Option<(Option<String>, Option<String>)>,
+    pub name_changed: Option<(String, String)>,
+    pub runtime_changed: Option<(String, String)>,
+}
+
+/// Calcula el cambio que aplicaria un rollback al snapshot `version`,
+/// sin tocar el manifest. El frontend lo muestra al usuario para confirmar.
+pub fn preview_rollback(
+    project_id: &str,
+    project_path: &str,
+    version: u32,
+) -> Result<RollbackPreview, NexenvError> {
+    let snapshots = list_snapshots(project_id)?;
+    let target = snapshots.iter().find(|s| s.version == version).ok_or_else(|| {
+        NexenvError::InvalidConfig(format!("Snapshot v{} no encontrado", version))
+    })?;
+
+    let current = manifest::load_manifest(project_path).unwrap_or(None);
+
+    let (added_techs, removed_techs, added_recipes, removed_recipes,
+         profile_changed, editor_changed, name_changed, runtime_changed) = match &current {
+        Some(cur) => {
+            let added_techs: Vec<String> = target.manifest.technologies.iter()
+                .filter(|t| !cur.technologies.contains(t)).cloned().collect();
+            let removed_techs: Vec<String> = cur.technologies.iter()
+                .filter(|t| !target.manifest.technologies.contains(t)).cloned().collect();
+            let added_recipes: Vec<String> = target.manifest.recipes_applied.iter()
+                .filter(|r| !cur.recipes_applied.contains(r)).cloned().collect();
+            let removed_recipes: Vec<String> = cur.recipes_applied.iter()
+                .filter(|r| !target.manifest.recipes_applied.contains(r)).cloned().collect();
+            let profile = if cur.profile != target.manifest.profile {
+                Some((cur.profile.clone(), target.manifest.profile.clone()))
+            } else { None };
+            let editor = if cur.editor != target.manifest.editor {
+                Some((cur.editor.clone(), target.manifest.editor.clone()))
+            } else { None };
+            let name = if cur.name != target.manifest.name {
+                Some((cur.name.clone(), target.manifest.name.clone()))
+            } else { None };
+            let runtime = if cur.runtime != target.manifest.runtime {
+                Some((cur.runtime.clone(), target.manifest.runtime.clone()))
+            } else { None };
+            (added_techs, removed_techs, added_recipes, removed_recipes,
+             profile, editor, name, runtime)
+        }
+        None => (
+            target.manifest.technologies.clone(),
+            Vec::new(),
+            target.manifest.recipes_applied.clone(),
+            Vec::new(),
+            None, None, None, None,
+        ),
+    };
+
+    Ok(RollbackPreview {
+        target_version: target.version,
+        target_timestamp: target.timestamp.clone(),
+        current_manifest_exists: current.is_some(),
+        added_techs, removed_techs, added_recipes, removed_recipes,
+        profile_changed, editor_changed, name_changed, runtime_changed,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -241,6 +315,51 @@ mod tests {
         assert_eq!(restored.name, "original");
         assert_eq!(restored.runtime, "node");
 
+        let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
+    }
+
+    #[test]
+    fn test_preview_rollback_shows_diff_against_current() {
+        let dir = tempfile::tempdir().unwrap();
+        let project_path = dir.path().to_str().unwrap();
+        let pid = "test-snap-preview";
+
+        let m1 = ProjectManifest {
+            name: "v1".to_string(),
+            runtime: "node".to_string(),
+            technologies: vec!["nodejs".to_string()],
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m1).unwrap();
+        save_snapshot(pid, project_path).unwrap();
+
+        let m2 = ProjectManifest {
+            name: "v2".to_string(),
+            runtime: "python".to_string(),
+            technologies: vec!["python".to_string(), "fastapi".to_string()],
+            recipes_applied: vec!["docker".to_string()],
+            ..Default::default()
+        };
+        manifest::save_manifest(project_path, &m2).unwrap();
+
+        let preview = preview_rollback(pid, project_path, 1).unwrap();
+        assert_eq!(preview.target_version, 1);
+        assert!(preview.current_manifest_exists);
+        assert!(preview.added_techs.contains(&"nodejs".to_string()));
+        assert!(preview.removed_techs.contains(&"python".to_string()));
+        assert!(preview.removed_recipes.contains(&"docker".to_string()));
+        assert_eq!(preview.name_changed, Some(("v2".into(), "v1".into())));
+        assert_eq!(preview.runtime_changed, Some(("python".into(), "node".into())));
+
+        let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
+    }
+
+    #[test]
+    fn test_preview_rollback_missing_snapshot_errors() {
+        let dir = tempfile::tempdir().unwrap();
+        let pid = "test-snap-preview-missing";
+        let result = preview_rollback(pid, dir.path().to_str().unwrap(), 99);
+        assert!(result.is_err());
         let _ = std::fs::remove_dir_all(snapshots_dir(pid).unwrap());
     }
 

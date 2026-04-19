@@ -9,9 +9,10 @@
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  max-width: 22rem;
+  max-width: 28rem;
   overflow: hidden;
   cursor: default;
+  line-height: 1.5;
 }
 
 .dlx-toast__bg {
@@ -30,6 +31,8 @@
   position: relative;
   z-index: 1;
   white-space: pre-line;
+  word-break: break-word;
+  display: block;
 }
 
 .dlx-toast__progress {

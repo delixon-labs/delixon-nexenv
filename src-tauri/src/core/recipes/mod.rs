@@ -51,6 +51,9 @@ pub fn list_recipes() -> Vec<Recipe> {
         recipe_ci_github(),
         recipe_linting_biome(),
         recipe_database_prisma(),
+        recipe_auth_jwt(),
+        recipe_database_sqlalchemy(),
+        recipe_monitoring(),
     ]
 }
 
@@ -372,6 +375,369 @@ model User {
     }
 }
 
+fn recipe_auth_jwt() -> Recipe {
+    Recipe {
+        id: "auth-jwt".to_string(),
+        name: "JWT Auth".to_string(),
+        description: "Autenticacion JWT con refresh tokens (Express/Fastify)".to_string(),
+        category: "auth".to_string(),
+        files_to_create: vec![
+            RecipeFile {
+                path: "src/auth/jwt.ts".to_string(),
+                content: r#"import jwt from 'jsonwebtoken';
+
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'change-me-access';
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'change-me-refresh';
+const ACCESS_TTL = process.env.JWT_ACCESS_TTL || '15m';
+const REFRESH_TTL = process.env.JWT_REFRESH_TTL || '7d';
+
+export interface AccessPayload { sub: string; email?: string; }
+export interface RefreshPayload { sub: string; jti: string; }
+
+export function signAccess(payload: AccessPayload): string {
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TTL });
+}
+
+export function signRefresh(payload: RefreshPayload): string {
+  return jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_TTL });
+}
+
+export function verifyAccess(token: string): AccessPayload {
+  return jwt.verify(token, ACCESS_SECRET) as AccessPayload;
+}
+
+export function verifyRefresh(token: string): RefreshPayload {
+  return jwt.verify(token, REFRESH_SECRET) as RefreshPayload;
+}
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "src/auth/middleware.ts".to_string(),
+                content: r#"import type { Request, Response, NextFunction } from 'express';
+import { verifyAccess } from './jwt';
+
+declare module 'express-serve-static-core' {
+  interface Request { user?: { sub: string; email?: string }; }
+}
+
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'missing token' });
+  try {
+    req.user = verifyAccess(token);
+    next();
+  } catch {
+    return res.status(401).json({ error: 'invalid or expired token' });
+  }
+}
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "src/auth/routes.ts".to_string(),
+                content: r#"import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
+import { signAccess, signRefresh, verifyRefresh } from './jwt';
+
+export const authRouter = Router();
+
+// POST /auth/login — sustituir validacion por la propia
+authRouter.post('/login', (req, res) => {
+  const { email, password } = req.body ?? {};
+  if (!email || !password) return res.status(400).json({ error: 'missing credentials' });
+  // TODO: validar contra base de datos
+  const userId = 'user-id-from-db';
+  const accessToken = signAccess({ sub: userId, email });
+  const refreshToken = signRefresh({ sub: userId, jti: randomUUID() });
+  res.json({ accessToken, refreshToken });
+});
+
+// POST /auth/refresh — emite nuevo access token
+authRouter.post('/refresh', (req, res) => {
+  const { refreshToken } = req.body ?? {};
+  if (!refreshToken) return res.status(400).json({ error: 'missing refresh token' });
+  try {
+    const payload = verifyRefresh(refreshToken);
+    const accessToken = signAccess({ sub: payload.sub });
+    res.json({ accessToken });
+  } catch {
+    res.status(401).json({ error: 'invalid refresh token' });
+  }
+});
+
+// POST /auth/logout — el cliente debe descartar tokens; aqui se podria revocar en una blacklist
+authRouter.post('/logout', (_req, res) => {
+  res.status(204).send();
+});
+"#.to_string(),
+            },
+        ],
+        deps_to_install: vec!["jsonwebtoken".to_string(), "express".to_string()],
+        dev_deps_to_install: vec![
+            "@types/jsonwebtoken".to_string(),
+            "@types/express".to_string(),
+        ],
+        env_vars_to_add: [
+            ("JWT_ACCESS_SECRET".to_string(), "change-me-access".to_string()),
+            ("JWT_REFRESH_SECRET".to_string(), "change-me-refresh".to_string()),
+            ("JWT_ACCESS_TTL".to_string(), "15m".to_string()),
+            ("JWT_REFRESH_TTL".to_string(), "7d".to_string()),
+        ]
+        .into_iter()
+        .collect(),
+        scripts_to_add: HashMap::new(),
+    }
+}
+
+fn recipe_database_sqlalchemy() -> Recipe {
+    Recipe {
+        id: "database-sqlalchemy".to_string(),
+        name: "SQLAlchemy + Alembic".to_string(),
+        description: "ORM SQLAlchemy con Postgres y migraciones Alembic".to_string(),
+        category: "database".to_string(),
+        files_to_create: vec![
+            RecipeFile {
+                path: "app/db/__init__.py".to_string(),
+                content: String::new(),
+            },
+            RecipeFile {
+                path: "app/db/session.py".to_string(),
+                content: r#"import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+DATABASE_URL = os.environ.get(
+    "DATABASE_URL",
+    "postgresql+psycopg://user:password@localhost:5432/mydb",
+)
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, future=True)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False, future=True)
+Base = declarative_base()
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "app/db/models.py".to_string(),
+                content: r#"from datetime import datetime
+from sqlalchemy import Column, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+
+from .session import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String, unique=True, nullable=False, index=True)
+    name = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "alembic.ini".to_string(),
+                content: r#"[alembic]
+script_location = alembic
+sqlalchemy.url = postgresql+psycopg://user:password@localhost:5432/mydb
+
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "alembic/env.py".to_string(),
+                content: r#"from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
+from alembic import context
+
+from app.db.session import Base
+from app.db import models  # noqa: F401  asegura que los modelos se registren
+
+config = context.config
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+
+def run_migrations_offline():
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online():
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "alembic/script.py.mako".to_string(),
+                content: r#""""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+revision = ${repr(up_revision)}
+down_revision = ${repr(down_revision)}
+branch_labels = ${repr(branch_labels)}
+depends_on = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    ${downgrades if downgrades else "pass"}
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "alembic/versions/.gitkeep".to_string(),
+                content: String::new(),
+            },
+        ],
+        deps_to_install: vec![
+            "sqlalchemy>=2.0".to_string(),
+            "psycopg[binary]>=3.1".to_string(),
+            "alembic>=1.13".to_string(),
+        ],
+        dev_deps_to_install: vec![],
+        env_vars_to_add: [(
+            "DATABASE_URL".to_string(),
+            "postgresql+psycopg://user:password@localhost:5432/mydb".to_string(),
+        )]
+        .into_iter()
+        .collect(),
+        scripts_to_add: HashMap::new(),
+    }
+}
+
+fn recipe_monitoring() -> Recipe {
+    Recipe {
+        id: "monitoring".to_string(),
+        name: "Health + Structured Logging".to_string(),
+        description: "Endpoint /health y logging estructurado JSON (pino/structlog)".to_string(),
+        category: "monitoring".to_string(),
+        files_to_create: vec![
+            RecipeFile {
+                path: "src/monitoring/health.ts".to_string(),
+                content: r#"import type { Request, Response } from 'express';
+
+const STARTED_AT = Date.now();
+const VERSION = process.env.APP_VERSION || '0.0.0';
+
+export function healthHandler(_req: Request, res: Response) {
+  res.json({
+    status: 'ok',
+    version: VERSION,
+    uptimeSeconds: Math.floor((Date.now() - STARTED_AT) / 1000),
+    db: true,
+  });
+}
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "src/monitoring/logger.ts".to_string(),
+                content: r#"import pino from 'pino';
+
+export const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  base: { service: process.env.SERVICE_NAME || 'app' },
+  timestamp: pino.stdTimeFunctions.isoTime,
+});
+
+export type Logger = typeof logger;
+"#.to_string(),
+            },
+            RecipeFile {
+                path: "src/monitoring/README.md".to_string(),
+                content: r#"# Monitoring
+
+## Endpoints
+- `GET /health` — devuelve `{ status, version, uptimeSeconds, db }`. Conectalo con `app.get('/health', healthHandler)`.
+
+## Logger
+- Importa `logger` desde `src/monitoring/logger.ts`.
+- Usa `logger.info({ event: 'user.login', userId })` con campos estructurados, no strings concatenados.
+- Configurable con `LOG_LEVEL` (default `info`) y `SERVICE_NAME`.
+"#.to_string(),
+            },
+        ],
+        deps_to_install: vec!["pino".to_string()],
+        dev_deps_to_install: vec![],
+        env_vars_to_add: [
+            ("APP_VERSION".to_string(), "0.0.0".to_string()),
+            ("LOG_LEVEL".to_string(), "info".to_string()),
+            ("SERVICE_NAME".to_string(), "app".to_string()),
+        ]
+        .into_iter()
+        .collect(),
+        scripts_to_add: HashMap::new(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -379,7 +745,7 @@ mod tests {
     #[test]
     fn test_list_recipes() {
         let recipes = list_recipes();
-        assert_eq!(recipes.len(), 6);
+        assert_eq!(recipes.len(), 9);
     }
 
     #[test]
@@ -431,5 +797,60 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let result = apply_recipe(dir.path().to_str().unwrap(), "nonexistent");
         assert!(result.is_err());
+    }
+
+    // --- 3 recipes nuevas (G4 del plan v1.0.0) ---
+
+    #[test]
+    fn test_recipe_auth_jwt_apply_creates_files_and_env() {
+        let dir = tempfile::tempdir().unwrap();
+        let result = apply_recipe(dir.path().to_str().unwrap(), "auth-jwt").unwrap();
+        assert!(result.files_created.contains(&"src/auth/jwt.ts".to_string()));
+        assert!(result.files_created.contains(&"src/auth/middleware.ts".to_string()));
+        assert!(result.files_created.contains(&"src/auth/routes.ts".to_string()));
+        assert!(result.env_vars_added.contains(&"JWT_ACCESS_SECRET".to_string()));
+        assert!(result.env_vars_added.contains(&"JWT_REFRESH_SECRET".to_string()));
+
+        let routes = std::fs::read_to_string(dir.path().join("src/auth/routes.ts")).unwrap();
+        assert!(routes.contains("/login"));
+        assert!(routes.contains("/refresh"));
+        assert!(routes.contains("/logout"));
+    }
+
+    #[test]
+    fn test_recipe_database_sqlalchemy_apply_creates_alembic_skeleton() {
+        let dir = tempfile::tempdir().unwrap();
+        let result = apply_recipe(dir.path().to_str().unwrap(), "database-sqlalchemy").unwrap();
+        assert!(result.files_created.contains(&"alembic.ini".to_string()));
+        assert!(result.files_created.contains(&"alembic/env.py".to_string()));
+        assert!(result.files_created.contains(&"app/db/session.py".to_string()));
+        assert!(result.files_created.contains(&"app/db/models.py".to_string()));
+        assert!(result.env_vars_added.contains(&"DATABASE_URL".to_string()));
+
+        let session = std::fs::read_to_string(dir.path().join("app/db/session.py")).unwrap();
+        assert!(session.contains("create_engine"));
+        assert!(session.contains("DATABASE_URL"));
+        let env_py = std::fs::read_to_string(dir.path().join("alembic/env.py")).unwrap();
+        assert!(env_py.contains("target_metadata = Base.metadata"));
+    }
+
+    #[test]
+    fn test_recipe_monitoring_apply_creates_health_and_logger() {
+        let dir = tempfile::tempdir().unwrap();
+        let result = apply_recipe(dir.path().to_str().unwrap(), "monitoring").unwrap();
+        assert!(result.files_created.contains(&"src/monitoring/health.ts".to_string()));
+        assert!(result.files_created.contains(&"src/monitoring/logger.ts".to_string()));
+        assert!(result.env_vars_added.contains(&"LOG_LEVEL".to_string()));
+
+        let health = std::fs::read_to_string(dir.path().join("src/monitoring/health.ts")).unwrap();
+        assert!(health.contains("status"));
+        assert!(health.contains("uptimeSeconds"));
+    }
+
+    #[test]
+    fn test_new_recipes_visible_via_get() {
+        assert!(get_recipe("auth-jwt").is_some());
+        assert!(get_recipe("database-sqlalchemy").is_some());
+        assert!(get_recipe("monitoring").is_some());
     }
 }

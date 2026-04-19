@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { create } from "zustand";
+import { toErrorMessage, type UiError } from "@/lib/errors";
 import "./Toast.css";
 
 /* ── Store global ─────────────────────────── */
@@ -25,12 +26,18 @@ export const useToastStore = create<ToastStore>()((set) => ({
     set({ toast: { message, type, duration, key: Date.now() } }),
 }));
 
-/** Shorthand: toast.success("mensaje"), toast.error("mensaje"), etc. */
+/** Shorthand: toast.success("mensaje"), toast.error("mensaje" | UiError | unknown), etc.
+ *  toast.error acepta UiError estructurado y lo formatea a multilinea automaticamente. */
 export const toast = {
   success: (msg: string, duration?: number) =>
     useToastStore.getState().show(msg, "success", duration),
-  error: (msg: string, duration?: number) =>
-    useToastStore.getState().show(msg, "error", duration),
+  error: (msg: string | UiError | unknown, duration?: number) => {
+    const text = typeof msg === "string" ? msg : toErrorMessage(msg);
+    const wantsLonger = text.includes("\n");
+    useToastStore
+      .getState()
+      .show(text, "error", duration ?? (wantsLonger ? 8000 : 3000));
+  },
   warning: (msg: string, duration?: number) =>
     useToastStore.getState().show(msg, "warning", duration),
   info: (msg: string, duration?: number) =>

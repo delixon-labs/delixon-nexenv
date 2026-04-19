@@ -12,9 +12,11 @@ fn path_has_control_chars(path: &str) -> bool {
     path.chars().any(|c| c.is_control())
 }
 
-/// Abre una terminal en la carpeta del proyecto con el entorno correcto cargado
+/// Abre una terminal en la carpeta del proyecto con el entorno correcto cargado.
+/// Inyecta los bin paths de los runtimes declarados (nvm/fnm/pyenv/rustup) en PATH.
 #[command]
 pub async fn open_terminal(project_id: String) -> Result<(), String> {
+    let total = std::time::Instant::now();
     let projects = store::get().list_projects().map_err(|e| e.to_string())?;
     let project = projects
         .iter()
@@ -33,17 +35,19 @@ pub async fn open_terminal(project_id: String) -> Result<(), String> {
         ));
     }
 
-    // Cargar env vars del proyecto
     let mut env_vars = store::get().load_env_vars(&project_id).unwrap_or_default();
 
-    // Terminal history isolation (bash, zsh, PowerShell)
     if let Ok(history_path) = storage::get_history_path(&project_id) {
         let _ = storage::init_data_dir();
         let hp = history_path.to_string_lossy().to_string();
-        // bash y zsh usan HISTFILE
         env_vars.insert("HISTFILE".to_string(), hp.clone());
-        // PowerShell usa PSReadLineHistorySavePath
         env_vars.insert("PSReadLineHistorySavePath".to_string(), hp);
+    }
+
+    let activation = crate::core::runtime::activate::activate(&project.runtimes);
+    if !activation.bin_paths.is_empty() {
+        let current = std::env::var("PATH").unwrap_or_default();
+        env_vars.insert("PATH".to_string(), activation.prefix_path(&current));
     }
 
     if cfg!(target_os = "windows") {
@@ -69,6 +73,14 @@ pub async fn open_terminal(project_id: String) -> Result<(), String> {
             return Err("No se encontro un emulador de terminal instalado. Soportados: x-terminal-emulator, gnome-terminal, xfce4-terminal, konsole, mate-terminal, tilix, alacritty, kitty, wezterm, foot, terminator, sakura, lxterminal, xterm".to_string());
         }
     }
+
+    println!(
+        "[nexenv] open_terminal id={} runtimes={} activation_ms={} total_ms={}",
+        project_id,
+        project.runtimes.len(),
+        activation.elapsed_ms,
+        total.elapsed().as_millis()
+    );
 
     Ok(())
 }
