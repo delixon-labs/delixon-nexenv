@@ -48,8 +48,7 @@ desktop.ini
 # Claude AI (memoria y contexto local — nunca al repo)
 .claude/
 
-# Documentacion del proyecto
-docs/
+# Documentacion interna (no publica)
 nexenv.docs/
 
 # Reportes internos generados por agentes

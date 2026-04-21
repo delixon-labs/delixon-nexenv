@@ -8,6 +8,17 @@ Before contributing, please read this document in full.
 
 ---
 
+## Where does the code live?
+
+Nexenv is split across two repositories:
+
+- **This repository** (`delixon-labs/delixon-nexenv`, public) hosts the installation wrappers (`npm/cli/`, `pip/cli/`), the user-facing documentation (`docs/`), the license, and the compliance files (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md). Pull requests to these areas are open and welcome.
+- **`delixon-labs/nexenv-core`** (private) hosts the Rust backend, the React frontend, the Tauri configuration and the release workflows. The source code is not publicly browsable while each version is within its first two years (FSL-1.1-ALv2 window). It becomes open source (Apache 2.0) two years after each release.
+
+To contribute to the **core**, follow the flow in the next section. For everything else (wrappers, docs, compliance files), open a PR directly in this repository.
+
+---
+
 ## Before you start
 
 ### License and contributions
@@ -24,20 +35,23 @@ All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
 
 ## What kind of contributions are welcome
 
-### ✅ Welcome
+### ✅ Welcome in this public repository
 
-- **Bug reports** with clear reproduction steps
-- **Bug fixes** with tests
-- **Documentation improvements** (README, docs/, inline comments)
+- **Bug reports** against Nexenv itself (reproduction steps, OS + version, error output)
+- **Fixes and improvements to the npm wrapper** (`npm/cli/`)
+- **Fixes and improvements to the pip wrapper** (`pip/cli/`)
+- **Documentation improvements** (`docs/`, README, CONTRIBUTING, LICENSE-FAQ)
 - **Typo fixes** and small polish PRs
-- **New templates** (add an entry under `src-tauri/src/core/templates/`)
-- **New recipes** (add under `src-tauri/src/core/recipes/`)
-- **New technology entries** in the catalog (`src-tauri/src/core/catalog/technologies/*.yaml`)
-- **Translations** of the UI
-- **Performance improvements** with benchmarks
-- **Cross-platform bug fixes** (Windows/macOS/Linux specific issues)
+- **Translations** of user-facing documentation
 
-### ⚠️ Discuss first (open an issue)
+### ✅ Welcome in the core — through the invited-access flow
+
+- **Bug fixes** to the Rust or React core
+- **New templates**, recipes or catalog entries
+- **Performance improvements** with benchmarks
+- **Cross-platform fixes** (Windows/macOS/Linux specific issues)
+
+### ⚠️ Discuss first (open an issue in this repository)
 
 - **New commands** or major CLI surface changes
 - **Breaking changes** to the manifest format
@@ -58,60 +72,29 @@ All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
 
 ## How to contribute
 
-### 1. Find or create an issue
+### Contributing to the wrappers or documentation (public)
 
-- Check [existing issues](https://github.com/delixon-labs/delixon-nexenv/issues).
-- For small fixes (typos, clear bugs), feel free to open a PR directly.
-- For larger changes, **open an issue first** to discuss the approach. This saves you time and helps us align.
+1. **Find or create an issue** in [this repository's issue tracker](https://github.com/delixon-labs/delixon-nexenv/issues). For small fixes (typos, clear bugs), feel free to open a PR directly.
+2. **Fork and branch**
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/delixon-nexenv.git
+   cd delixon-nexenv
+   git checkout -b fix/description-of-change
+   ```
+3. **Make your changes** in `npm/cli/`, `pip/cli/`, or the root documentation files.
+4. **Test the wrappers** as appropriate (install locally, run `nexenv --version`, etc.).
+5. **Open a PR against the `develop` branch** with a clear title and description.
 
-### 2. Fork and branch
+### Contributing to the core (private repository)
 
-```bash
-# Fork via the GitHub UI, then:
-git clone https://github.com/YOUR-USERNAME/delixon-nexenv.git
-cd delixon-nexenv
-git checkout -b fix/description-of-change
-```
+1. **Open an issue in this public repository** describing what you'd like to change.
+2. If the change is welcome and non-trivial, we'll reply with next steps: CLA (where applicable) and temporary access to `delixon-labs/nexenv-core` for your specific contribution.
+3. Your PR gets opened in the private repository and merged under FSL-1.1-ALv2 like the rest of the project.
+4. The resulting binaries are published in the Releases section of this public repository on the next tag.
 
-### 3. Set up your development environment
+For small bug fixes and suggestions, opening an issue here is always the fastest path.
 
-See the [README Development section](README.md#development) for requirements and setup.
-
-Minimum versions:
-- Rust 1.77+
-- Node.js 22+
-- npm 10+
-
-### 4. Make your changes
-
-- Follow existing code style (rustfmt for Rust, Prettier for TS/TSX).
-- Add tests for new functionality.
-- Update documentation if user-facing behavior changes.
-- Keep commits focused — one logical change per commit.
-
-### 5. Test
-
-```bash
-# Rust core
-cd src-tauri && cargo test
-
-# Frontend
-npm run test
-npm run lint
-
-# Build
-npm run tauri build
-```
-
-### 6. Submit a pull request
-
-- Target the `develop` branch, not `main`.
-- Write a clear title and description.
-- Link the issue if one exists.
-- Explain the why, not just the what.
-- Include screenshots or GIFs for UI changes.
-
-### 7. Review process
+### Review process
 
 - A maintainer will review within ~7 days for most PRs.
 - We may ask for changes or discuss alternative approaches.
@@ -121,7 +104,7 @@ npm run tauri build
 
 ## Branching and releases
 
-Nexenv uses a three-branch model:
+The public repository uses a three-branch model:
 
 ```
 feature/* or fix/*  →  desarrollo  →  develop  →  main
@@ -131,7 +114,9 @@ feature/* or fix/*  →  desarrollo  →  develop  →  main
 - `develop`: integration branch before release.
 - `main`: tracks the latest stable release (tagged).
 
-Releases are cut by maintainers. Contributors should never push directly to `develop` or `main`.
+Contributors should open PRs against `develop`. Never push directly to `develop` or `main`.
+
+Releases are cut by maintainers from the private repository. The release workflow builds the binaries in `nexenv-core` and publishes them as assets on a release in this public repository.
 
 ---
 
@@ -173,7 +158,7 @@ Features that don't fit Nexenv's scope will be declined respectfully.
 - **Questions about using Nexenv**: [GitHub Discussions](https://github.com/delixon-labs/delixon-nexenv/discussions)
 - **Bug reports**: [GitHub Issues](https://github.com/delixon-labs/delixon-nexenv/issues)
 - **Security issues**: see [SECURITY.md](SECURITY.md)
-- **Licensing questions**: see [LICENSE-FAQ.md](LICENSE-FAQ.md) or email `hello@delixon.dev`
+- **Licensing questions, code audits under NDA, core contribution requests**: see [LICENSE-FAQ.md](LICENSE-FAQ.md) or email `delirestevez@gmail.com`
 
 ---
 
