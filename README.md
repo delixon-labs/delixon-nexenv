@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo-nexenv.png" width="120" alt="Nexenv" />
+</p>
+
 <h1 align="center">Nexenv</h1>
 
 <p align="center">
