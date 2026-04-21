@@ -1,7 +1,7 @@
 {
   "name": "@delixon/nexenv",
   "version": "1.0.0",
-  "description": "Workspace manager for developers — GUI + CLI",
+  "description": "Per-project development environment manager. Detects stack, isolates variables, opens projects ready to work. Desktop + CLI. Source-available (FSL-1.1-ALv2).",
   "license": "SEE LICENSE IN LICENSE",
   "author": "Delixon Labs <hello@delixon.dev> (https://delixon.dev)",
   "repository": {
@@ -13,9 +13,13 @@
     "nexenv",
     "cli",
     "devtools",
-    "project-management",
     "developer-tools",
-    "workspace-manager"
+    "environment-manager",
+    "per-project-environment",
+    "stack-detection",
+    "local-first",
+    "tauri",
+    "rust"
   ],
   "bin": {
     "nexenv": "bin/nexenv"

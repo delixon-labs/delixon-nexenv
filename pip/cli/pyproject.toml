@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nexenv"
 version = "1.0.0"
-description = "Workspace manager for developers"
+description = "Per-project development environment manager. Detects stack, isolates variables, opens projects ready to work. Source-available (FSL-1.1-ALv2)."
 readme = "README.md"
 license = "LicenseRef-FSL-1.1-ALv2"
 license-files = ["LICENSE"]
@@ -13,9 +13,9 @@ requires-python = ">=3.9"
 authors = [
     {name = "Delixon Labs", email = "hello@delixon.dev"}
 ]
-keywords = ["nexenv", "developer-tools", "workspace-manager", "devtools"]
+keywords = ["nexenv", "developer-tools", "devtools", "environment-manager", "per-project-environment", "stack-detection", "local-first"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
