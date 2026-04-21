@@ -178,6 +178,9 @@ enum Commands {
         /// Nombre del proyecto (busqueda parcial)
         name: String,
     },
+
+    /// Modo interactivo (REPL con menu y quick actions)
+    Shell,
 }
 
 #[derive(Subcommand)]
@@ -288,6 +291,7 @@ fn run_command(cmd: Commands) -> Result<(), String> {
         Commands::Note { project, text } => cmd_note(&project, text.as_deref()),
         Commands::Ps { project } => cmd_ps(project.as_deref()),
         Commands::Unlink { name } => cmd_unlink(&name),
+        Commands::Shell => nexenv_lib::tui::run(),
     }
 }
 

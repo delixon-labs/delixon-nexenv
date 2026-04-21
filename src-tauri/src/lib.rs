@@ -2,6 +2,7 @@
 mod commands;
 pub mod core;
 pub mod enterprise;
+pub mod tui;
 
 #[cfg(feature = "tauri-app")]
 use commands::{
