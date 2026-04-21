@@ -5,8 +5,8 @@
 <h1 align="center">Nexenv</h1>
 
 <p align="center">
-  <strong>Workspace manager for developers.</strong><br>
-  Stop configuring. Start building.
+  <strong>Per-project development environment manager.</strong><br>
+  Detects stack, isolates variables, opens projects ready to work.
 </p>
 
 <p align="center">
@@ -18,9 +18,9 @@
 
 ---
 
-Nexenv is a cross-platform desktop application that manages development environments per project — fully isolated, fully local, fully private.
+Nexenv is a per-project development environment manager for Windows, macOS and Linux. Each project declares a manifest (`./.nexenv/manifest.yaml`) with its runtime version, env vars, services (Docker), health checks and editor. One command activates everything and opens the project ready to work.
 
-One click. Project open. Environment ready.
+**Source-available** under [FSL-1.1-ALv2](LICENSE) — not open source yet. Each version converts to Apache 2.0 two years after release.
 
 ## Features
 
@@ -85,10 +85,16 @@ Output: `src-tauri/target/release/bundle/`
 
 ## License
 
-Source-available under [FSL-1.1-ALv2](LICENSE). Each version converts to Apache 2.0 two years after release. See [LICENSE-FAQ.md](LICENSE-FAQ.md) for details.
+**Nexenv is source-available, not open source.**
 
+Licensed under [FSL-1.1-ALv2](LICENSE) — the Functional Source License with Apache 2.0 Future License. In plain English:
 
-You can use, study, modify and redistribute the code for any purpose **except** building a competing commercial product or service.
+- ✅ Use Nexenv for free — personal, commercial, enterprise
+- ✅ Read, study, modify and redistribute the code
+- ✅ Each version auto-converts to Apache 2.0 **two years** after its release (v1.0.0 → Apache 2.0 on 2028-04-21)
+- ❌ Don't build a commercial product or service that competes with Nexenv
+
+See [LICENSE-FAQ.md](LICENSE-FAQ.md) for the full FAQ, including enterprise use, private forks, and why we chose this model.
 
 ---
 
