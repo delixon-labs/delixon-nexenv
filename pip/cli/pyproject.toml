@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexenv"
-version = "1.0.0b2"
+version = "1.0.0"
 description = "Workspace manager for developers"
 readme = "README.md"
 license = "LicenseRef-FSL-1.1-ALv2"
