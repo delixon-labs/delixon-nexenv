@@ -1,6 +1,6 @@
 [package]
 name = "nexenv"
-version = "1.0.0-beta.2"
+version = "1.0.0"
 description = "Gestor de workspaces para desarrolladores"
 authors = ["delirrestevez"]
 license = "FSL-1.1-ALv2"
@@ -59,6 +59,10 @@ uuid = { version = "=1.22.0", features = ["v4"] }
 chrono = { version = "=0.4.44", features = ["serde"] }
 clap = { version = "=4.5.40", features = ["derive"] }
 colored = "=3.0.0"
+dialoguer = "=0.11.0"
+shell-words = "=1.1.0"
+reedline = "=0.36.0"
+crossterm = "=0.28.1"
 serde_yml = "=0.0.12"
 rusqlite = { version = "=0.39.0", features = ["bundled"] }
 reqwest = { version = "=0.12.18", features = ["json"], optional = true }
