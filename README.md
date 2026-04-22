@@ -29,7 +29,7 @@ Nexenv is split across two repositories:
 - **This repository** (`delixon-labs/delixon-nexenv`, public) hosts the installation wrappers for npm and pip, the user-facing documentation, the license, and the compliance files. This is also where the official binaries are published under Releases.
 - **`delixon-labs/nexenv-core`** (private) hosts the source code of the Rust backend and React frontend.
 
-Nexenv is source-available under [FSL-1.1-ALv2](LICENSE) — not open source during the first two years of each release. The core source is not publicly browsable during that window. For code audits under NDA (enterprise compliance), contact `delirestevez@gmail.com`. Each version automatically converts to Apache 2.0 two years after release, at which point the full source for that version becomes available under an open-source license.
+Nexenv is source-available under [FSL-1.1-ALv2](LICENSE) — not open source during the first two years of each release. The core source is not publicly browsable during that window. For code audits under NDA (enterprise compliance), contact `legal@delixon.dev`. Each version automatically converts to Apache 2.0 two years after release, at which point the full source for that version becomes available under an open-source license.
 
 ## Features
 
