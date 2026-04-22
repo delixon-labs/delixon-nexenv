@@ -158,7 +158,7 @@ Features that don't fit Nexenv's scope will be declined respectfully.
 - **Questions about using Nexenv**: [GitHub Discussions](https://github.com/delixon-labs/delixon-nexenv/discussions)
 - **Bug reports**: [GitHub Issues](https://github.com/delixon-labs/delixon-nexenv/issues)
 - **Security issues**: see [SECURITY.md](SECURITY.md)
-- **Licensing questions, code audits under NDA, core contribution requests**: see [LICENSE-FAQ.md](LICENSE-FAQ.md) or email `delirestevez@gmail.com`
+- **Licensing questions, code audits under NDA, core contribution requests**: see [LICENSE-FAQ.md](LICENSE-FAQ.md) or email `legal@delixon.dev`
 
 ---
 

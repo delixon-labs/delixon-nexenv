@@ -2,14 +2,14 @@
 
 Nexenv is **source-available** software under the [Functional Source License (FSL-1.1-ALv2)](LICENSE).
 
-This is not open source in the traditional sense. The source code is publicly available and usable, with one restriction: you cannot use it to build a competing commercial product. After two years, each version automatically converts to Apache 2.0.
+This is not open source in the traditional sense. The installation wrappers, user documentation and compiled binaries are publicly available. The core source code is visible to invited contributors during the FSL window and becomes public two years after each release. One usage restriction applies: you cannot use the code to build a competing commercial product.
 
 ---
 
 ## What you CAN do
 
 - Use Nexenv internally at your company, regardless of size
-- Read, study and learn from the source code
+- Read, study and learn from each release's source code (public two years after release; available earlier under NDA for enterprise audits)
 - Modify the code for your personal or internal use
 - Use it for non-commercial education and research
 - Provide professional services to others who use Nexenv
@@ -41,13 +41,16 @@ No. That would be a Competing Use under the license terms.
 Two years after each version's release date. After that date, you may use that version under the full terms of the Apache License 2.0, including commercial use. Example: Nexenv v1.0.0 released 2026-04-21 becomes Apache 2.0 on 2028-04-21 — automatically, without any action from us.
 
 **Is Nexenv open source?**
-No, not during the first two years of each release. Nexenv is *source-available*: the source code is viewable and usable with the restrictions listed above. After two years per version, each release becomes open source under Apache 2.0 automatically.
+No, not during the first two years of each release. Nexenv is *source-available*: during the FSL window the core source is accessible to invited contributors (CLA) and available for formal code audits under NDA. Two years after each release, that version converts to Apache 2.0 automatically and the source becomes public.
 
 **Why not Apache 2.0 from day one?**
 Building Nexenv takes resources. FSL lets us share the code with the community while protecting the project during its growth phase. After two years, every version becomes open source regardless of what we do — it's a commitment coded into the license, not a promise.
 
 **Can I audit the code before using Nexenv?**
-Yes. The source is publicly viewable (see the repository). For enterprise compliance requirements (SOC2, HIPAA, etc.), we also offer formal code audits under NDA. Contact: hello@delixon.dev.
+Yes. For enterprise compliance requirements (SOC2, HIPAA, etc.), we offer formal code audits under NDA. Each version's source also becomes publicly auditable two years after release when it converts to Apache 2.0. Contact: legal@delixon.dev.
+
+**Where is the source code?**
+The installation wrappers and documentation live in the public repository `delixon-labs/delixon-nexenv`. The core source (Rust backend + React frontend) lives in a separate repository during the FSL window and becomes publicly available two years after each release, at which point it converts to Apache 2.0. For enterprise audits of a specific version before its conversion, contact `legal@delixon.dev`.
 
 **How do I know Nexenv isn't sending my data somewhere?**
 Nexenv is local-first by design. All data lives in SQLite on your machine (`~/.nexenv/`). There is no telemetry by default, no required account, no cloud component in the core product. You can verify this with standard tools (Wireshark, Little Snitch, lsof).
@@ -73,4 +76,4 @@ Yes. For bug fixes, feature suggestions and small improvements, PRs and issues a
 
 Delixon Labs is the developer tools division of [XPlus Technologies LLC](https://xplustechnologies.com).
 
-For licensing inquiries: hello@delixon.dev
+For licensing inquiries: legal@delixon.dev
