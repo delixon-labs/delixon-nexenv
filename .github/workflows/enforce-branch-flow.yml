@@ -1,6 +1,7 @@
 name: Enforce branch flow
 
-# Flow: local -> dev (PR) -> main (PR)
+# Flow interno: local -> dev (PR) -> main (PR)
+# Externos: fork -> PR a dev (cualquier rama del fork) -> dev -> main (por mantenedor)
 on:
   pull_request:
     branches: [main, dev]
@@ -24,13 +25,9 @@ jobs:
           fi
           echo "OK: PR to main comes from dev."
 
-      - name: PRs to dev only from local
+      - name: PRs to dev are welcome from any branch
         if: github.base_ref == 'dev'
         run: |
-          if [ "${{ github.head_ref }}" != "local" ]; then
-            echo "ERROR: PRs to dev must come ONLY from 'local'."
-            echo "Source branch: ${{ github.head_ref }}"
-            echo "Correct flow: local -> dev (PR) -> main (PR)"
-            exit 1
-          fi
-          echo "OK: PR to dev comes from local."
+          echo "OK: PR to dev accepted from '${{ github.head_ref }}'."
+          echo "Contributors (incluidos forks externos) pueden abrir PRs a dev."
+          echo "Los mantenedores revisan y deciden que se mergea."
