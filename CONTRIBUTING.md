@@ -83,7 +83,7 @@ All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
    ```
 3. **Make your changes** in `npm/cli/`, `pip/cli/`, or the root documentation files.
 4. **Test the wrappers** as appropriate (install locally, run `nexenv --version`, etc.).
-5. **Open a PR against the `develop` branch** with a clear title and description.
+5. **Open a PR against the `dev` branch** with a clear title and description.
 
 ### Contributing to the core (private repository)
 
@@ -107,14 +107,14 @@ For small bug fixes and suggestions, opening an issue here is always the fastest
 The public repository uses a three-branch model:
 
 ```
-feature/* or fix/*  →  desarrollo  →  develop  →  main
+feature/* or fix/*  →  local  →  dev  →  main
 ```
 
-- `desarrollo`: day-to-day work, fast-moving.
-- `develop`: integration branch before release.
+- `local`: day-to-day work, fast-moving.
+- `dev`: integration branch before release.
 - `main`: tracks the latest stable release (tagged).
 
-Contributors should open PRs against `develop`. Never push directly to `develop` or `main`.
+Contributors should open PRs against `dev`. Direct pushes to `main`, `dev` and `local` are blocked by branch protection (including for maintainers — `enforce_admins: true`). Merging to `main` is restricted to repository owners.
 
 Releases are cut by maintainers from the private repository. The release workflow builds the binaries in `nexenv-core` and publishes them as assets on a release in this public repository.
 
