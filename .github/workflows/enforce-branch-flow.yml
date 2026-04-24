@@ -1,9 +1,9 @@
 name: Enforce branch flow
 
-# Flow: desarrollo → develop (PR) → main (PR)
+# Flow: local -> dev (PR) -> main (PR)
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
 permissions:
   contents: read
@@ -13,24 +13,24 @@ jobs:
     name: Verify branch flow
     runs-on: ubuntu-latest
     steps:
-      - name: PRs to main only from develop
+      - name: PRs to main only from dev
         if: github.base_ref == 'main'
         run: |
-          if [ "${{ github.head_ref }}" != "develop" ]; then
-            echo "ERROR: PRs to main must come ONLY from 'develop'."
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "ERROR: PRs to main must come ONLY from 'dev'."
             echo "Source branch: ${{ github.head_ref }}"
-            echo "Correct flow: desarrollo -> develop (PR) -> main (PR)"
+            echo "Correct flow: local -> dev (PR) -> main (PR)"
             exit 1
           fi
-          echo "OK: PR to main comes from develop."
+          echo "OK: PR to main comes from dev."
 
-      - name: PRs to develop only from desarrollo
-        if: github.base_ref == 'develop'
+      - name: PRs to dev only from local
+        if: github.base_ref == 'dev'
         run: |
-          if [ "${{ github.head_ref }}" != "desarrollo" ]; then
-            echo "ERROR: PRs to develop must come ONLY from 'desarrollo'."
+          if [ "${{ github.head_ref }}" != "local" ]; then
+            echo "ERROR: PRs to dev must come ONLY from 'local'."
             echo "Source branch: ${{ github.head_ref }}"
-            echo "Correct flow: desarrollo -> develop (PR) -> main (PR)"
+            echo "Correct flow: local -> dev (PR) -> main (PR)"
             exit 1
           fi
-          echo "OK: PR to develop comes from desarrollo."
+          echo "OK: PR to dev comes from local."
