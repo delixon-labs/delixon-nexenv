@@ -81,3 +81,6 @@ coverage/
 
 # Python build artifacts
 *.egg-info/
+
+# Documentacion personal del owner (planes, flujos internos)
+.delidocs/
