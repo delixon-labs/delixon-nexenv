@@ -25,17 +25,15 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Node.js
+        # Node 24 (LTS) viene con npm >= 11, requerido para OIDC trusted
+        # publishing. Node 22 viene con npm 10.x que NO soporta OIDC, y el
+        # 'npm install -g npm@latest' falla en CI con MODULE_NOT_FOUND
+        # (promise-retry) por self-update race condition. Bajar/subir
+        # version de Node es el camino limpio.
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 22
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
-
-      # OIDC trusted publishing requiere npm >= 11.5.1. La npm que viene con
-      # Node 22 (10.x) ignora el OIDC token y trata de autenticar con el
-      # placeholder vacio del .npmrc, fallando con 404. Forzamos npm latest
-      # para que el flujo OIDC se complete correctamente.
-      - name: Upgrade npm to support OIDC
-        run: npm install -g npm@latest
 
       - name: Update version
         working-directory: npm/cli
