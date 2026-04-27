@@ -12,6 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     permissions:
+      # `id-token: write` habilita OIDC: el job firma un JWT con la identidad
+      # de este workflow y npm lo valida contra el "Trusted Publisher"
+      # configurado en https://www.npmjs.com/package/@delixon/nexenv/access
+      # (delixon-labs/delixon-nexenv + npm-publish.yml + environment production).
+      # Asi publicamos sin tokens, sin OTP y sin secrets que rotar.
+      id-token: write
       contents: read
 
     steps:
@@ -30,6 +36,7 @@ jobs:
 
       - name: Publish @delixon/nexenv
         working-directory: npm/cli
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # --provenance agrega un attestation firmado al paquete: los usuarios
+        # ven en npm que el .tgz fue compilado por este workflow exacto desde
+        # este repo, no inyectado por un atacante con un token filtrado.
+        run: npm publish --access public --provenance
