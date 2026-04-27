@@ -30,6 +30,13 @@ jobs:
           node-version: 22
           registry-url: "https://registry.npmjs.org"
 
+      # OIDC trusted publishing requiere npm >= 11.5.1. La npm que viene con
+      # Node 22 (10.x) ignora el OIDC token y trata de autenticar con el
+      # placeholder vacio del .npmrc, fallando con 404. Forzamos npm latest
+      # para que el flujo OIDC se complete correctamente.
+      - name: Upgrade npm to support OIDC
+        run: npm install -g npm@latest
+
       - name: Update version
         working-directory: npm/cli
         run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
