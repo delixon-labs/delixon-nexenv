@@ -84,3 +84,4 @@ coverage/
 
 # Documentacion personal del owner (planes, flujos internos)
 .delidocs/
+.delixon.docs/
