@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexenv"
-version = "1.0.0"
+version = "1.1.2"
 description = "Per-project development environment manager. Detects stack, isolates variables, opens projects ready to work. Source-available (FSL-1.1-ALv2)."
 readme = "README.md"
 license = "LicenseRef-FSL-1.1-ALv2"
