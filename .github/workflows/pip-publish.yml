@@ -12,11 +12,23 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     permissions:
-      contents: read
+      # `contents: write` para hacer commit + push del bump al repo tras
+      # publish exitoso (ver step "Commit version bump"). Asi el
+      # pyproject.toml queda alineado con la version publicada en PyPI.
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # ref: local porque main esta protegida (require PR + enforce
+          # admins) y el bot no puede pushear directo. local es la rama
+          # de trabajo, sin restricciones. El owner promueve manual
+          # local -> dev -> main siguiendo el flow estandar del repo.
+          ref: local
+          # fetch-depth: 0 para que el push funcione (con depth=1 el HEAD
+          # queda detached y no permite push).
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v6.0.0
@@ -55,3 +67,31 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: python -m twine upload dist/*
+
+      - name: Commit version bump back to local branch
+        # Si el upload a PyPI fue exitoso, commiteamos el bump del
+        # pyproject.toml a la rama `local`. El owner promueve manual
+        # local -> dev -> main siguiendo el flow estandar.
+        #
+        # Si el upload fallo, este step no corre por el default
+        # `if: success()`. El bump nunca queda en el repo apuntando a una
+        # version que no se publico realmente.
+        #
+        # Sobre la rama destino: `main` esta protegida con require PR y
+        # enforce_admins, asi que ni el bot ni los admins pueden pushear
+        # directo. `local` es la rama de trabajo sin esa restriccion. El
+        # commit del bot queda como "checkpoint pendiente de promocion" en
+        # local hasta el siguiente ciclo de release.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pip/cli/pyproject.toml
+          if git diff --cached --quiet; then
+            echo "No changes to commit (pyproject.toml already at requested version)."
+            exit 0
+          fi
+          git commit -m "chore(pip): bump nexenv to ${{ github.event.inputs.version }} (auto)"
+          # Pull con rebase por si hubo otros pushes a local mientras el job
+          # corria (raro pero posible).
+          git pull --rebase origin local
+          git push origin local
