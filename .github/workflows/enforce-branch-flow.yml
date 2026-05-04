@@ -13,13 +13,19 @@ jobs:
   check-source-branch:
     name: Verify branch flow
     runs-on: ubuntu-latest
+    # head_ref se pasa via env var (no se interpola en el script):
+    # los nombres de branch son potencialmente untrusted (forks, contributors)
+    # y un nombre malicioso podria inyectar comandos en el shell.
+    env:
+      HEAD_REF: ${{ github.head_ref }}
+      BASE_REF: ${{ github.base_ref }}
     steps:
       - name: PRs to main only from dev
         if: github.base_ref == 'main'
         run: |
-          if [ "${{ github.head_ref }}" != "dev" ]; then
+          if [ "${HEAD_REF}" != "dev" ]; then
             echo "ERROR: PRs to main must come ONLY from 'dev'."
-            echo "Source branch: ${{ github.head_ref }}"
+            echo "Source branch: ${HEAD_REF}"
             echo "Correct flow: local -> dev (PR) -> main (PR)"
             exit 1
           fi
@@ -28,6 +34,6 @@ jobs:
       - name: PRs to dev are welcome from any branch
         if: github.base_ref == 'dev'
         run: |
-          echo "OK: PR to dev accepted from '${{ github.head_ref }}'."
+          echo "OK: PR to dev accepted from '${HEAD_REF}'."
           echo "Contributors (incluidos forks externos) pueden abrir PRs a dev."
           echo "Los mantenedores revisan y deciden que se mergea."
