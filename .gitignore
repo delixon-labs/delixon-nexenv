@@ -5,6 +5,8 @@
 node_modules/
 .pnp
 .pnp.js
+# package-lock.json no se versiona en wrappers publicados a npm
+package-lock.json
 
 # Build outputs
 dist/
