@@ -6,8 +6,8 @@ We provide security updates for the latest stable release of Nexenv.
 
 | Version | Supported |
 |---------|-----------|
-| 1.0.x   | ✅ Yes    |
-| < 1.0.0 | ❌ No     |
+| 1.1.x   | ✅ Yes    |
+| < 1.1.0 | ❌ No     |
 
 ## Reporting a vulnerability
 
@@ -71,4 +71,4 @@ We aim for **90 days** from report to public disclosure, with flexibility depend
 
 ---
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-05-04*
