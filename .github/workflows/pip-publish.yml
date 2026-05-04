@@ -12,9 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     permissions:
+      # `id-token: write` habilita OIDC para Trusted Publisher de PyPI.
+      # PyPI valida la identidad del workflow contra el publisher configurado
+      # en https://pypi.org/manage/account/publishing/ (delixon-labs/
+      # delixon-nexenv + pip-publish.yml + environment production). Asi
+      # publicamos sin tokens, sin secrets que rotar y sin riesgo de filtrado.
+      #
       # `contents: write` para hacer commit + push del bump al repo tras
       # publish exitoso (ver step "Commit version bump"). Asi el
       # pyproject.toml queda alineado con la version publicada en PyPI.
+      id-token: write
       contents: write
 
     steps:
@@ -36,18 +43,25 @@ jobs:
           python-version: "3.12"
 
       - name: Install build tools
-        run: python -m pip install --upgrade build twine
+        run: python -m pip install --upgrade build
 
       - name: Update version in pyproject.toml
         working-directory: pip/cli
+        # La version se pasa via env var (no interpolada en el script),
+        # asi el input nunca se inyecta literalmente en el codigo Python.
+        env:
+          NEW_VERSION: ${{ github.event.inputs.version }}
         run: |
           python - <<'PY'
-          import pathlib, re, sys
+          import os, pathlib, re, sys
+          v = os.environ["NEW_VERSION"]
+          if not re.match(r"^[0-9]+(\.[0-9]+)+([.-][a-zA-Z0-9]+)*$", v):
+              sys.exit(f"version invalida: {v!r}")
           p = pathlib.Path("pyproject.toml")
           text = p.read_text(encoding="utf-8")
           new = re.sub(
               r'^(version\s*=\s*)"[^"]*"',
-              r'\1"${{ github.event.inputs.version }}"',
+              lambda m: f'{m.group(1)}"{v}"',
               text,
               count=1,
               flags=re.MULTILINE,
@@ -61,12 +75,17 @@ jobs:
         working-directory: pip/cli
         run: python -m build
 
-      - name: Publish nexenv
-        working-directory: pip/cli
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: python -m twine upload dist/*
+      - name: Publish nexenv (OIDC Trusted Publisher)
+        # OIDC Trusted Publisher: PyPI valida la identidad del workflow via
+        # JWT firmado por GitHub. Sin tokens, sin secrets rotables. Requiere
+        # configuracion previa en pypi.org/manage/account/publishing/ con:
+        #   - Owner: delixon-labs
+        #   - Repository: delixon-nexenv
+        #   - Workflow: pip-publish.yml
+        #   - Environment: production
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.13.0
+        with:
+          packages-dir: pip/cli/dist
 
       - name: Commit version bump back to local branch
         # Si el upload a PyPI fue exitoso, commiteamos el bump del
@@ -76,12 +95,8 @@ jobs:
         # Si el upload fallo, este step no corre por el default
         # `if: success()`. El bump nunca queda en el repo apuntando a una
         # version que no se publico realmente.
-        #
-        # Sobre la rama destino: `main` esta protegida con require PR y
-        # enforce_admins, asi que ni el bot ni los admins pueden pushear
-        # directo. `local` es la rama de trabajo sin esa restriccion. El
-        # commit del bot queda como "checkpoint pendiente de promocion" en
-        # local hasta el siguiente ciclo de release.
+        env:
+          NEW_VERSION: ${{ github.event.inputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -90,7 +105,7 @@ jobs:
             echo "No changes to commit (pyproject.toml already at requested version)."
             exit 0
           fi
-          git commit -m "chore(pip): bump nexenv to ${{ github.event.inputs.version }} (auto)"
+          git commit -m "chore(pip): bump nexenv to ${NEW_VERSION} (auto)"
           # Pull con rebase por si hubo otros pushes a local mientras el job
           # corria (raro pero posible).
           git pull --rebase origin local
