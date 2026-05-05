@@ -87,26 +87,37 @@ jobs:
         with:
           packages-dir: pip/cli/dist
 
-      - name: Commit version bump back to local branch
+      - name: Commit version bump via REST API (server-signed)
         # Si el upload a PyPI fue exitoso, commiteamos el bump del
-        # pyproject.toml a la rama `local`. El owner promueve manual
-        # local -> dev -> main siguiendo el flow estandar.
+        # pyproject.toml a la rama `local` usando la REST API de GitHub
+        # Contents (PUT /repos/{owner}/{repo}/contents/{path}). Este endpoint
+        # crea el commit server-side y lo firma automaticamente con la web
+        # flow key de GitHub (B5690EEEBB952194), asi llega ya verificado y
+        # compatible con `required_signatures` en main cuando se promueve.
+        #
+        # No usamos `git commit` en shell porque el runner no tiene clave
+        # SSH/GPG configurada → commit sin firma → bloqueo en main.
         #
         # Si el upload fallo, este step no corre por el default
-        # `if: success()`. El bump nunca queda en el repo apuntando a una
-        # version que no se publico realmente.
+        # `if: success()`.
         env:
+          REPO: ${{ github.repository }}
           NEW_VERSION: ${{ github.event.inputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILE_PATH: pip/cli/pyproject.toml
+          BRANCH: local
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pip/cli/pyproject.toml
-          if git diff --cached --quiet; then
+          set -euo pipefail
+          NEW_CONTENT_B64=$(base64 -w0 < "${FILE_PATH}")
+          REMOTE_META=$(gh api "repos/${REPO}/contents/${FILE_PATH}?ref=${BRANCH}")
+          CURRENT_SHA=$(echo "${REMOTE_META}" | jq -r '.sha')
+          REMOTE_CONTENT_B64=$(echo "${REMOTE_META}" | jq -r '.content' | tr -d '\n' | base64 -d | base64 -w0)
+          if [ "${NEW_CONTENT_B64}" = "${REMOTE_CONTENT_B64}" ]; then
             echo "No changes to commit (pyproject.toml already at requested version)."
             exit 0
           fi
-          git commit -m "chore(pip): bump nexenv to ${NEW_VERSION} (auto)"
-          # Pull con rebase por si hubo otros pushes a local mientras el job
-          # corria (raro pero posible).
-          git pull --rebase origin local
-          git push origin local
+          gh api -X PUT "repos/${REPO}/contents/${FILE_PATH}" \
+            -f "message=chore(pip): bump nexenv to ${NEW_VERSION} (auto)" \
+            -f "content=${NEW_CONTENT_B64}" \
+            -f "sha=${CURRENT_SHA}" \
+            -f "branch=${BRANCH}"
