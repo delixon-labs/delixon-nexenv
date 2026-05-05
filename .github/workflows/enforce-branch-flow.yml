@@ -1,6 +1,8 @@
 name: Enforce branch flow
 
 # Flow interno: local -> dev (PR) -> main (PR)
+# Excepcion: ramas release/* pueden ir directo a main (cherry-picks firmados,
+# hotfixes coordinados con nexenv-core, sincronizaciones puntuales).
 # Externos: fork -> PR a dev (cualquier rama del fork) -> dev -> main (por mantenedor)
 on:
   pull_request:
@@ -20,16 +22,21 @@ jobs:
       HEAD_REF: ${{ github.head_ref }}
       BASE_REF: ${{ github.base_ref }}
     steps:
-      - name: PRs to main only from dev
+      - name: PRs to main only from dev or release/*
         if: github.base_ref == 'main'
         run: |
-          if [ "${HEAD_REF}" != "dev" ]; then
-            echo "ERROR: PRs to main must come ONLY from 'dev'."
-            echo "Source branch: ${HEAD_REF}"
-            echo "Correct flow: local -> dev (PR) -> main (PR)"
-            exit 1
-          fi
-          echo "OK: PR to main comes from dev."
+          case "${HEAD_REF}" in
+            dev|release/*)
+              echo "OK: PR to main comes from '${HEAD_REF}'."
+              ;;
+            *)
+              echo "ERROR: PRs to main must come from 'dev' or 'release/*'."
+              echo "Source branch: ${HEAD_REF}"
+              echo "Correct flow: local -> dev (PR) -> main (PR)"
+              echo "Excepcion: release/* permitido para cherry-picks firmados y hotfixes."
+              exit 1
+              ;;
+          esac
 
       - name: PRs to dev are welcome from any branch
         if: github.base_ref == 'dev'
