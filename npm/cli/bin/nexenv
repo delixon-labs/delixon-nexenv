@@ -1,19 +1,254 @@
 #!/usr/bin/env node
 /* eslint-env node */
 
-const { execFileSync } = require("child_process");
+// Lanzador autosuficiente de Nexenv.
+//
+// El binario NO se descarga al instalar el paquete (sin scripts de
+// instalacion). Se descarga y verifica la primera vez que se ejecuta el
+// comando, se cachea en el directorio de cache del usuario y las siguientes
+// ejecuciones lo lanzan directamente sin coste.
+//
+// Funciona con cualquier gestor (npm, pnpm, yarn, bun) y con --ignore-scripts,
+// y no ejecuta nada en la instalacion.
+
+const https = require("https");
+const crypto = require("crypto");
+const os = require("os");
+const {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} = require("fs");
 const { join } = require("path");
+const { execFileSync } = require("child_process");
 
-const ext = process.platform === "win32" ? ".exe" : "";
-const binary = join(__dirname, `nexenv${ext}`);
+const { platform, arch } = process;
+const pkg = require("../package.json");
+const version = pkg.version;
 
-try {
-  execFileSync(binary, process.argv.slice(2), { stdio: "inherit" });
-} catch (error) {
-  if (error.status !== undefined) {
-    process.exit(error.status);
-  }
-  console.error("Nexenv: no se pudo ejecutar el binario.");
-  console.error("Intenta reinstalar: npm install -g @delixon/nexenv");
+const ASSET_MAP = {
+  "win32-x64": "nexenv-cli-win32-x64.exe",
+  "linux-x64": "nexenv-cli-linux-x64",
+  "darwin-arm64": "nexenv-cli-darwin-arm64",
+  "darwin-x64": "nexenv-cli-darwin-x64",
+};
+
+// Clave publica Ed25519 (32 bytes crudos, base64) dedicada a firmar los
+// binarios CLI. La privada vive SOLO en GitHub Secrets del repo privado
+// nexenv-core (NEXENV_CLI_SIGNING_KEY); el CI firma cada binario en el
+// release y publica <asset>.sig junto a el. Clave independiente de la del
+// auto-updater Tauri (separacion de claves por dominio).
+const CLI_SIGNING_PUBKEY = "Eb4QBC8smzRemJnyM/BjhfBiQADa8xhq/7fvc4ZGohs=";
+
+const key = `${platform}-${arch}`;
+const asset = ASSET_MAP[key];
+
+function fail(msg) {
+  console.error(`Nexenv: ${msg}`);
+  console.error(
+    "  Releases: https://github.com/delixon-labs/delixon-nexenv/releases",
+  );
+  console.error(
+    "  Entorno sin red: define NEXENV_BINARY=/ruta/al/binario para usar uno local.",
+  );
   process.exit(1);
+}
+
+function runBinary(path) {
+  try {
+    if (statSync(path).size === 0) {
+      try {
+        rmSync(versionDir, { recursive: true, force: true });
+      } catch {
+        /* ignore */
+      }
+      fail("binario en cache corrupto; reintenta el comando.");
+    }
+  } catch {
+    /* statSync solo falla si NEXENV_BINARY apunta a algo raro */
+  }
+  try {
+    execFileSync(path, process.argv.slice(2), { stdio: "inherit" });
+    process.exit(0);
+  } catch (error) {
+    if (error && error.status !== undefined) process.exit(error.status);
+    fail("no se pudo ejecutar el binario.");
+  }
+}
+
+if (!asset) {
+  fail(
+    `plataforma no soportada (${key}). ` +
+      "Soportadas: win32-x64, linux-x64, darwin-arm64, darwin-x64",
+  );
+}
+
+// Escape hatch para entornos sin red / CI con binario pre-provisto.
+const override = process.env.NEXENV_BINARY;
+if (override) {
+  if (!existsSync(override)) fail(`NEXENV_BINARY no existe: ${override}`);
+  runBinary(override);
+}
+
+const releaseBase = `https://github.com/delixon-labs/delixon-nexenv/releases/download/v${version}`;
+const binaryUrl = `${releaseBase}/${asset}`;
+const checksumsUrl = `${releaseBase}/SHA256SUMS`;
+const signatureUrl = `${releaseBase}/${asset}.sig`;
+
+const cacheRoot = resolveCacheDir();
+const versionDir = join(cacheRoot, version);
+const binaryName = platform === "win32" ? "nexenv.exe" : "nexenv";
+const cachedBinary = join(versionDir, binaryName);
+const okMarker = join(versionDir, `${binaryName}.ok`);
+
+// Camino rapido: binario ya verificado en cache → ejecutar sin red.
+if (existsSync(cachedBinary) && existsSync(okMarker)) {
+  runBinary(cachedBinary);
+}
+
+// Camino lento: resolver el binario (primera vez para esta version).
+ensureBinary()
+  .then(() => runBinary(cachedBinary))
+  .catch((err) => fail(`no se pudo preparar el binario: ${err.message}`));
+
+// ---------------------------------------------------------------------------
+
+function resolveCacheDir() {
+  const home = os.homedir();
+  if (platform === "win32") {
+    const base = process.env.LOCALAPPDATA || join(home, "AppData", "Local");
+    return join(base, "nexenv", "bin");
+  }
+  if (platform === "darwin") {
+    return join(home, "Library", "Caches", "nexenv", "bin");
+  }
+  const xdg = process.env.XDG_CACHE_HOME || join(home, ".cache");
+  return join(xdg, "nexenv", "bin");
+}
+
+function httpGet(url, { text = false } = {}, maxRedirects = 5) {
+  return new Promise((resolve, reject) => {
+    function attempt(current, remaining) {
+      if (remaining < 0) return reject(new Error("demasiados redirects"));
+      https
+        .get(current, (res) => {
+          const { statusCode, headers } = res;
+          if (statusCode >= 300 && statusCode < 400 && headers.location) {
+            res.resume();
+            return attempt(headers.location, remaining - 1);
+          }
+          if (statusCode === 404) {
+            res.resume();
+            return resolve(null);
+          }
+          if (statusCode !== 200) {
+            res.resume();
+            return reject(new Error(`HTTP ${statusCode} en ${current}`));
+          }
+          const chunks = [];
+          res.on("data", (c) => chunks.push(c));
+          res.on("end", () => {
+            const buf = Buffer.concat(chunks);
+            resolve(text ? buf.toString("utf8") : buf);
+          });
+          res.on("error", reject);
+        })
+        .on("error", reject);
+    }
+    attempt(url, maxRedirects);
+  });
+}
+
+// Clave publica Ed25519 (SPKI DER) a partir de los 32 bytes crudos.
+// El prefijo DER de Ed25519 es fijo y conocido.
+function ed25519PublicKey(raw32) {
+  const der = Buffer.concat([
+    Buffer.from("302a300506032b6570032100", "hex"),
+    raw32,
+  ]);
+  return crypto.createPublicKey({ key: der, format: "der", type: "spki" });
+}
+
+function verifySignature(binaryBuf, sigText) {
+  const pubRaw = Buffer.from(CLI_SIGNING_PUBKEY, "base64");
+  if (pubRaw.length !== 32) return false;
+
+  // Firma cruda Ed25519 sobre los bytes exactos del binario: el .sig contiene
+  // base64 de los 64 bytes de firma (lo que produce el paso de firma del CI).
+  const sigBuf = Buffer.from(sigText.trim(), "base64");
+  if (sigBuf.length !== 64) return false;
+
+  try {
+    return crypto.verify(null, binaryBuf, ed25519PublicKey(pubRaw), sigBuf);
+  } catch {
+    return false;
+  }
+}
+
+function parseSha256Sums(textData) {
+  const map = {};
+  for (const raw of textData.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const m = line.match(/^([a-f0-9]{64})\s+\*?(.+)$/i);
+    if (m) map[m[2].trim()] = m[1].toLowerCase();
+  }
+  return map;
+}
+
+async function ensureBinary() {
+  mkdirSync(versionDir, { recursive: true });
+
+  console.error(`Nexenv: preparando binario v${version} (${key})...`);
+  const binBuf = await httpGet(binaryUrl);
+  if (!binBuf) throw new Error(`binario no encontrado: ${binaryUrl}`);
+
+  // Verificacion 1 — firma criptografica Ed25519 (preferida).
+  const sigText = await httpGet(signatureUrl, { text: true });
+  let signatureVerified = false;
+  if (sigText) {
+    if (!verifySignature(binBuf, sigText)) {
+      throw new Error(
+        "la firma del binario NO es valida (posible manipulacion). Abortado.",
+      );
+    }
+    signatureVerified = true;
+    console.error("Nexenv: firma Ed25519 verificada.");
+  }
+
+  // Verificacion 2 — SHA-256 (defensa en profundidad / compat de transicion).
+  const sumsText = await httpGet(checksumsUrl, { text: true });
+  if (sumsText) {
+    const expected = parseSha256Sums(sumsText)[asset];
+    if (!expected) throw new Error(`SHA256SUMS sin entrada para ${asset}`);
+    const actual = crypto.createHash("sha256").update(binBuf).digest("hex");
+    if (actual !== expected) {
+      throw new Error(
+        `checksum incorrecto para ${asset}\n  esperado: ${expected}\n  obtenido: ${actual}`,
+      );
+    }
+    console.error(`Nexenv: SHA-256 OK (${expected.slice(0, 16)}...).`);
+  } else if (!signatureVerified) {
+    console.error(
+      `Nexenv: AVISO — el release v${version} no incluye firma ni SHA256SUMS.\n` +
+        "  El binario llego por HTTPS pero NO se verifico su integridad.\n" +
+        "  Los proximos releases incluiran firma Ed25519 y sera obligatoria.",
+    );
+  }
+
+  // Escritura atomica: a temporal y rename, para no corromper si dos
+  // ejecuciones compiten por la misma version.
+  const tmp = join(
+    versionDir,
+    `.tmp-${process.pid}-${crypto.randomBytes(4).toString("hex")}`,
+  );
+  writeFileSync(tmp, binBuf);
+  if (platform !== "win32") chmodSync(tmp, 0o755);
+  renameSync(tmp, cachedBinary);
+  // Marcador "verificado": habilita el camino rapido en ejecuciones futuras.
+  writeFileSync(okMarker, `${new Date().toISOString()}\n`);
 }
