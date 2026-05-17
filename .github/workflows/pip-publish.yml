@@ -59,16 +59,19 @@ jobs:
               sys.exit(f"version invalida: {v!r}")
           p = pathlib.Path("pyproject.toml")
           text = p.read_text(encoding="utf-8")
-          new = re.sub(
-              r'^(version\s*=\s*)"[^"]*"',
-              lambda m: f'{m.group(1)}"{v}"',
-              text,
-              count=1,
-              flags=re.MULTILINE,
-          )
-          if new == text:
+          pat = re.compile(r'^(version\s*=\s*)"([^"]*)"', flags=re.MULTILINE)
+          m = pat.search(text)
+          # Distinguir "campo ausente" (error real) de "ya en la version
+          # pedida" (idempotente: no-op y se publica igual).
+          if not m:
               sys.exit("version field not found in pyproject.toml")
-          p.write_text(new, encoding="utf-8")
+          if m.group(2) == v:
+              print(f"pyproject.toml ya en {v}; no se cambia.")
+          else:
+              p.write_text(
+                  pat.sub(lambda mm: f'{mm.group(1)}"{v}"', text, count=1),
+                  encoding="utf-8",
+              )
           PY
 
       - name: Build sdist and wheel
