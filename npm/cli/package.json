@@ -24,9 +24,6 @@
   "bin": {
     "nexenv": "bin/nexenv"
   },
-  "scripts": {
-    "postinstall": "node scripts/postinstall.js"
-  },
   "os": [
     "win32",
     "linux",

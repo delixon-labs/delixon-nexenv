@@ -87,3 +87,9 @@ coverage/
 # Documentacion personal del owner (planes, flujos internos)
 .delidocs/
 .delixon.docs/
+
+# Material criptografico privado — NUNCA al repo
+*.pem
+*.key
+*.minisig.key
+nexenv-cli-signing*
