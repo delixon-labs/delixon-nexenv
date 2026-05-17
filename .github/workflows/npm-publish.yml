@@ -50,7 +50,18 @@ jobs:
 
       - name: Update version
         working-directory: npm/cli
-        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        # Idempotente: si package.json ya esta en la version pedida (el owner
+        # ya bumpeo y promociono a local), NO se ejecuta `npm version` (que
+        # falla con "Version not changed"). Se publica igual.
+        env:
+          NEW_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          if [ "$CURRENT" = "$NEW_VERSION" ]; then
+            echo "package.json ya en $NEW_VERSION; no se cambia."
+          else
+            npm version "$NEW_VERSION" --no-git-tag-version
+          fi
 
       - name: Publish @delixon/nexenv
         working-directory: npm/cli
